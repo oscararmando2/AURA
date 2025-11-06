@@ -257,6 +257,8 @@ function $MPC_message(event) {
     // Validate origin for security - use exact matching
     const validOrigins = ['https://www.mercadopago.com.mx', 'https://secure.mlstatic.com'];
     if (!validOrigins.includes(event.origin)) {
+        // Log unauthorized postMessage attempts for security monitoring
+        console.warn('Unauthorized postMessage from origin:', event.origin);
         return; // Ignore messages from unknown origins
     }
 

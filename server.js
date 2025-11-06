@@ -101,7 +101,10 @@ const sessionSecret = process.env.SESSION_SECRET || (() => {
         process.exit(1);
     }
     // Development only: generate random secret
-    return require('crypto').randomBytes(32).toString('hex');
+    const generatedSecret = require('crypto').randomBytes(32).toString('hex');
+    console.log('Development mode: Using auto-generated session secret');
+    console.log('For production, set SESSION_SECRET environment variable');
+    return generatedSecret;
 })();
 
 app.use(session({
@@ -331,12 +334,29 @@ app.get('/auth/status', (req, res) => {
 
 // Save subscription information
 app.post('/subscription', isAuthenticated, (req, res) => {
-
     const { preapproval_id, status } = req.body;
+
+    // Validate status if provided
+    const validStatuses = ['pending', 'active', 'paused', 'cancelled'];
+    const subscriptionStatus = status || 'pending';
+    if (!validStatuses.includes(subscriptionStatus)) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'Estado de suscripción inválido' 
+        });
+    }
+
+    // Validate preapproval_id format if provided (basic validation)
+    if (preapproval_id && (typeof preapproval_id !== 'string' || preapproval_id.length > 100)) {
+        return res.status(400).json({ 
+            success: false, 
+            message: 'ID de preaprobación inválido' 
+        });
+    }
 
     db.run(
         'INSERT INTO subscriptions (user_id, preapproval_id, status) VALUES (?, ?, ?)',
-        [req.session.userId, preapproval_id || null, status || 'pending'],
+        [req.session.userId, preapproval_id || null, subscriptionStatus],
         function(err) {
             if (err) {
                 console.error('Error saving subscription:', err.message);
