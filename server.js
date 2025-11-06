@@ -8,9 +8,12 @@ const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Database setup
 const db = new sqlite3.Database('./aura_studio.db', (err) => {
@@ -58,6 +61,26 @@ function initDatabase() {
     });
 }
 
+// Security middleware
+app.use(helmet({
+    contentSecurityPolicy: false, // Disable for now to allow external scripts (MercadoPago, fonts, etc.)
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: 'Demasiadas solicitudes desde esta IP, por favor intente más tarde.'
+});
+
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit each IP to 5 login/register attempts per windowMs
+    message: 'Demasiados intentos de autenticación, por favor intente más tarde.'
+});
+
+app.use(limiter);
+
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -69,7 +92,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        httpOnly: true,
+        secure: isProduction, // Use secure cookies in production
+        sameSite: 'lax'
     }
 }));
 
@@ -81,7 +107,7 @@ app.get('/', (req, res) => {
 });
 
 // User registration
-app.post('/register', async (req, res) => {
+app.post('/register', authLimiter, async (req, res) => {
     const { username, email, password } = req.body;
 
     // Validate input
@@ -92,8 +118,8 @@ app.post('/register', async (req, res) => {
         });
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Validate email format (simple regex to prevent ReDoS)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
         return res.status(400).json({ 
             success: false, 
@@ -153,7 +179,7 @@ app.post('/register', async (req, res) => {
 });
 
 // User login
-app.post('/login', (req, res) => {
+app.post('/login', authLimiter, (req, res) => {
     const { username, password } = req.body;
 
     // Validate input
