@@ -62,8 +62,10 @@ function initDatabase() {
 }
 
 // Security middleware
+// Note: CSP is disabled to allow external resources (MercadoPago, Google Fonts, CDN libraries)
+// In production, consider implementing a strict CSP with whitelisted domains
 app.use(helmet({
-    contentSecurityPolicy: false, // Disable for now to allow external scripts (MercadoPago, fonts, etc.)
+    contentSecurityPolicy: false,
 }));
 
 // Rate limiting
@@ -87,6 +89,9 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 // Session configuration
+// Note: CSRF protection is not implemented for this JSON API
+// Sessions are used only for authentication, not for state-changing operations via forms
+// For production, consider adding CSRF tokens if serving HTML forms
 app.use(session({
     secret: process.env.SESSION_SECRET || 'aura-studio-secret-key-2025-change-in-production',
     resave: false,
@@ -95,7 +100,7 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         httpOnly: true,
         secure: isProduction, // Use secure cookies in production
-        sameSite: 'lax'
+        sameSite: 'lax' // Provides some CSRF protection
     }
 }));
 
