@@ -33,6 +33,7 @@ function initDatabase() {
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL,
+            is_admin INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `, (err) => {
@@ -92,8 +93,19 @@ app.use(express.static(path.join(__dirname)));
 // Note: CSRF protection is not implemented for this JSON API
 // Sessions are used only for authentication, not for state-changing operations via forms
 // For production, consider adding CSRF tokens if serving HTML forms
+
+// Generate a random secret if SESSION_SECRET is not provided
+const sessionSecret = process.env.SESSION_SECRET || (() => {
+    if (isProduction) {
+        console.error('ERROR: SESSION_SECRET environment variable is required in production!');
+        process.exit(1);
+    }
+    // Development only: generate random secret
+    return require('crypto').randomBytes(32).toString('hex');
+})();
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'aura-studio-secret-key-2025-change-in-production',
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -103,6 +115,47 @@ app.use(session({
         sameSite: 'lax' // Provides some CSRF protection
     }
 }));
+
+// Middleware to check if user is authenticated
+function isAuthenticated(req, res, next) {
+    if (req.session.userId) {
+        return next();
+    }
+    res.status(401).json({ 
+        success: false, 
+        message: 'No autorizado. Por favor inicie sesión.' 
+    });
+}
+
+// Middleware to check if user is admin
+function isAdmin(req, res, next) {
+    if (!req.session.userId) {
+        return res.status(401).json({ 
+            success: false, 
+            message: 'No autorizado. Por favor inicie sesión.' 
+        });
+    }
+
+    // Check if user is admin
+    db.get('SELECT is_admin FROM users WHERE id = ?', [req.session.userId], (err, user) => {
+        if (err) {
+            console.error('Error checking admin status:', err.message);
+            return res.status(500).json({ 
+                success: false, 
+                message: 'Error en el servidor' 
+            });
+        }
+
+        if (!user || !user.is_admin) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Acceso denegado. Se requieren privilegios de administrador.' 
+            });
+        }
+
+        next();
+    });
+}
 
 // Routes
 
@@ -277,13 +330,7 @@ app.get('/auth/status', (req, res) => {
 });
 
 // Save subscription information
-app.post('/subscription', (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Debe iniciar sesión primero' 
-        });
-    }
+app.post('/subscription', isAuthenticated, (req, res) => {
 
     const { preapproval_id, status } = req.body;
 
@@ -308,13 +355,7 @@ app.post('/subscription', (req, res) => {
 });
 
 // Get user's subscriptions
-app.get('/subscriptions', (req, res) => {
-    if (!req.session.userId) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Debe iniciar sesión primero' 
-        });
-    }
+app.get('/subscriptions', isAuthenticated, (req, res) => {
 
     db.all(
         'SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC',
@@ -336,18 +377,10 @@ app.get('/subscriptions', (req, res) => {
     );
 });
 
-// Admin route - Get all users (requires authentication)
-app.get('/admin/users', (req, res) => {
-    // In production, add proper admin authentication
-    if (!req.session.userId) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'No autorizado' 
-        });
-    }
-
+// Admin route - Get all users (requires admin privileges)
+app.get('/admin/users', isAdmin, (req, res) => {
     db.all(
-        'SELECT id, username, email, created_at FROM users ORDER BY created_at DESC',
+        'SELECT id, username, email, is_admin, created_at FROM users ORDER BY created_at DESC',
         (err, users) => {
             if (err) {
                 console.error('Error querying users:', err.message);
@@ -365,16 +398,8 @@ app.get('/admin/users', (req, res) => {
     );
 });
 
-// Admin route - Get all subscriptions (requires authentication)
-app.get('/admin/subscriptions', (req, res) => {
-    // In production, add proper admin authentication
-    if (!req.session.userId) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'No autorizado' 
-        });
-    }
-
+// Admin route - Get all subscriptions (requires admin privileges)
+app.get('/admin/subscriptions', isAdmin, (req, res) => {
     db.all(
         `SELECT s.*, u.username, u.email 
          FROM subscriptions s 

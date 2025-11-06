@@ -254,9 +254,9 @@ function showMessage(message, type) {
 
 // MercadoPago callback handler
 function $MPC_message(event) {
-    // Validate origin for security
+    // Validate origin for security - use exact matching
     const validOrigins = ['https://www.mercadopago.com.mx', 'https://secure.mlstatic.com'];
-    if (!validOrigins.some(origin => event.origin.startsWith(origin))) {
+    if (!validOrigins.includes(event.origin)) {
         return; // Ignore messages from unknown origins
     }
 

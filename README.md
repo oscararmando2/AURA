@@ -97,13 +97,28 @@ AURA/
 - `POST /logout` - Cerrar sesión
 - `GET /auth/status` - Verificar estado de autenticación
 
-### Suscripciones
+### Suscripciones (requiere autenticación)
 - `POST /subscription` - Guardar información de suscripción
 - `GET /subscriptions` - Obtener suscripciones del usuario
 
-### Administración
+### Administración (requiere privilegios de admin)
 - `GET /admin/users` - Listar todos los usuarios
 - `GET /admin/subscriptions` - Listar todas las suscripciones
+
+## Crear un Usuario Administrador
+
+Para crear un usuario administrador, usa SQLite directamente:
+
+```bash
+sqlite3 aura_studio.db "UPDATE users SET is_admin = 1 WHERE username = 'tu_usuario';"
+```
+
+O durante el desarrollo:
+```bash
+sqlite3 aura_studio.db
+UPDATE users SET is_admin = 1 WHERE username = 'admin';
+.exit
+```
 
 ## Configuración de MercadoPago
 
