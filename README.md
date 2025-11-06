@@ -35,17 +35,23 @@ cd AURA
 npm install
 ```
 
-3. Iniciar el servidor:
+3. Configurar variables de entorno (opcional):
+```bash
+cp .env.example .env
+# Editar .env con tus valores
+```
+
+4. Iniciar el servidor:
 ```bash
 npm start
 ```
 
-4. Para desarrollo con auto-reload:
+5. Para desarrollo con auto-reload:
 ```bash
 npm run dev
 ```
 
-5. Abrir en el navegador:
+6. Abrir en el navegador:
 ```
 http://localhost:3000
 ```

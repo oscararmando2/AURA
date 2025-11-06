@@ -211,31 +211,34 @@ function showMessage(message, type) {
         letter-spacing: 1px;
     `;
 
-    // Add animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
+    // Add animation styles once if not already present
+    if (!document.getElementById('message-animations')) {
+        const style = document.createElement('style');
+        style.id = 'message-animations';
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
             }
-            to {
-                transform: translateX(0);
-                opacity: 1;
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
             }
-        }
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-    `;
-    document.head.appendChild(style);
+        `;
+        document.head.appendChild(style);
+    }
 
     // Add to page
     document.body.appendChild(messageDiv);
@@ -251,6 +254,12 @@ function showMessage(message, type) {
 
 // MercadoPago callback handler
 function $MPC_message(event) {
+    // Validate origin for security
+    const validOrigins = ['https://www.mercadopago.com.mx', 'https://secure.mlstatic.com'];
+    if (!validOrigins.some(origin => event.origin.startsWith(origin))) {
+        return; // Ignore messages from unknown origins
+    }
+
     if (event.data && event.data.preapproval_id) {
         // Save subscription information
         fetch('/subscription', {

@@ -65,7 +65,7 @@ app.use(express.static(path.join(__dirname)));
 
 // Session configuration
 app.use(session({
-    secret: 'aura-studio-secret-key-2025',
+    secret: process.env.SESSION_SECRET || 'aura-studio-secret-key-2025-change-in-production',
     resave: false,
     saveUninitialized: false,
     cookie: {
