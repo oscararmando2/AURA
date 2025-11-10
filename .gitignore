@@ -33,3 +33,6 @@ logs/
 # Build files
 dist/
 build/
+
+# Generated PDFs
+pdfs/*.pdf
