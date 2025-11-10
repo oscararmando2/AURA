@@ -1,26 +1,79 @@
-# AURA STUDIO
+# AURA - Sistema de Facturación
 
-Sitio web moderno y responsivo para AURA STUDIO - Estudio de Pilates en Zitacuaro, Michoacan.
+Sistema completo de facturación y gestión de inventario para **El Mexiquense Market**.
 
-## Características
+## 🎯 Sistemas Disponibles
 
-- ✨ Diseño ultra moderno y responsivo
-- 🎨 Esquema de colores blanco y negro
-- 💪 Sección de beneficios del Pilates
-- 📍 Ubicación en Zitacuaro, Michoacan
-- 💳 Integración con MercadoPago para suscripciones
-- 👤 Sistema de registro e inicio de sesión
-- 🗄️ Base de datos SQLite para usuarios y suscripciones
-- 📱 Diseño completamente responsivo
+Este repositorio contiene **dos sistemas** de facturación:
 
-## Tecnologías Utilizadas
+### 1. 🐍 Sistema Python (Recomendado para nuevos usuarios)
+**Ubicación:** `python_invoice_system/`
 
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Backend**: Node.js, Express
+Sistema completo desarrollado en Python con:
+- ✅ Importación desde CSV/Excel
+- ✅ Búsqueda por UPC parcial
+- ✅ Asignación automática de IDs a productos sin UPC
+- ✅ Generación de facturas interactivas
+- ✅ Exportación a CSV, Excel y PDF
+- ✅ Base de datos SQLite (sin configuración)
+- ✅ Interfaz CLI fácil de usar
+
+**[Ver documentación completa →](python_invoice_system/README.md)**
+
+### 2. 🌐 Sistema PHP/MySQL (Sistema web)
+**Ubicación:** Raíz del proyecto
+
+Sistema web profesional con:
+- ✅ Interfaz web moderna y responsiva
+- ✅ Autocompletado de productos por UPC
+- ✅ Generación de PDFs profesionales
+- ✅ Base de datos MySQL
+- ✅ Visor de PDFs integrado
+
+**[Ver documentación PHP →](FACTURACION_README.md)**
+
+## 🚀 Inicio Rápido
+
+### Para Sistema Python:
+
+```bash
+cd python_invoice_system
+pip install -r requirements.txt
+python main.py
+```
+
+### Para Sistema PHP:
+
+```bash
+# Configurar base de datos MySQL
+mysql -u root -p < database.sql
+
+# Iniciar servidor PHP
+php -S localhost:8080
+```
+
+## 📋 Características Principales
+
+- 🔍 **Búsqueda por UPC parcial**: Encuentra productos escribiendo solo parte del código
+- 🏷️ **Productos sin UPC**: Asignación automática de identificadores únicos (ej: CILANTRO001)
+- 📊 **Importación masiva**: Soporta CSV y Excel (Sheet 1)
+- 🧾 **Facturas profesionales**: Múltiples formatos de exportación
+- 💰 **Créditos y descuentos**: Aplicación de créditos en facturas
+- 💾 **Base de datos**: Almacenamiento persistente de productos y facturas
+
+## 🎨 Tecnologías Utilizadas
+
+### Sistema Python
+- **Lenguaje**: Python 3.8+
+- **Datos**: Pandas, OpenPyXL
 - **Base de datos**: SQLite3
-- **Autenticación**: bcryptjs, express-session
-- **Pagos**: MercadoPago
-- **Animaciones**: AOS (Animate On Scroll)
+- **PDFs**: ReportLab
+
+### Sistema PHP
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Backend**: PHP 7.4+
+- **Base de datos**: MySQL
+- **PDFs**: FPDF
 
 ## Instalación
 
@@ -41,106 +94,123 @@ cp .env.example .env
 # Editar .env con tus valores
 ```
 
-4. Iniciar el servidor:
+## 📦 Instalación
+
+### Sistema Python (Recomendado)
+
+1. Navegar al directorio:
 ```bash
-npm start
+cd python_invoice_system
 ```
 
-5. Para desarrollo con auto-reload:
+2. Crear entorno virtual (recomendado):
 ```bash
-npm run dev
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
 
-6. Abrir en el navegador:
-```
-http://localhost:3000
+3. Instalar dependencias:
+```bash
+pip install -r requirements.txt
 ```
 
-## Estructura del Proyecto
+4. Iniciar el sistema:
+```bash
+python main.py
+```
+
+5. (Opcional) Ver ejemplo de uso:
+```bash
+python ejemplo_uso.py
+```
+
+### Sistema PHP (Servidor Web)
+
+1. Crear base de datos:
+```bash
+mysql -u root -p < database.sql
+```
+
+2. Configurar conexión (editar `conexion.php`):
+```php
+define('DB_USER', 'tu_usuario');
+define('DB_PASS', 'tu_contraseña');
+```
+
+3. Iniciar servidor:
+```bash
+php -S localhost:8080
+```
+
+4. Abrir en navegador:
+```
+http://localhost:8080/factura.php
+```
+
+## 📁 Estructura del Proyecto
 
 ```
 AURA/
-├── index.html          # Página principal
-├── styles.css          # Estilos modernos y responsivos
-├── app.js             # JavaScript del cliente
-├── server.js          # Servidor backend
-├── package.json       # Dependencias del proyecto
-├── .gitignore         # Archivos a ignorar en git
-└── README.md          # Este archivo
+├── python_invoice_system/    # Sistema Python
+│   ├── main.py               # Interfaz CLI
+│   ├── inventario.py         # Gestión de inventario
+│   ├── facturacion.py        # Gestión de facturas
+│   ├── ejemplo_uso.py        # Ejemplo de uso
+│   ├── datos_ejemplo.csv     # Datos de muestra
+│   ├── requirements.txt      # Dependencias
+│   └── README.md            # Documentación detallada
+│
+├── factura.php              # Sistema web PHP
+├── buscar.php               # API búsqueda productos
+├── guardar_factura.php      # Guardar y generar PDFs
+├── conexion.php             # Conexión MySQL
+├── database.sql             # Schema de base de datos
+├── fpdf/                    # Librería PDF
+├── pdfs/                    # PDFs generados
+│
+├── index.html               # Página de bienvenida
+├── server.js                # Servidor Node.js (legacy)
+├── package.json             # Dependencias Node.js
+└── README.md               # Este archivo
 ```
 
-## Funcionalidades
+## 🎯 Casos de Uso
 
-### Frontend
-
-- **Hero Section**: Imagen de fondo con llamado a la acción
-- **Visión**: Descripción del estudio y sus objetivos
-- **Beneficios**: Grid con 6 beneficios principales del Pilates
-- **Horarios**: Información de horarios de atención
-- **Ubicación**: Mapa integrado de Google Maps
-- **Suscripción**: Botón de pago con MercadoPago
-- **Autenticación**: Formularios de registro e inicio de sesión
-
-### Backend
-
-- **Registro de usuarios**: Con validación y hash de contraseñas
-- **Inicio de sesión**: Sistema de sesiones con Express
-- **Base de datos**: SQLite para almacenar usuarios y suscripciones
-- **API REST**: Endpoints para gestión de usuarios y suscripciones
-- **Panel de administración**: Endpoints para ver usuarios y suscripciones
-
-## API Endpoints
-
-### Autenticación
-- `POST /register` - Registrar nuevo usuario
-- `POST /login` - Iniciar sesión
-- `POST /logout` - Cerrar sesión
-- `GET /auth/status` - Verificar estado de autenticación
-
-### Suscripciones (requiere autenticación)
-- `POST /subscription` - Guardar información de suscripción
-- `GET /subscriptions` - Obtener suscripciones del usuario
-
-### Administración (requiere privilegios de admin)
-- `GET /admin/users` - Listar todos los usuarios
-- `GET /admin/subscriptions` - Listar todas las suscripciones
-
-## Crear un Usuario Administrador
-
-Para crear un usuario administrador, usa SQLite directamente:
-
+### Ejemplo 1: Importar Productos
 ```bash
-sqlite3 aura_studio.db "UPDATE users SET is_admin = 1 WHERE username = 'tu_usuario';"
+python python_invoice_system/main.py
+# Seleccionar: 1 → 1 → datos_ejemplo.csv
 ```
 
-O durante el desarrollo:
+### Ejemplo 2: Buscar por UPC Parcial
 ```bash
-sqlite3 aura_studio.db
-UPDATE users SET is_admin = 1 WHERE username = 'admin';
-.exit
+# Buscar "715" encuentra: "715141514643 - Egglands Best..."
+# Buscar "CILANTRO" encuentra: "CILANTRO001 - CILANTRO"
 ```
 
-## Configuración de MercadoPago
-
-El botón de suscripción está configurado con el ID del plan de MercadoPago:
+### Ejemplo 3: Crear Factura
+```bash
+# 1. Buscar "715" → Seleccionar producto → Cantidad: 2
+# 2. Buscar "CILANTRO" → Seleccionar → Cantidad: 10
+# 3. Buscar "0700" → Seleccionar producto → Cantidad: 3
+# 4. Aplicar crédito: $5.00
+# 5. Guardar y exportar (CSV, Excel, PDF)
 ```
-preapproval_plan_id=e7b1306f0c12462985724495ffb3e341
-```
 
-## Diseño Responsivo
+## 📊 Datos de Ejemplo
 
-El sitio es completamente responsivo con breakpoints en:
-- Móvil: < 480px
-- Tablet: < 768px
-- Desktop: > 768px
-- Pantallas grandes: > 1600px
+El archivo `python_invoice_system/datos_ejemplo.csv` incluye 100 productos con:
+- ✅ Productos con UPC numéricos
+- ✅ Productos sin UPC (CILANTRO, CAJA AGUACATE, etc.)
+- ✅ Diferentes categorías y precios
+- ✅ Formato compatible con importación
 
-## Seguridad
+## 🔒 Seguridad
 
-- Contraseñas hasheadas con bcryptjs
-- Sesiones seguras con express-session
-- Validación de datos en cliente y servidor
-- Protección contra SQL injection con prepared statements
+- ✅ Prepared statements para prevenir SQL injection
+- ✅ Validación de datos en entrada
+- ✅ Sanitización de datos
+- ✅ Manejo de errores apropiado
 
 ## Licencia
 
