@@ -310,6 +310,74 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Autocomplete dropdown styles */
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--blanco);
+            border: 2px solid var(--verde-principal);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+        }
+
+        .autocomplete-dropdown.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--gris-claro);
+            transition: background-color 0.2s ease;
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover,
+        .autocomplete-item.selected {
+            background-color: #e8f5e9;
+        }
+
+        .autocomplete-item-upc {
+            font-weight: 600;
+            color: var(--verde-principal);
+            font-size: 13px;
+        }
+
+        .autocomplete-item-name {
+            color: var(--texto-oscuro);
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .autocomplete-item-price {
+            color: var(--rojo-principal);
+            font-weight: 600;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .autocomplete-no-results {
+            padding: 12px;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            font-style: italic;
+        }
+
         @media (max-width: 1200px) {
             .container {
                 grid-template-columns: 1fr;
@@ -382,7 +450,12 @@
                 </thead>
                 <tbody id="productosBody">
                     <tr class="producto-row">
-                        <td><input type="text" class="upc-input" placeholder="7501000..." maxlength="20"></td>
+                        <td>
+                            <div class="autocomplete-container">
+                                <input type="text" class="upc-input" placeholder="7501000..." maxlength="20" autocomplete="off">
+                                <div class="autocomplete-dropdown"></div>
+                            </div>
+                        </td>
                         <td><input type="text" class="descripcion-input" placeholder="Nombre del producto"></td>
                         <td><input type="number" class="cantidad-input" value="1" min="0" step="0.01"></td>
                         <td><input type="number" class="precio-input" value="0" min="0" step="0.01"></td>
@@ -442,10 +515,26 @@
         // Inicializar fecha actual
         document.getElementById('fecha').valueAsDate = new Date();
 
+        // Variables para el autocomplete
+        let autocompleteTimeout = null;
+        let selectedIndex = -1;
+
         // Autocompletar producto por UPC
         document.addEventListener('input', function(e) {
             if (e.target.classList.contains('upc-input')) {
                 const upc = e.target.value.trim();
+                
+                // Mostrar dropdown de autocomplete si hay al menos 3 caracteres
+                if (upc.length >= 3) {
+                    clearTimeout(autocompleteTimeout);
+                    autocompleteTimeout = setTimeout(() => {
+                        mostrarAutocomplete(upc, e.target);
+                    }, 300);
+                } else {
+                    ocultarAutocomplete(e.target);
+                }
+                
+                // Auto-completar si el UPC es completo (al menos 7 caracteres)
                 if (upc.length >= 7) {
                     buscarProducto(upc, e.target);
                 }
@@ -454,6 +543,43 @@
             // Calcular total de la línea
             if (e.target.classList.contains('cantidad-input') || e.target.classList.contains('precio-input')) {
                 calcularLineaTotal(e.target);
+            }
+        });
+
+        // Manejar navegación con teclado en autocomplete
+        document.addEventListener('keydown', function(e) {
+            if (!e.target.classList.contains('upc-input')) return;
+            
+            const dropdown = e.target.closest('.autocomplete-container').querySelector('.autocomplete-dropdown');
+            if (!dropdown.classList.contains('show')) return;
+            
+            const items = dropdown.querySelectorAll('.autocomplete-item');
+            if (items.length === 0) return;
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                actualizarSeleccionAutocomplete(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                actualizarSeleccionAutocomplete(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < items.length) {
+                    items[selectedIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                ocultarAutocomplete(e.target);
+            }
+        });
+
+        // Cerrar autocomplete al hacer click fuera
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete-container')) {
+                document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
             }
         });
 
@@ -476,6 +602,84 @@
             } catch (error) {
                 console.error('Error al buscar producto:', error);
             }
+        }
+
+        // Mostrar dropdown de autocomplete
+        async function mostrarAutocomplete(search, inputElement) {
+            try {
+                const response = await fetch(`buscar_autocomplete.php?search=${encodeURIComponent(search)}`);
+                const data = await response.json();
+                
+                const container = inputElement.closest('.autocomplete-container');
+                const dropdown = container.querySelector('.autocomplete-dropdown');
+                dropdown.innerHTML = '';
+                selectedIndex = -1;
+                
+                if (data.success && data.productos.length > 0) {
+                    data.productos.forEach(producto => {
+                        const item = document.createElement('div');
+                        item.className = 'autocomplete-item';
+                        item.innerHTML = `
+                            <div class="autocomplete-item-upc">UPC: ${producto.upc}</div>
+                            <div class="autocomplete-item-name">${producto.nombre}</div>
+                            <div class="autocomplete-item-price">$${producto.precio} / ${producto.unidad}</div>
+                        `;
+                        
+                        item.addEventListener('click', function() {
+                            seleccionarProducto(producto, inputElement);
+                        });
+                        
+                        dropdown.appendChild(item);
+                    });
+                    
+                    dropdown.classList.add('show');
+                } else if (search.length >= 3) {
+                    dropdown.innerHTML = '<div class="autocomplete-no-results">No se encontraron productos</div>';
+                    dropdown.classList.add('show');
+                }
+            } catch (error) {
+                console.error('Error al buscar autocomplete:', error);
+            }
+        }
+
+        // Ocultar dropdown de autocomplete
+        function ocultarAutocomplete(inputElement) {
+            const container = inputElement.closest('.autocomplete-container');
+            const dropdown = container.querySelector('.autocomplete-dropdown');
+            dropdown.classList.remove('show');
+            dropdown.innerHTML = '';
+            selectedIndex = -1;
+        }
+
+        // Seleccionar producto del autocomplete
+        function seleccionarProducto(producto, inputElement) {
+            const row = inputElement.closest('tr');
+            const upcInput = row.querySelector('.upc-input');
+            const descripcionInput = row.querySelector('.descripcion-input');
+            const precioInput = row.querySelector('.precio-input');
+            
+            // Llenar los campos
+            upcInput.value = producto.upc;
+            descripcionInput.value = producto.nombre;
+            precioInput.value = producto.precio;
+            
+            // Calcular total de la línea
+            calcularLineaTotal(precioInput);
+            
+            // Ocultar dropdown
+            ocultarAutocomplete(inputElement);
+        }
+
+        // Actualizar selección visual en autocomplete
+        function actualizarSeleccionAutocomplete(items) {
+            items.forEach((item, index) => {
+                if (index === selectedIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
         }
 
         // Calcular total de una línea
@@ -513,7 +717,12 @@
             const newRow = document.createElement('tr');
             newRow.className = 'producto-row';
             newRow.innerHTML = `
-                <td><input type="text" class="upc-input" placeholder="7501000..." maxlength="20"></td>
+                <td>
+                    <div class="autocomplete-container">
+                        <input type="text" class="upc-input" placeholder="7501000..." maxlength="20" autocomplete="off">
+                        <div class="autocomplete-dropdown"></div>
+                    </div>
+                </td>
                 <td><input type="text" class="descripcion-input" placeholder="Nombre del producto"></td>
                 <td><input type="number" class="cantidad-input" value="1" min="0" step="0.01"></td>
                 <td><input type="number" class="precio-input" value="0" min="0" step="0.01"></td>
@@ -663,7 +872,12 @@
             const tbody = document.getElementById('productosBody');
             tbody.innerHTML = `
                 <tr class="producto-row">
-                    <td><input type="text" class="upc-input" placeholder="7501000..." maxlength="20"></td>
+                    <td>
+                        <div class="autocomplete-container">
+                            <input type="text" class="upc-input" placeholder="7501000..." maxlength="20" autocomplete="off">
+                            <div class="autocomplete-dropdown"></div>
+                        </div>
+                    </td>
                     <td><input type="text" class="descripcion-input" placeholder="Nombre del producto"></td>
                     <td><input type="number" class="cantidad-input" value="1" min="0" step="0.01"></td>
                     <td><input type="number" class="precio-input" value="0" min="0" step="0.01"></td>
