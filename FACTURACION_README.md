@@ -62,7 +62,14 @@ AURA/
    - Crear base de datos: `el_mexiquense_market`
    - Importar el archivo `database.sql`
 
-3. **Configurar conexión a la base de datos**
+3. **Cargar productos (318 productos del inventario)**
+   ```bash
+   mysql -u root -p el_mexiquense_market < insert_products.sql
+   ```
+   
+   📚 Ver [PRODUCT_INSTALLATION.md](PRODUCT_INSTALLATION.md) para más detalles sobre la instalación de productos.
+
+4. **Configurar conexión a la base de datos**
    
    Editar `conexion.php` y actualizar las credenciales:
    ```php
@@ -72,12 +79,12 @@ AURA/
    define('DB_NAME', 'el_mexiquense_market');
    ```
 
-4. **Configurar permisos**
+5. **Configurar permisos**
    ```bash
    chmod 777 pdfs/
    ```
 
-5. **Iniciar el servidor**
+6. **Iniciar el servidor**
    
    **Con XAMPP/MAMP:**
    - Copiar archivos a la carpeta `htdocs/`
