@@ -2,6 +2,8 @@
 
 Sistema completo de facturación y gestión de inventario para **El Mexiquense Market**.
 
+> **Nota**: Este repositorio contiene únicamente el sistema de facturación. Todo el contenido relacionado con Pilates ha sido removido.
+
 ## 🎯 Sistemas Disponibles
 
 Este repositorio contiene **dos sistemas** de facturación:
