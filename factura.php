@@ -39,6 +39,13 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content {
+            flex: 1;
         }
 
         .header h1 {
@@ -51,6 +58,29 @@
             font-size: 14px;
             font-weight: 300;
             opacity: 0.9;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--blanco);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-btn:hover {
+            background: var(--blanco);
+            color: var(--verde-principal);
+            border-color: var(--blanco);
         }
 
         .container {
@@ -387,10 +417,23 @@
         @media (max-width: 768px) {
             .header {
                 padding: 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
             }
 
             .header h1 {
                 font-size: 22px;
+            }
+
+            .header-nav {
+                width: 100%;
+            }
+
+            .nav-btn {
+                display: block;
+                text-align: center;
+                width: 100%;
             }
 
             .panel {
@@ -411,8 +454,13 @@
 <body>
     <!-- Cabecera -->
     <div class="header">
-        <h1>🛒 EL MEXIQUENSE MARKET</h1>
-        <p>Sistema de Facturación Profesional</p>
+        <div class="header-content">
+            <h1>🛒 EL MEXIQUENSE MARKET</h1>
+            <p>Sistema de Facturación Profesional</p>
+        </div>
+        <div class="header-nav">
+            <a href="index.html" class="nav-btn">🏠 Inicio</a>
+        </div>
     </div>
 
     <div class="container">
