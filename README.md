@@ -1,8 +1,33 @@
-# AURA - Sistema de Facturación
+# AURA - Sistema de Facturación y Studio Pilates
+
+Este repositorio contiene **dos sistemas independientes**:
+
+1. **Sistema de Facturación** - Para El Mexiquense Market
+2. **AURA Studio** - Website de reservas de clases de Pilates
+
+---
+
+## 🧘 AURA Studio - Pilates Website
+
+Website profesional con sistema de reservas integrado con Firebase.
+
+**Características:**
+- ✅ Sistema de reservas en línea con Firebase Firestore
+- ✅ Calendario interactivo con FullCalendar
+- ✅ Panel de administración para gestión de reservas
+- ✅ Autenticación de usuarios con Firebase Auth
+- ✅ Diseño responsive y moderno
+
+**[Ver documentación completa de Pilates →](PILATES_README.md)**
+
+**Recientes actualizaciones:**
+- 🔧 **Corrección de reservas (2025-11-12)**: Solucionado el problema de guardado de reservas. Ver [RESERVATION_FIX_SUMMARY.md](RESERVATION_FIX_SUMMARY.md)
+
+---
+
+## 💼 Sistema de Facturación
 
 Sistema completo de facturación y gestión de inventario para **El Mexiquense Market**.
-
-> **Nota**: Este repositorio contiene únicamente el sistema de facturación. Todo el contenido relacionado con Pilates ha sido removido.
 
 ## 🎯 Sistemas Disponibles
 

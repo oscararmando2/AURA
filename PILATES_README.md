@@ -1,5 +1,13 @@
 # AURA STUDIO - Pilates Website
 
+## 🔧 Recent Updates
+
+**Reservation Saving Fix (2025-11-12)**
+- ✅ Fixed issue where reservations were not being saved to Firebase Firestore
+- ✅ Improved error handling and user feedback
+- ✅ Added comprehensive logging for debugging
+- 📖 See [RESERVATION_FIX_SUMMARY.md](RESERVATION_FIX_SUMMARY.md) for technical details
+
 ## Quick Start
 
 The AURA STUDIO Pilates website is ready to use! Here's how to get started:
