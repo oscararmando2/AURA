@@ -1062,6 +1062,58 @@
     </style>
 </head>
 <body>
+    <!-- ========== Hamburger Menu ========== -->
+    <!-- Menú hamburguesa en la esquina superior derecha -->
+    <div id="hamburger-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+        <!-- Botón hamburguesa (tres líneas) -->
+        <button id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); border: none; border-radius: 12px; padding: 12px 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.4); transition: all 0.3s ease;">
+            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0; transition: 0.3s;"></div>
+            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0; transition: 0.3s;"></div>
+            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0; transition: 0.3s;"></div>
+        </button>
+        
+        <!-- Menú desplegable -->
+        <div id="menu-dropdown" role="menu" aria-hidden="true" style="display: none; position: absolute; top: 60px; right: 0; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); border: 2px solid rgba(246, 200, 199, 0.3); min-width: 200px; overflow: hidden;">
+            <button id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease; border-bottom: 1px solid rgba(246, 200, 199, 0.2);">
+                📝 Registrarse
+            </button>
+            <button id="menu-admin-login" role="menuitem" aria-label="Login Admin" style="display: block; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease; border-bottom: 1px solid rgba(246, 200, 199, 0.2);">
+                🔐 Login Admin
+            </button>
+            <button id="menu-logout" role="menuitem" aria-label="Cerrar Sesión" style="display: none; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease;">
+                🚪 Cerrar Sesión
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal para Registro de Usuario -->
+    <div id="register-modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
+            <h2 id="register-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Registrarse</h2>
+            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Crea tu cuenta para reservar clases</p>
+            <div id="register-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
+            <div id="register-success" style="display: none; background: linear-gradient(135deg, #c8f6c8 0%, #e3fbe3 100%); color: #2d5f2d; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
+            <form id="register-form">
+                <div style="margin-bottom: 15px;">
+                    <label for="register-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
+                    <input type="email" id="register-email" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="register-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña (mínimo 6 caracteres)</label>
+                    <input type="password" id="register-password" required minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.3);">
+                        Registrarse
+                    </button>
+                    <button type="button" id="register-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ========== 1. Welcome Section (Hero Section) ========== -->
     <section class="hero-section">
         <div class="hero-content">
@@ -1192,24 +1244,32 @@
         </div>
     </section>
 
-    <!-- ========== 5. Admin Login Section ========== -->
-    <section id="admin-login-section" class="contact-section" style="display: none;">
-        <h2>Acceso de Administrador</h2>
-        <div style="max-width: 400px; margin: 0 auto;">
-            <div id="login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;"></div>
-            <form id="admin-login-form" style="text-align: left;">
+    <!-- ========== 5. Admin Login Section (Modal Style) ========== -->
+    <div id="admin-login-modal" role="dialog" aria-labelledby="admin-login-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
+            <h2 id="admin-login-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Acceso de Administrador</h2>
+            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Ingresa con tu cuenta de administrador</p>
+            <div id="login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
+            <form id="admin-login-form">
+                <div style="margin-bottom: 15px;">
+                    <label for="admin-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
+                    <input type="email" id="admin-email" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
                 <div style="margin-bottom: 20px;">
-                    <label for="admin-email" style="display: block; margin-bottom: 8px; color: #666; font-weight: 500;">Correo Electrónico</label>
-                    <input type="email" id="admin-email" required style="width: 100%; padding: 14px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;">
+                    <label for="admin-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
+                    <input type="password" id="admin-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
-                <div style="margin-bottom: 25px;">
-                    <label for="admin-password" style="display: block; margin-bottom: 8px; color: #666; font-weight: 500;">Contraseña</label>
-                    <input type="password" id="admin-password" required style="width: 100%; padding: 14px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;">
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.3);">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" id="admin-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
+                        Cancelar
+                    </button>
                 </div>
-                <button type="submit" class="contact-btn" style="width: 100%;">Iniciar Sesión</button>
             </form>
         </div>
-    </section>
+    </div>
 
     <!-- ========== 6. Admin Panel Section ========== -->
     <section id="admin-panel-section" class="contact-section" style="display: none;">
@@ -1257,6 +1317,147 @@
 
     <!-- FullCalendar JS desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
+    
+    <!-- ========== Hamburger Menu Functionality ========== -->
+    <script>
+        /*
+         * Funcionalidad del Menú Hamburguesa
+         * - Toggle para mostrar/ocultar menú
+         * - Navegación a modales de registro y login
+         * - Botón de logout visible solo cuando hay sesión activa
+         * - Accesibilidad con ARIA labels
+         * - Responsive y funcional en móviles
+         */
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburgerBtn = document.getElementById('hamburger-btn');
+            const menuDropdown = document.getElementById('menu-dropdown');
+            const menuRegister = document.getElementById('menu-register');
+            const menuAdminLogin = document.getElementById('menu-admin-login');
+            const menuLogout = document.getElementById('menu-logout');
+            
+            const registerModal = document.getElementById('register-modal');
+            const registerCancel = document.getElementById('register-cancel');
+            const adminLoginModal = document.getElementById('admin-login-modal');
+            const adminLoginCancel = document.getElementById('admin-login-cancel');
+            
+            // Toggle hamburger menu
+            hamburgerBtn.addEventListener('click', () => {
+                const isOpen = menuDropdown.style.display === 'block';
+                menuDropdown.style.display = isOpen ? 'none' : 'block';
+                hamburgerBtn.setAttribute('aria-expanded', !isOpen);
+                menuDropdown.setAttribute('aria-hidden', isOpen);
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!hamburgerBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+                    menuDropdown.style.display = 'none';
+                    hamburgerBtn.setAttribute('aria-expanded', 'false');
+                    menuDropdown.setAttribute('aria-hidden', 'true');
+                }
+            });
+            
+            // Hover effects for menu items
+            const menuItems = [menuRegister, menuAdminLogin, menuLogout];
+            menuItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    item.style.background = 'linear-gradient(135deg, #fef5f5 0%, #fbe3e3 100%)';
+                });
+                item.addEventListener('mouseleave', () => {
+                    item.style.background = 'transparent';
+                });
+            });
+            
+            // Show register modal
+            menuRegister.addEventListener('click', () => {
+                menuDropdown.style.display = 'none';
+                hamburgerBtn.setAttribute('aria-expanded', 'false');
+                menuDropdown.setAttribute('aria-hidden', 'true');
+                registerModal.style.display = 'flex';
+                document.getElementById('register-email').focus();
+            });
+            
+            // Show admin login modal
+            menuAdminLogin.addEventListener('click', () => {
+                menuDropdown.style.display = 'none';
+                hamburgerBtn.setAttribute('aria-expanded', 'false');
+                menuDropdown.setAttribute('aria-hidden', 'true');
+                adminLoginModal.style.display = 'flex';
+                document.getElementById('admin-email').focus();
+            });
+            
+            // Close register modal
+            registerCancel.addEventListener('click', () => {
+                registerModal.style.display = 'none';
+                document.getElementById('register-form').reset();
+                document.getElementById('register-error').style.display = 'none';
+                document.getElementById('register-success').style.display = 'none';
+            });
+            
+            // Close admin login modal
+            adminLoginCancel.addEventListener('click', () => {
+                adminLoginModal.style.display = 'none';
+                document.getElementById('admin-login-form').reset();
+                document.getElementById('login-error').style.display = 'none';
+            });
+            
+            // Close modals on ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    registerModal.style.display = 'none';
+                    adminLoginModal.style.display = 'none';
+                    menuDropdown.style.display = 'none';
+                    hamburgerBtn.setAttribute('aria-expanded', 'false');
+                    menuDropdown.setAttribute('aria-hidden', 'true');
+                }
+            });
+            
+            // Close modals when clicking outside
+            registerModal.addEventListener('click', (e) => {
+                if (e.target === registerModal) {
+                    registerModal.style.display = 'none';
+                    document.getElementById('register-form').reset();
+                    document.getElementById('register-error').style.display = 'none';
+                    document.getElementById('register-success').style.display = 'none';
+                }
+            });
+            
+            adminLoginModal.addEventListener('click', (e) => {
+                if (e.target === adminLoginModal) {
+                    adminLoginModal.style.display = 'none';
+                    document.getElementById('admin-login-form').reset();
+                    document.getElementById('login-error').style.display = 'none';
+                }
+            });
+            
+            // Hover effects for buttons
+            const submitButtons = document.querySelectorAll('button[type="submit"]');
+            submitButtons.forEach(btn => {
+                if (btn.style.background && btn.style.background.includes('f6c8c7')) {
+                    btn.addEventListener('mouseenter', () => {
+                        btn.style.transform = 'translateY(-2px)';
+                        btn.style.boxShadow = '0 8px 20px rgba(246, 200, 199, 0.5)';
+                    });
+                    btn.addEventListener('mouseleave', () => {
+                        btn.style.transform = 'translateY(0)';
+                        btn.style.boxShadow = '0 4px 15px rgba(246, 200, 199, 0.3)';
+                    });
+                }
+            });
+            
+            // Hover effect for hamburger button
+            hamburgerBtn.addEventListener('mouseenter', () => {
+                hamburgerBtn.style.transform = 'translateY(-2px)';
+                hamburgerBtn.style.boxShadow = '0 8px 20px rgba(246, 200, 199, 0.6)';
+            });
+            hamburgerBtn.addEventListener('mouseleave', () => {
+                hamburgerBtn.style.transform = 'translateY(0)';
+                hamburgerBtn.style.boxShadow = '0 4px 15px rgba(246, 200, 199, 0.4)';
+            });
+        });
+    </script>
+    
     <script>
         /*
          * Implementación de FullCalendar para AURA Studio
@@ -1565,7 +1766,7 @@
         // ========== IMPORTAR FIREBASE SDK v10 ==========
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // ========== CONFIGURACIÓN DE FIREBASE ==========
@@ -1599,6 +1800,65 @@
         let currentUser = null;
 
         // ========== FUNCIONES DE AUTENTICACIÓN ==========
+
+        /**
+         * Manejar el envío del formulario de registro
+         */
+        function setupUserRegistration() {
+            const registerForm = document.getElementById('register-form');
+            const registerError = document.getElementById('register-error');
+            const registerSuccess = document.getElementById('register-success');
+
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                
+                // Ocultar mensajes previos
+                registerError.style.display = 'none';
+                registerSuccess.style.display = 'none';
+                
+                try {
+                    // Crear usuario en Firebase Authentication
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    
+                    console.log('Usuario registrado exitosamente:', userCredential.user.email);
+                    
+                    // Mostrar mensaje de éxito
+                    registerSuccess.textContent = `¡Registro exitoso! Bienvenido/a ${email}`;
+                    registerSuccess.style.display = 'block';
+                    
+                    // Limpiar formulario
+                    registerForm.reset();
+                    
+                    // Cerrar modal después de 2 segundos
+                    setTimeout(() => {
+                        document.getElementById('register-modal').style.display = 'none';
+                        registerSuccess.style.display = 'none';
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error('Error de registro:', error);
+                    
+                    // Mostrar mensaje de error
+                    let errorMessage = 'Error al registrar. Por favor, inténtalo de nuevo.';
+                    
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMessage = 'Este correo electrónico ya está registrado. Por favor, usa otro o inicia sesión.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Correo electrónico inválido. Por favor, verifica el formato.';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMessage = 'Contraseña débil. Debe tener al menos 6 caracteres.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    registerError.textContent = errorMessage;
+                    registerError.style.display = 'block';
+                }
+            });
+        }
 
         /**
          * Manejar el envío del formulario de login
@@ -1654,17 +1914,38 @@
          * Configurar el botón de cerrar sesión
          */
         function setupLogout() {
-            const logoutBtn = document.getElementById('admin-logout-btn');
+            // Botón de logout en el menú hamburguesa
+            const menuLogoutBtn = document.getElementById('menu-logout');
             
-            logoutBtn.addEventListener('click', async () => {
+            menuLogoutBtn.addEventListener('click', async () => {
                 try {
                     await signOut(auth);
                     console.log('Sesión cerrada correctamente');
+                    
+                    // Cerrar el menú
+                    document.getElementById('menu-dropdown').style.display = 'none';
+                    document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
+                    document.getElementById('menu-dropdown').setAttribute('aria-hidden', 'true');
+                    
                 } catch (error) {
                     console.error('Error al cerrar sesión:', error);
                     alert('Error al cerrar sesión. Por favor, inténtalo de nuevo.');
                 }
             });
+            
+            // Botón de logout en el panel de admin (si existe)
+            const adminLogoutBtn = document.getElementById('admin-logout-btn');
+            if (adminLogoutBtn) {
+                adminLogoutBtn.addEventListener('click', async () => {
+                    try {
+                        await signOut(auth);
+                        console.log('Sesión cerrada correctamente');
+                    } catch (error) {
+                        console.error('Error al cerrar sesión:', error);
+                        alert('Error al cerrar sesión. Por favor, inténtalo de nuevo.');
+                    }
+                });
+            }
         }
 
         /**
@@ -1672,35 +1953,61 @@
          */
         function setupAuthObserver() {
             onAuthStateChanged(auth, async (user) => {
-                const loginSection = document.getElementById('admin-login-section');
+                const adminLoginModal = document.getElementById('admin-login-modal');
                 const adminPanel = document.getElementById('admin-panel-section');
                 const loginForm = document.getElementById('admin-login-form');
                 const loginError = document.getElementById('login-error');
+                const menuLogout = document.getElementById('menu-logout');
+                const menuRegister = document.getElementById('menu-register');
+                const menuAdminLogin = document.getElementById('menu-admin-login');
                 
-                if (user && user.email === 'admin@aura.com') {
-                    // Usuario autenticado como admin
+                if (user) {
                     currentUser = user;
                     
-                    // Ocultar login y mostrar panel de admin
-                    loginSection.style.display = 'none';
-                    adminPanel.style.display = 'block';
+                    // Mostrar botón de logout en el menú
+                    menuLogout.style.display = 'block';
                     
-                    // Mostrar email del admin
-                    document.getElementById('admin-email-display').textContent = user.email;
+                    // Ocultar opciones de registro y login cuando hay sesión
+                    menuRegister.style.display = 'none';
+                    menuAdminLogin.style.display = 'none';
                     
-                    // Limpiar formulario de login
-                    loginForm.reset();
-                    loginError.style.display = 'none';
-                    
-                    // Cargar reservas
-                    await loadReservations();
+                    // Si es admin, mostrar panel y cerrar modal
+                    if (user.email === 'admin@aura.com') {
+                        adminLoginModal.style.display = 'none';
+                        adminPanel.style.display = 'block';
+                        
+                        // Mostrar email del admin
+                        document.getElementById('admin-email-display').textContent = user.email;
+                        
+                        // Limpiar formulario de login
+                        loginForm.reset();
+                        loginError.style.display = 'none';
+                        
+                        // Cargar reservas
+                        await loadReservations();
+                        
+                        // Scroll al panel de admin
+                        setTimeout(() => {
+                            adminPanel.scrollIntoView({ behavior: 'smooth' });
+                        }, 300);
+                    } else {
+                        // Usuario normal (no admin) - cerrar modal de login
+                        adminLoginModal.style.display = 'none';
+                        adminPanel.style.display = 'none';
+                    }
                     
                 } else {
-                    // No hay usuario autenticado o no es admin
+                    // No hay usuario autenticado
                     currentUser = null;
                     
-                    // Mostrar login y ocultar panel
-                    loginSection.style.display = 'block';
+                    // Ocultar botón de logout
+                    menuLogout.style.display = 'none';
+                    
+                    // Mostrar opciones de registro y login
+                    menuRegister.style.display = 'block';
+                    menuAdminLogin.style.display = 'block';
+                    
+                    // Ocultar panel de admin
                     adminPanel.style.display = 'none';
                 }
             });
@@ -1896,6 +2203,38 @@
             calendar.unselect();
         }
 
+        // ========== REGLAS DE SEGURIDAD DE FIRESTORE ==========
+        /*
+         * INSTRUCCIONES: Copia y pega estas reglas en Firebase Console > Firestore Database > Rules
+         * 
+         * Estas reglas permiten:
+         * - Lectura de la colección 'reservas' SOLO al usuario admin@aura.com
+         * - Escritura pública en 'reservas' para que cualquier usuario pueda hacer reservas
+         * 
+         * REGLAS DE FIRESTORE (copiar en Firebase Console):
+         * 
+         * rules_version = '2';
+         * service cloud.firestore {
+         *   match /databases/{database}/documents {
+         *     // Colección de reservas
+         *     match /reservas/{document=**} {
+         *       // Lectura solo para el administrador
+         *       allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+         *       // Escritura pública para permitir reservas
+         *       allow write: if true;
+         *     }
+         *     
+         *     // Todas las demás colecciones: acceso denegado por defecto
+         *     match /{document=**} {
+         *       allow read, write: if false;
+         *     }
+         *   }
+         * }
+         * 
+         * IMPORTANTE: Después de copiar estas reglas en Firebase Console,
+         * haz clic en "Publicar" para aplicar los cambios.
+         */
+
         // ========== INICIALIZACIÓN ==========
         
         /**
@@ -1904,7 +2243,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Inicializando sistema de autenticación y reservas...');
             
-            // Configurar login y logout
+            // Configurar registro, login y logout
+            setupUserRegistration();
             setupAdminLogin();
             setupLogout();
             
