@@ -36,3 +36,6 @@ build/
 
 # Generated PDFs
 pdfs/*.pdf
+
+# Temporary files
+tmp/
