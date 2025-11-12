@@ -2453,6 +2453,7 @@
             
             // Set a flag to indicate Firebase is ready
             window.firebaseReady = true;
+            console.log('✅ Firebase está listo para guardar reservas (window.firebaseReady = true)');
             
         } catch (error) {
             console.error('❌ Error al inicializar Firebase:', error);
@@ -2760,6 +2761,7 @@
         // Exponer función globalmente inmediatamente después de definirla
         // Esto asegura que esté disponible antes de que el usuario intente usarla
         window.saveReservationToFirestore = saveReservation;
+        console.log('✅ Función saveReservationToFirestore expuesta globalmente');
 
         /**
          * Cargar todas las reservas desde Firestore
