@@ -6,6 +6,10 @@
     <title>AURA STUDIO - Pilates a tu medida</title>
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css" rel="stylesheet">
+    <!-- Firebase SDK v10 via CDN - Authentication and Firestore -->
+    <script type="module">
+        // Firebase imports will be handled in the script section
+    </script>
     <style>
         * {
             margin: 0;
@@ -1188,7 +1192,59 @@
         </div>
     </section>
 
-    <!-- ========== 5. Contact Section ========== -->
+    <!-- ========== 5. Admin Login Section ========== -->
+    <section id="admin-login-section" class="contact-section" style="display: none;">
+        <h2>Acceso de Administrador</h2>
+        <div style="max-width: 400px; margin: 0 auto;">
+            <div id="login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;"></div>
+            <form id="admin-login-form" style="text-align: left;">
+                <div style="margin-bottom: 20px;">
+                    <label for="admin-email" style="display: block; margin-bottom: 8px; color: #666; font-weight: 500;">Correo Electrónico</label>
+                    <input type="email" id="admin-email" required style="width: 100%; padding: 14px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;">
+                </div>
+                <div style="margin-bottom: 25px;">
+                    <label for="admin-password" style="display: block; margin-bottom: 8px; color: #666; font-weight: 500;">Contraseña</label>
+                    <input type="password" id="admin-password" required style="width: 100%; padding: 14px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;">
+                </div>
+                <button type="submit" class="contact-btn" style="width: 100%;">Iniciar Sesión</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- ========== 6. Admin Panel Section ========== -->
+    <section id="admin-panel-section" class="contact-section" style="display: none;">
+        <h2>Panel de Administrador</h2>
+        <p style="margin-bottom: 10px;">Bienvenido, <strong id="admin-email-display"></strong></p>
+        <button id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px;">Cerrar Sesión</button>
+        
+        <div style="max-width: 1200px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
+            <h3 style="color: #333; margin-bottom: 20px; font-size: 1.8rem; font-weight: 600;">Reservas</h3>
+            <div id="reservations-loading" style="text-align: center; padding: 40px; color: #666;">
+                <p>Cargando reservas...</p>
+            </div>
+            <div id="reservations-container" style="display: none; overflow-x: auto;">
+                <table id="reservations-table" style="width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 15px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff;">
+                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Nombre</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Email</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Fecha y Hora</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Notas</th>
+                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Fecha de Reserva</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservations-tbody">
+                        <!-- Reservations will be loaded here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            <div id="no-reservations" style="display: none; text-align: center; padding: 40px; color: #666;">
+                <p>No hay reservas en este momento.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 7. Contact Section ========== -->
     <section class="contact-section">
         <h2>Comunícate con Nosotros</h2>
         <p>WhatsApp</p>
@@ -1442,6 +1498,437 @@
 
             calendar.unselect();
         }
+    </script>
+
+    <!-- Firebase SDK v10 via CDN -->
+    <script type="module">
+        /*
+         * ========== FIREBASE CONFIGURATION ==========
+         * 
+         * INSTRUCCIONES PARA CONFIGURAR FIREBASE:
+         * 
+         * 1. Crear proyecto Firebase:
+         *    - Ve a https://console.firebase.google.com/
+         *    - Haz clic en "Agregar proyecto"
+         *    - Nombre del proyecto: "AURA Studio" (o el que prefieras)
+         *    - Sigue los pasos para completar la creación
+         * 
+         * 2. Habilitar Authentication:
+         *    - En el menú lateral, ve a "Authentication" > "Get started"
+         *    - En la pestaña "Sign-in method", habilita "Correo electrónico/contraseña"
+         *    - Guarda los cambios
+         * 
+         * 3. Crear usuario administrador:
+         *    - En Authentication, ve a la pestaña "Users"
+         *    - Haz clic en "Add user"
+         *    - Email: admin@aura.com
+         *    - Contraseña: admin123
+         *    - Haz clic en "Add user"
+         * 
+         * 4. Habilitar Firestore:
+         *    - En el menú lateral, ve a "Firestore Database" > "Create database"
+         *    - Elige "Start in test mode" (temporalmente para pruebas)
+         *    - Selecciona la ubicación más cercana
+         *    - Haz clic en "Enable"
+         * 
+         * 5. Configurar reglas de seguridad de Firestore:
+         *    - En Firestore, ve a la pestaña "Rules"
+         *    - Reemplaza las reglas existentes con:
+         * 
+         *    rules_version = '2';
+         *    service cloud.firestore {
+         *      match /databases/{database}/documents {
+         *        // Colección de reservas: lectura solo para admin, escritura pública
+         *        match /reservas/{document=**} {
+         *          allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+         *          allow write: if true;
+         *        }
+         *      }
+         *    }
+         * 
+         *    - Haz clic en "Publish"
+         * 
+         * 6. Obtener configuración de Firebase:
+         *    - Ve a la configuración del proyecto (ícono de engranaje junto a "Project Overview")
+         *    - En "Your apps", selecciona "Web" (</>) 
+         *    - Registra la app con un nombre (ej: "AURA Web")
+         *    - Copia el objeto "firebaseConfig"
+         *    - Reemplaza el objeto firebaseConfig de abajo con tus valores
+         * 
+         * 7. Desplegar en GitHub Pages:
+         *    - Asegúrate de que el archivo index.html esté en la rama main
+         *    - Ve a Settings > Pages en tu repositorio
+         *    - Selecciona la rama main y carpeta root
+         *    - Guarda y espera a que se despliegue
+         */
+
+        // ========== IMPORTAR FIREBASE SDK v10 ==========
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // ========== CONFIGURACIÓN DE FIREBASE ==========
+        // IMPORTANTE: Reemplaza estos valores con tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "TU_PROJECT_ID.firebaseapp.com",
+            projectId: "TU_PROJECT_ID",
+            storageBucket: "TU_PROJECT_ID.appspot.com",
+            messagingSenderId: "TU_MESSAGING_SENDER_ID",
+            appId: "TU_APP_ID"
+        };
+
+        // ========== INICIALIZAR FIREBASE ==========
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log('Firebase inicializado correctamente');
+        } catch (error) {
+            console.error('Error al inicializar Firebase:', error);
+            console.log('Por favor, configura Firebase según las instrucciones en el código.');
+        }
+
+        // ========== VARIABLES GLOBALES ==========
+        let currentUser = null;
+
+        // ========== FUNCIONES DE AUTENTICACIÓN ==========
+
+        /**
+         * Manejar el envío del formulario de login
+         */
+        function setupAdminLogin() {
+            const loginForm = document.getElementById('admin-login-form');
+            const loginError = document.getElementById('login-error');
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('admin-email').value;
+                const password = document.getElementById('admin-password').value;
+                
+                // Ocultar error previo
+                loginError.style.display = 'none';
+                
+                try {
+                    // Autenticar con Firebase
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    
+                    // Verificar que sea el usuario admin
+                    if (userCredential.user.email !== 'admin@aura.com') {
+                        await signOut(auth);
+                        throw new Error('Acceso denegado. Solo el administrador puede acceder.');
+                    }
+                    
+                    console.log('Login exitoso:', userCredential.user.email);
+                    
+                } catch (error) {
+                    console.error('Error de autenticación:', error);
+                    
+                    // Mostrar mensaje de error
+                    let errorMessage = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'Usuario no encontrado. Por favor, verifica tu email.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Contraseña incorrecta. Por favor, inténtalo de nuevo.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Email inválido. Por favor, ingresa un email válido.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    loginError.textContent = errorMessage;
+                    loginError.style.display = 'block';
+                }
+            });
+        }
+
+        /**
+         * Configurar el botón de cerrar sesión
+         */
+        function setupLogout() {
+            const logoutBtn = document.getElementById('admin-logout-btn');
+            
+            logoutBtn.addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    console.log('Sesión cerrada correctamente');
+                } catch (error) {
+                    console.error('Error al cerrar sesión:', error);
+                    alert('Error al cerrar sesión. Por favor, inténtalo de nuevo.');
+                }
+            });
+        }
+
+        /**
+         * Observar cambios en el estado de autenticación
+         */
+        function setupAuthObserver() {
+            onAuthStateChanged(auth, async (user) => {
+                const loginSection = document.getElementById('admin-login-section');
+                const adminPanel = document.getElementById('admin-panel-section');
+                const loginForm = document.getElementById('admin-login-form');
+                const loginError = document.getElementById('login-error');
+                
+                if (user && user.email === 'admin@aura.com') {
+                    // Usuario autenticado como admin
+                    currentUser = user;
+                    
+                    // Ocultar login y mostrar panel de admin
+                    loginSection.style.display = 'none';
+                    adminPanel.style.display = 'block';
+                    
+                    // Mostrar email del admin
+                    document.getElementById('admin-email-display').textContent = user.email;
+                    
+                    // Limpiar formulario de login
+                    loginForm.reset();
+                    loginError.style.display = 'none';
+                    
+                    // Cargar reservas
+                    await loadReservations();
+                    
+                } else {
+                    // No hay usuario autenticado o no es admin
+                    currentUser = null;
+                    
+                    // Mostrar login y ocultar panel
+                    loginSection.style.display = 'block';
+                    adminPanel.style.display = 'none';
+                }
+            });
+        }
+
+        // ========== FUNCIONES DE FIRESTORE ==========
+
+        /**
+         * Guardar reserva en Firestore
+         */
+        async function saveReservation(nombre, email, fechaHora, notas = '') {
+            try {
+                const docRef = await addDoc(collection(db, 'reservas'), {
+                    nombre: nombre,
+                    email: email,
+                    fechaHora: fechaHora,
+                    notas: notas,
+                    timestamp: serverTimestamp()
+                });
+                
+                console.log('Reserva guardada con ID:', docRef.id);
+                return docRef.id;
+                
+            } catch (error) {
+                console.error('Error al guardar reserva:', error);
+                throw error;
+            }
+        }
+
+        /**
+         * Cargar todas las reservas desde Firestore
+         */
+        async function loadReservations() {
+            const loadingDiv = document.getElementById('reservations-loading');
+            const containerDiv = document.getElementById('reservations-container');
+            const noReservationsDiv = document.getElementById('no-reservations');
+            const tbody = document.getElementById('reservations-tbody');
+            
+            // Mostrar loading
+            loadingDiv.style.display = 'block';
+            containerDiv.style.display = 'none';
+            noReservationsDiv.style.display = 'none';
+            
+            try {
+                // Consultar todas las reservas ordenadas por timestamp descendente
+                const q = query(collection(db, 'reservas'), orderBy('timestamp', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                // Limpiar tabla
+                tbody.innerHTML = '';
+                
+                if (querySnapshot.empty) {
+                    // No hay reservas
+                    loadingDiv.style.display = 'none';
+                    noReservationsDiv.style.display = 'block';
+                } else {
+                    // Hay reservas, llenar la tabla
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const row = tbody.insertRow();
+                        
+                        // Formatear fecha y hora
+                        let fechaHoraFormatted = data.fechaHora || '-';
+                        let timestampFormatted = '-';
+                        
+                        if (data.timestamp) {
+                            const date = data.timestamp.toDate();
+                            timestampFormatted = date.toLocaleString('es-ES', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        }
+                        
+                        // Insertar celdas
+                        row.innerHTML = `
+                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${data.nombre || '-'}</td>
+                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${data.email || '-'}</td>
+                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${fechaHoraFormatted}</td>
+                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${data.notas || '-'}</td>
+                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${timestampFormatted}</td>
+                        `;
+                    });
+                    
+                    loadingDiv.style.display = 'none';
+                    containerDiv.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar reservas:', error);
+                loadingDiv.innerHTML = '<p style="color: #f6c8c7;">Error al cargar reservas. Por favor, recarga la página.</p>';
+            }
+        }
+
+        /**
+         * Modificar la función handleDateSelect para guardar en Firestore
+         * Esto reemplaza la función existente en el código anterior
+         */
+        window.handleDateSelectWithFirestore = async function(info) {
+            const day = info.start.getDay();
+            const hour = info.start.getHours();
+            const allowedHours = [6, 7, 8, 9, 10, 17, 18, 19];
+
+            // Check if Sunday
+            if (day === 0) {
+                alert('❌ No hay clases los domingos');
+                calendar.unselect();
+                return;
+            }
+
+            // Check if hour is allowed
+            if (!allowedHours.includes(hour)) {
+                alert('❌ Horario no disponible.\n\nPor favor selecciona:\n🌅 Mañana: 6:00 AM - 11:00 AM\n🌆 Tarde: 5:00 PM - 8:00 PM');
+                calendar.unselect();
+                return;
+            }
+
+            // Check if plan is selected
+            if (selectedPlan.classes === 0) {
+                alert('⚠️ Por favor, selecciona un plan primero');
+                calendar.unselect();
+                return;
+            }
+
+            // Check if limit reached
+            if (selectedPlan.bookedClasses >= selectedPlan.classes) {
+                alert('✅ Ya has reservado todas las clases de tu plan.\n\nSi deseas cambiar una clase, haz clic en ella para cancelarla.');
+                calendar.unselect();
+                return;
+            }
+
+            // Solicitar datos del cliente para guardar en Firestore
+            const nombre = prompt('Por favor, ingresa tu nombre completo:');
+            if (!nombre) {
+                calendar.unselect();
+                return;
+            }
+
+            const email = prompt('Por favor, ingresa tu correo electrónico:');
+            if (!email) {
+                calendar.unselect();
+                return;
+            }
+
+            const notas = prompt('¿Alguna nota especial para tu clase? (opcional):') || '';
+
+            // Format date and time for confirmation and storage
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            const dateStr = info.start.toLocaleDateString('es-ES', dateOptions);
+            const timeStr = info.start.toLocaleTimeString('es-ES', timeOptions);
+            const fechaHoraStr = `${dateStr} a las ${timeStr}`;
+
+            try {
+                // Guardar en Firestore
+                const reservaId = await saveReservation(nombre, email, fechaHoraStr, notas);
+                
+                // Add event to calendar
+                const eventId = Date.now().toString();
+                calendar.addEvent({
+                    id: eventId,
+                    title: `✓ ${nombre}`,
+                    start: info.startStr,
+                    end: info.endStr,
+                    backgroundColor: '#fbe3e3',
+                    borderColor: '#e8cccc',
+                    textColor: '#333',
+                    extendedProps: {
+                        firebaseId: reservaId,
+                        email: email,
+                        notas: notas
+                    }
+                });
+
+                selectedPlan.bookedClasses++;
+                selectedPlan.bookedEvents.push(eventId);
+
+                const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
+
+                if (selectedPlan.bookedClasses >= selectedPlan.classes) {
+                    alert(`✅ ¡Reserva Completada y Guardada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nHas reservado todas tus ${selectedPlan.classes} clases.\n\nRecibirás una confirmación en ${email}`);
+                } else {
+                    alert(`✅ ¡Clase Reservada y Guardada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nClases reservadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}\n\nRecibirás una confirmación en ${email}`);
+                }
+                
+            } catch (error) {
+                console.error('Error al guardar la reserva:', error);
+                alert('❌ Error al guardar la reserva. Por favor, inténtalo de nuevo o contacta con nosotros.');
+            }
+
+            calendar.unselect();
+        }
+
+        // ========== INICIALIZACIÓN ==========
+        
+        /**
+         * Inicializar todo cuando el DOM esté listo
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Inicializando sistema de autenticación y reservas...');
+            
+            // Configurar login y logout
+            setupAdminLogin();
+            setupLogout();
+            
+            // Observar cambios de autenticación
+            setupAuthObserver();
+            
+            // Exponer función para poder usarla desde el código del calendario
+            window.saveReservationToFirestore = saveReservation;
+            window.loadReservationsFromFirestore = loadReservations;
+        });
+
+        // Nota: Para integrar con el calendario existente, reemplaza la función handleDateSelect
+        // en el código del calendario con handleDateSelectWithFirestore
+    </script>
+
+    <script>
+        // Modificar el calendario para usar la nueva función con Firestore
+        // Esta modificación se hace después de que el módulo Firebase se carga
+        document.addEventListener('DOMContentLoaded', () => {
+            // Esperar un momento para que Firebase se inicialice
+            setTimeout(() => {
+                // Si el calendario ya está inicializado, actualizar su configuración
+                if (calendar && typeof window.handleDateSelectWithFirestore === 'function') {
+                    // Reemplazar el handler de select
+                    calendar.setOption('select', window.handleDateSelectWithFirestore);
+                    console.log('Calendario integrado con Firestore');
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
