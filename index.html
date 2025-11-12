@@ -425,10 +425,11 @@
             transform: translateY(0);
         }
 
+        /* Contenedor del calendario - Responsive y centrado con máximo 900px */
         #calendar-container {
             display: none;
-            max-width: 900px;
-            margin: 50px auto 0;
+            max-width: 900px; /* Ancho máximo de 900px */
+            margin: 50px auto 0; /* Centrado automático */
             padding: 30px;
             background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
             border-radius: 25px;
@@ -437,6 +438,7 @@
             animation: fadeInUp 0.8s ease-out;
         }
 
+        /* Div con id="calendar" donde se renderiza FullCalendar */
         #calendar {
             color: #333;
         }
@@ -1197,9 +1199,19 @@
         <p class="hours">Abre hoy: 06:00 a.m. – 08:00 p.m.</p>
     </section>
 
-    <!-- FullCalendar JS -->
+    <!-- FullCalendar JS desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
     <script>
+        /*
+         * Implementación de FullCalendar para AURA Studio
+         * - Vista mensual inicial (dayGridMonth) con opción a vista semanal (timeGridWeek)
+         * - Calendario en español (locale: 'es')
+         * - Eventos predefinidos de clases de pilates
+         * - Al hacer clic en un evento: muestra alerta con título y hora
+         * - Al hacer clic en una fecha: loguea la fecha en consola
+         * - Responsive y centrado con máximo 900px de ancho
+         */
+        
         let calendar;
         let selectedPlan = {
             classes: 0,
@@ -1234,13 +1246,14 @@
         function initCalendar() {
             const calendarEl = document.getElementById('calendar');
             
+            // Initialize FullCalendar with Spanish locale and monthly view
             calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'timeGridWeek',
-                locale: 'es',
+                initialView: 'dayGridMonth', // Vista mensual inicial
+                locale: 'es', // Configurar el calendario en español
                 headerToolbar: {
-                    left: 'prev,next today',
+                    left: 'prev,next today', // Botones de navegación
                     center: 'title',
-                    right: 'timeGridWeek,timeGridDay'
+                    right: 'dayGridMonth,timeGridWeek' // Opciones de vista: mensual y semanal
                 },
                 slotMinTime: '06:00:00',
                 slotMaxTime: '20:00:00',
@@ -1267,15 +1280,23 @@
                 select: function(info) {
                     handleDateSelect(info);
                 },
+                // Al hacer clic en un evento, mostrar alerta con título y hora
                 eventClick: function(info) {
-                    if (confirm('¿Deseas cancelar esta reserva?')) {
-                        info.event.remove();
-                        selectedPlan.bookedClasses--;
-                        selectedPlan.bookedEvents = selectedPlan.bookedEvents.filter(
-                            e => e !== info.event.id
-                        );
-                        updateBookingStatus();
-                    }
+                    const startTime = info.event.start.toLocaleTimeString('es-ES', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    });
+                    const endTime = info.event.end ? info.event.end.toLocaleTimeString('es-ES', { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                    }) : '';
+                    const timeRange = endTime ? `${startTime} - ${endTime}` : startTime;
+                    
+                    alert(`Evento: ${info.event.title}\nHora: ${timeRange}`);
+                },
+                // Al hacer clic en una fecha, loguear en consola
+                dateClick: function(info) {
+                    console.log('Fecha seleccionada:', info.dateStr);
                 },
                 selectAllow: function(selectInfo) {
                     const day = selectInfo.start.getDay();
@@ -1304,7 +1325,26 @@
                 ],
                 validRange: {
                     start: new Date()
-                }
+                },
+                // Eventos predefinidos para clases de pilates
+                events: [
+                    {
+                        title: 'Clase de Pilates - Básico',
+                        start: '2025-11-15T10:00:00',
+                        end: '2025-11-15T11:00:00',
+                        backgroundColor: '#f6c8c7',
+                        borderColor: '#e8cccc',
+                        textColor: '#333'
+                    },
+                    {
+                        title: 'Clase Reservada',
+                        start: '2025-11-18T18:00:00',
+                        end: '2025-11-18T19:00:00',
+                        backgroundColor: '#fbe3e3',
+                        borderColor: '#e8cccc',
+                        textColor: '#333'
+                    }
+                ]
             });
             
             calendar.render();
