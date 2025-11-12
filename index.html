@@ -1507,11 +1507,18 @@
          * - Guarda reservas en Firestore y actualiza calendario en tiempo real
          * - Responsive y centrado con máximo 900px de ancho
          * 
+         * FORMATO DE FECHAS (REQUISITO):
+         * - fechaHora se guarda en formato ISO: YYYY-MM-DDTHH:mm:ss
+         * - Ejemplo: "2025-11-15T10:00:00"
+         * - En la tabla de admin se formatea a texto legible en español
+         * - Compatible con parseo estándar de JavaScript Date
+         * 
          * DEBUGGING:
          * - Verifica que el CDN de FullCalendar v6.1.15 esté cargado
          * - Verifica que Firebase esté inicializado correctamente
          * - Verifica que el div #calendar exista en el DOM
          * - Revisa la consola para errores de red o permisos de Firestore
+         * - Verifica que fechaHora esté en formato ISO en Firestore
          */
         
         let calendar;
@@ -1774,12 +1781,30 @@
         }
 
         /**
-         * Parsear fechaHora desde formato de texto a objeto Date
-         * Formato esperado: "lunes, 15 de noviembre de 2025 a las 10:00"
+         * Parsear fechaHora a objeto Date
+         * Formato esperado: ISO (YYYY-MM-DDTHH:mm:ss) o texto español (fallback)
+         * 
+         * Prioridad:
+         * 1. ISO format (YYYY-MM-DDTHH:mm:ss) - formato estándar
+         * 2. Formato español legacy - compatibilidad con datos antiguos
          */
         function parseFechaHora(fechaHoraStr) {
             try {
-                // Extraer la fecha y hora del string
+                // Validar entrada
+                if (!fechaHoraStr || typeof fechaHoraStr !== 'string') {
+                    console.warn('⚠️ fechaHora inválido o vacío:', fechaHoraStr);
+                    return null;
+                }
+                
+                // Intentar parsear como ISO date primero (formato preferido)
+                // Formato: YYYY-MM-DDTHH:mm:ss o YYYY-MM-DDTHH:mm:ss.sssZ
+                const isoDate = new Date(fechaHoraStr);
+                if (!isNaN(isoDate.getTime())) {
+                    console.log('✅ Fecha parseada en formato ISO:', fechaHoraStr, '→', isoDate);
+                    return isoDate;
+                }
+                
+                // Fallback: intentar parsear formato español legacy
                 // Ejemplo: "lunes, 15 de noviembre de 2025 a las 10:00"
                 const regex = /(\d+)\s+de\s+(\w+)\s+de\s+(\d{4})\s+a\s+las\s+(\d{1,2}):(\d{2})/i;
                 const match = fechaHoraStr.match(regex);
@@ -1801,20 +1826,17 @@
                     const month = months[monthName];
                     
                     if (month !== undefined) {
-                        return new Date(year, month, day, hour, minute);
+                        const date = new Date(year, month, day, hour, minute);
+                        console.log('✅ Fecha parseada en formato español:', fechaHoraStr, '→', date);
+                        return date;
                     }
                 }
                 
-                // Intentar parsear como ISO date
-                const isoDate = new Date(fechaHoraStr);
-                if (!isNaN(isoDate.getTime())) {
-                    return isoDate;
-                }
-                
+                console.error('❌ No se pudo parsear fechaHora:', fechaHoraStr);
                 return null;
                 
             } catch (error) {
-                console.error('Error al parsear fechaHora:', fechaHoraStr, error);
+                console.error('❌ Error al parsear fechaHora:', fechaHoraStr, error);
                 return null;
             }
         }
@@ -1982,17 +2004,19 @@
             // Cerrar modal
             document.getElementById('time-selection-modal').style.display = 'none';
             
-            // Crear fecha y hora completa
+            // Crear fecha y hora completa en formato ISO
             const dateTimeStr = `${dateStr}T${time}:00`;
             const dateTime = new Date(dateTimeStr);
             const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
             
-            // Format date and time for storage
+            // Format date and time for display only
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const timeOptions = { hour: '2-digit', minute: '2-digit' };
             const dateFormatted = dateTime.toLocaleDateString('es-ES', dateOptions);
             const timeFormatted = dateTime.toLocaleTimeString('es-ES', timeOptions);
-            const fechaHoraStr = `${dateFormatted} a las ${timeFormatted}`;
+            
+            // Store fechaHora in ISO format (YYYY-MM-DDTHH:mm:ss) as required
+            const fechaHoraISO = dateTimeStr; // ISO format: YYYY-MM-DDTHH:mm:ss
             
             // Agregar evento al calendario temporalmente
             const eventId = `temp-${Date.now()}`;
@@ -2005,7 +2029,7 @@
                 borderColor: '#e8cccc',
                 textColor: '#333',
                 extendedProps: {
-                    fechaHora: fechaHoraStr,
+                    fechaHora: fechaHoraISO,
                     temporal: true
                 }
             });
@@ -2013,7 +2037,7 @@
             selectedPlan.bookedClasses++;
             selectedPlan.bookedEvents.push({
                 eventId: eventId,
-                fechaHora: fechaHoraStr,
+                fechaHora: fechaHoraISO, // Store in ISO format
                 date: dateTimeStr
             });
             
@@ -2033,6 +2057,7 @@
 
         /**
          * Guardar todas las reservas en Firestore
+         * Guarda fechaHora en formato ISO (YYYY-MM-DDTHH:mm:ss) como especificado en los requisitos
          */
         async function saveAllReservations() {
             if (!selectedPlan.userInfo || selectedPlan.bookedEvents.length === 0) {
@@ -2050,19 +2075,20 @@
                 
                 const { nombre, email, notas } = selectedPlan.userInfo;
                 
-                // Guardar cada reserva en Firestore
-                console.log('Guardando todas las reservas en Firestore...');
+                // Guardar cada reserva en Firestore con fechaHora en formato ISO
+                console.log('Guardando todas las reservas en Firestore con formato ISO...');
                 const savedReservations = [];
                 
                 for (const booking of selectedPlan.bookedEvents) {
+                    // booking.fechaHora ya está en formato ISO (YYYY-MM-DDTHH:mm:ss)
                     const reservaId = await window.saveReservationToFirestore(
                         nombre, 
                         email, 
-                        booking.fechaHora, 
+                        booking.fechaHora, // ISO format: YYYY-MM-DDTHH:mm:ss
                         notas
                     );
                     savedReservations.push(reservaId);
-                    console.log('✅ Reserva guardada con ID:', reservaId);
+                    console.log('✅ Reserva guardada con ID:', reservaId, '- fechaHora:', booking.fechaHora);
                 }
                 
                 alert(`✅ ¡Reservas Completadas y Guardadas!\n\n${savedReservations.length} clases reservadas para ${nombre}\n\nRecibirás una confirmación en ${email}`);
@@ -2462,28 +2488,40 @@
 
         /**
          * Guardar reserva en Firestore
+         * @param {string} nombre - Nombre del cliente
+         * @param {string} email - Email del cliente
+         * @param {string} fechaHora - Fecha y hora en formato ISO (YYYY-MM-DDTHH:mm:ss)
+         * @param {string} notas - Notas adicionales (opcional)
+         * @returns {Promise<string>} ID del documento creado
          */
         async function saveReservation(nombre, email, fechaHora, notas = '') {
             try {
+                // Validar que fechaHora esté en formato ISO
+                const dateTest = new Date(fechaHora);
+                if (isNaN(dateTest.getTime())) {
+                    throw new Error('❌ Formato de fecha inválido. Se requiere formato ISO (YYYY-MM-DDTHH:mm:ss)');
+                }
+                
                 const docRef = await addDoc(collection(db, 'reservas'), {
                     nombre: nombre,
                     email: email,
-                    fechaHora: fechaHora,
+                    fechaHora: fechaHora, // Formato ISO: YYYY-MM-DDTHH:mm:ss
                     notas: notas,
                     timestamp: serverTimestamp()
                 });
                 
-                console.log('Reserva guardada con ID:', docRef.id);
+                console.log('✅ Reserva guardada con ID:', docRef.id, '- fechaHora (ISO):', fechaHora);
                 return docRef.id;
                 
             } catch (error) {
-                console.error('Error al guardar reserva:', error);
+                console.error('❌ Error al guardar reserva:', error);
                 throw error;
             }
         }
 
         /**
          * Cargar todas las reservas desde Firestore
+         * Formatea fechaHora desde ISO a formato legible español
          */
         async function loadReservations() {
             const loadingDiv = document.getElementById('reservations-loading');
@@ -2514,10 +2552,29 @@
                         const data = doc.data();
                         const row = tbody.insertRow();
                         
-                        // Formatear fecha y hora
-                        let fechaHoraFormatted = data.fechaHora || '-';
-                        let timestampFormatted = '-';
+                        // Formatear fecha y hora de la reserva
+                        let fechaHoraFormatted = '-';
+                        if (data.fechaHora) {
+                            // Parsear desde ISO format (YYYY-MM-DDTHH:mm:ss)
+                            const parsedDate = parseFechaHora(data.fechaHora);
+                            if (parsedDate) {
+                                fechaHoraFormatted = parsedDate.toLocaleString('es-ES', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                            } else {
+                                // Si no se puede parsear, mostrar el valor crudo
+                                fechaHoraFormatted = data.fechaHora;
+                                console.warn('⚠️ No se pudo parsear fechaHora:', data.fechaHora);
+                            }
+                        }
                         
+                        // Formatear timestamp de cuando se hizo la reserva
+                        let timestampFormatted = '-';
                         if (data.timestamp) {
                             const date = data.timestamp.toDate();
                             timestampFormatted = date.toLocaleString('es-ES', {
