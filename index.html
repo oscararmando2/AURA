@@ -199,10 +199,164 @@
             display: none;
             max-width: 900px;
             margin: 40px auto 0;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         #calendar {
             color: #333;
+        }
+
+        /* ========== Enhanced Calendar Styling ========== */
+        .fc {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Calendar header */
+        .fc .fc-toolbar-title {
+            font-size: 1.8rem;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .fc .fc-button {
+            background-color: #fbe3e3;
+            border: none;
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .fc .fc-button:hover {
+            background-color: #e8cccc;
+        }
+
+        .fc .fc-button-active {
+            background-color: #eebbbb !important;
+        }
+
+        /* Time slots styling */
+        .fc .fc-timegrid-slot {
+            height: 3.5rem;
+            border-color: #e0e0e0;
+        }
+
+        .fc .fc-timegrid-slot-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Day headers */
+        .fc .fc-col-header-cell {
+            background-color: #f6c8c7;
+            padding: 15px 5px;
+            font-weight: bold;
+            color: #333;
+            border-color: #e8cccc;
+        }
+
+        .fc .fc-day-today {
+            background-color: rgba(251, 227, 227, 0.3) !important;
+        }
+
+        /* Available time slots highlighting */
+        .fc .fc-timegrid-slot[data-time*="06:00"],
+        .fc .fc-timegrid-slot[data-time*="07:00"],
+        .fc .fc-timegrid-slot[data-time*="08:00"],
+        .fc .fc-timegrid-slot[data-time*="09:00"],
+        .fc .fc-timegrid-slot[data-time*="10:00"],
+        .fc .fc-timegrid-slot[data-time*="17:00"],
+        .fc .fc-timegrid-slot[data-time*="18:00"],
+        .fc .fc-timegrid-slot[data-time*="19:00"] {
+            background-color: rgba(251, 227, 227, 0.15);
+            cursor: pointer;
+        }
+
+        /* Events (booked classes) */
+        .fc-event {
+            border-radius: 6px;
+            padding: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .fc-event:hover {
+            opacity: 0.9;
+        }
+
+        /* Grid lines */
+        .fc .fc-timegrid-col {
+            border-color: #e0e0e0;
+        }
+
+        .fc .fc-timegrid-axis {
+            background-color: #fafafa;
+        }
+
+        /* Hide non-business hour slots */
+        .fc .fc-timegrid-slot[data-time*="11:00"],
+        .fc .fc-timegrid-slot[data-time*="12:00"],
+        .fc .fc-timegrid-slot[data-time*="13:00"],
+        .fc .fc-timegrid-slot[data-time*="14:00"],
+        .fc .fc-timegrid-slot[data-time*="15:00"],
+        .fc .fc-timegrid-slot[data-time*="16:00"] {
+            display: none;
+        }
+
+        /* Calendar info banner */
+        .calendar-info {
+            background-color: #f6c8c7;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .calendar-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .calendar-info p {
+            color: #555;
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .legend-available {
+            background-color: rgba(251, 227, 227, 0.5);
+            border: 2px solid #e8cccc;
+        }
+
+        .legend-booked {
+            background-color: #fbe3e3;
+            border: 2px solid #e8cccc;
         }
 
         /* ========== 4. Image Scroll Section ========== */
@@ -445,6 +599,23 @@
             </div>
 
             <div id="calendar-container">
+                <div class="calendar-info">
+                    <h3>📅 Selecciona tus Clases</h3>
+                    <p><strong>Horarios Disponibles:</strong></p>
+                    <p>🌅 Mañana: 6:00 AM - 11:00 AM</p>
+                    <p>🌆 Tarde: 5:00 PM - 8:00 PM</p>
+                    <p><strong>Días:</strong> Lunes a Sábado</p>
+                    <div class="calendar-legend">
+                        <div class="legend-item">
+                            <div class="legend-color legend-available"></div>
+                            <span>Horarios Disponibles</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color legend-booked"></div>
+                            <span>Tus Clases Reservadas</span>
+                        </div>
+                    </div>
+                </div>
                 <div id="calendar"></div>
             </div>
         </div>
@@ -524,10 +695,25 @@
                 slotMinTime: '06:00:00',
                 slotMaxTime: '20:00:00',
                 slotDuration: '01:00:00',
+                slotLabelFormat: {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    meridiem: 'short',
+                    hour12: true
+                },
+                dayHeaderFormat: {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short'
+                },
                 allDaySlot: false,
                 hiddenDays: [0], // Hide Sunday
                 selectable: true,
                 selectMirror: true,
+                selectMinDistance: 5,
+                nowIndicator: true,
+                height: 'auto',
+                expandRows: true,
                 select: function(info) {
                     handleDateSelect(info);
                 },
@@ -538,7 +724,7 @@
                         selectedPlan.bookedEvents = selectedPlan.bookedEvents.filter(
                             e => e !== info.event.id
                         );
-                        alert(`Clase cancelada. Clases agendadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}`);
+                        updateBookingStatus();
                     }
                 },
                 selectAllow: function(selectInfo) {
@@ -565,10 +751,41 @@
                         startTime: '17:00',
                         endTime: '20:00'
                     }
-                ]
+                ],
+                validRange: {
+                    start: new Date()
+                }
             });
             
             calendar.render();
+            
+            // Hide non-business hour slots after render
+            hideUnavailableSlots();
+        }
+
+        function hideUnavailableSlots() {
+            // This function is called after calendar renders
+            // The CSS will handle hiding the slots
+            const unavailableSlots = document.querySelectorAll(
+                '.fc-timegrid-slot[data-time*="11:00"],' +
+                '.fc-timegrid-slot[data-time*="12:00"],' +
+                '.fc-timegrid-slot[data-time*="13:00"],' +
+                '.fc-timegrid-slot[data-time*="14:00"],' +
+                '.fc-timegrid-slot[data-time*="15:00"],' +
+                '.fc-timegrid-slot[data-time*="16:00"]'
+            );
+            unavailableSlots.forEach(slot => {
+                slot.style.display = 'none';
+            });
+        }
+
+        function updateBookingStatus() {
+            const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
+            if (remaining > 0) {
+                alert(`Clase cancelada. Clases restantes: ${remaining}\nClases agendadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}`);
+            } else {
+                alert(`Clase cancelada. Clases agendadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}`);
+            }
         }
 
         function handleDateSelect(info) {
@@ -578,37 +795,43 @@
 
             // Check if Sunday
             if (day === 0) {
-                alert('No hay clases los domingos');
+                alert('❌ No hay clases los domingos');
                 calendar.unselect();
                 return;
             }
 
             // Check if hour is allowed
             if (!allowedHours.includes(hour)) {
-                alert('Selecciona un horario permitido: 6:00-11:00 AM o 5:00-8:00 PM');
+                alert('❌ Horario no disponible.\n\nPor favor selecciona:\n🌅 Mañana: 6:00 AM - 11:00 AM\n🌆 Tarde: 5:00 PM - 8:00 PM');
                 calendar.unselect();
                 return;
             }
 
             // Check if plan is selected
             if (selectedPlan.classes === 0) {
-                alert('Por favor, selecciona un plan primero');
+                alert('⚠️ Por favor, selecciona un plan primero');
                 calendar.unselect();
                 return;
             }
 
             // Check if limit reached
             if (selectedPlan.bookedClasses >= selectedPlan.classes) {
-                alert('Has completado tu reserva. Ya has reservado todas las clases de tu plan.');
+                alert('✅ Ya has reservado todas las clases de tu plan.\n\nSi deseas cambiar una clase, haz clic en ella para cancelarla.');
                 calendar.unselect();
                 return;
             }
+
+            // Format date and time for confirmation
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            const dateStr = info.start.toLocaleDateString('es-ES', dateOptions);
+            const timeStr = info.start.toLocaleTimeString('es-ES', timeOptions);
 
             // Add event
             const eventId = Date.now().toString();
             calendar.addEvent({
                 id: eventId,
-                title: 'Clase Reservada',
+                title: '✓ Clase Reservada',
                 start: info.startStr,
                 end: info.endStr,
                 backgroundColor: '#fbe3e3',
@@ -619,10 +842,12 @@
             selectedPlan.bookedClasses++;
             selectedPlan.bookedEvents.push(eventId);
 
+            const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
+
             if (selectedPlan.bookedClasses >= selectedPlan.classes) {
-                alert(`Has completado tu reserva. Clases agendadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}`);
+                alert(`✅ ¡Reserva Completada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nHas reservado todas tus ${selectedPlan.classes} clases.`);
             } else {
-                alert(`Clase reservada. Clases agendadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}`);
+                alert(`✅ ¡Clase Reservada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nClases reservadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}`);
             }
 
             calendar.unselect();
