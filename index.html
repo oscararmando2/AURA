@@ -1156,12 +1156,86 @@
                 font-size: 80px;
             }
         }
+
+        /* ========== Navigation Styles ========== */
+        #main-nav {
+            padding-top: 15px;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #f6c8c7;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Adjust body padding to account for fixed nav */
+        body {
+            padding-top: 0;
+        }
+
+        .hero-section {
+            padding-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            #main-nav {
+                padding: 10px 15px;
+            }
+            
+            .hero-section {
+                padding-top: 60px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- ========== Hamburger Menu ========== -->
+    <!-- ========== Navigation Bar ========== -->
+    <nav id="main-nav" style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 245, 245, 0.95) 100%); backdrop-filter: blur(10px); box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1); z-index: 999; padding: 15px 30px; transition: all 0.3s ease;">
+        <div style="max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+            <!-- Logo/Brand -->
+            <a href="#" onclick="scrollToSection(event, 'hero')" style="text-decoration: none; color: #f6c8c7; font-size: 1.5rem; font-weight: 700; letter-spacing: 2px;">AURA STUDIO</a>
+            
+            <!-- Desktop Navigation Links -->
+            <div id="nav-links" style="display: flex; gap: 30px; align-items: center;">
+                <a href="#" onclick="scrollToSection(event, 'hero')" class="nav-link" style="text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s ease; position: relative;">Inicio</a>
+                <a href="#about" onclick="scrollToSection(event, 'about')" class="nav-link" style="text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s ease; position: relative;">Sobre Nosotros</a>
+                <a href="#booking" onclick="scrollToSection(event, 'booking')" class="nav-link" style="text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s ease; position: relative;">Reservas</a>
+                <a href="#gallery" onclick="scrollToSection(event, 'gallery')" class="nav-link" style="text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s ease; position: relative;">Instalaciones</a>
+                <a href="#contact" onclick="scrollToSection(event, 'contact')" class="nav-link" style="text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s ease; position: relative;">Contacto</a>
+                <a href="factura.php" style="text-decoration: none; color: #333; font-weight: 500; transition: color 0.3s ease; position: relative;">💼 Sistema de Facturación</a>
+            </div>
+            
+            <!-- Mobile Menu Button -->
+            <button id="mobile-nav-toggle" style="display: none; background: none; border: none; cursor: pointer;" onclick="toggleMobileNav()">
+                <span style="display: block; width: 25px; height: 3px; background: #f6c8c7; margin: 5px 0; transition: 0.3s;"></span>
+                <span style="display: block; width: 25px; height: 3px; background: #f6c8c7; margin: 5px 0; transition: 0.3s;"></span>
+                <span style="display: block; width: 25px; height: 3px; background: #f6c8c7; margin: 5px 0; transition: 0.3s;"></span>
+            </button>
+        </div>
+        
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-nav-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); padding: 20px; flex-direction: column; gap: 15px;">
+            <a href="#" onclick="scrollToSection(event, 'hero'); closeMobileNav();" style="text-decoration: none; color: #333; font-weight: 500; padding: 10px; border-radius: 8px; transition: background 0.3s ease;">Inicio</a>
+            <a href="#about" onclick="scrollToSection(event, 'about'); closeMobileNav();" style="text-decoration: none; color: #333; font-weight: 500; padding: 10px; border-radius: 8px; transition: background 0.3s ease;">Sobre Nosotros</a>
+            <a href="#booking" onclick="scrollToSection(event, 'booking'); closeMobileNav();" style="text-decoration: none; color: #333; font-weight: 500; padding: 10px; border-radius: 8px; transition: background 0.3s ease;">Reservas</a>
+            <a href="#gallery" onclick="scrollToSection(event, 'gallery'); closeMobileNav();" style="text-decoration: none; color: #333; font-weight: 500; padding: 10px; border-radius: 8px; transition: background 0.3s ease;">Instalaciones</a>
+            <a href="#contact" onclick="scrollToSection(event, 'contact'); closeMobileNav();" style="text-decoration: none; color: #333; font-weight: 500; padding: 10px; border-radius: 8px; transition: background 0.3s ease;">Contacto</a>
+            <a href="factura.php" style="text-decoration: none; color: #333; font-weight: 500; padding: 10px; border-radius: 8px; transition: background 0.3s ease;">💼 Sistema de Facturación</a>
+        </div>
+    </nav>
+
+    <!-- ========== Hamburger Menu (User Account) ========== -->
     <!-- Menú hamburguesa en la esquina superior derecha -->
-    <div id="hamburger-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <div id="hamburger-container" style="position: fixed; top: 70px; right: 20px; z-index: 1000;">
         <!-- Botón hamburguesa (tres líneas) -->
         <button id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); border: none; border-radius: 12px; padding: 12px 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.4); transition: all 0.3s ease;">
             <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0; transition: 0.3s;"></div>
@@ -1231,7 +1305,7 @@
     </div>
 
     <!-- ========== 1. Welcome Section (Hero Section) ========== -->
-    <section class="hero-section">
+    <section id="hero" class="hero-section">
         <div class="hero-content">
             <h1>Bienvenida</h1>
             <h2>Pilates a tu medida</h2>
@@ -1241,7 +1315,7 @@
     </section>
 
     <!-- ========== 2. About Section ========== -->
-    <section class="about-section">
+    <section id="about" class="about-section">
         <div class="about-item">
             <div class="about-image">
                 <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=400&fit=crop" alt="Pilates Studio">
@@ -1346,7 +1420,7 @@
     </section>
 
     <!-- ========== 4. Image Scroll Section ========== -->
-    <section class="image-scroll-section">
+    <section id="gallery" class="image-scroll-section">
         <h2>Nuestras Instalaciones</h2>
         <div class="image-scroll-container">
             <div class="image-wrapper" onclick="likeImage(this)">
@@ -1445,7 +1519,7 @@
     </section>
 
     <!-- ========== 7. Contact Section ========== -->
-    <section class="contact-section">
+    <section id="contact" class="contact-section">
         <h2>Comunícate con Nosotros</h2>
         <p>WhatsApp</p>
         <p>¿Preguntas?</p>
@@ -1613,6 +1687,143 @@
                 hamburgerBtn.style.boxShadow = '0 4px 15px rgba(246, 200, 199, 0.4)';
             });
         });
+    </script>
+
+    <!-- ========== Navigation & Routing Functions ========== -->
+    <script>
+        /**
+         * Smooth scrolling to sections with navigation support
+         * Handles hash-based routing for single-page navigation
+         */
+        
+        // Function to scroll to a specific section
+        function scrollToSection(event, sectionId) {
+            if (event) {
+                event.preventDefault();
+            }
+            
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const navHeight = document.getElementById('main-nav').offsetHeight;
+                const sectionTop = section.offsetTop - navHeight;
+                
+                window.scrollTo({
+                    top: sectionTop,
+                    behavior: 'smooth'
+                });
+                
+                // Update URL hash without jumping
+                history.pushState(null, null, `#${sectionId}`);
+                
+                // Update active nav link
+                updateActiveNavLink(sectionId);
+            }
+        }
+        
+        // Function to toggle mobile navigation
+        function toggleMobileNav() {
+            const mobileMenu = document.getElementById('mobile-nav-menu');
+            const isOpen = mobileMenu.style.display === 'flex';
+            
+            mobileMenu.style.display = isOpen ? 'none' : 'flex';
+        }
+        
+        // Function to close mobile navigation
+        function closeMobileNav() {
+            document.getElementById('mobile-nav-menu').style.display = 'none';
+        }
+        
+        // Function to update active navigation link
+        function updateActiveNavLink(sectionId) {
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === `#${sectionId}` || (href === '#' && sectionId === 'hero')) {
+                    link.style.color = '#f6c8c7';
+                    link.style.fontWeight = '700';
+                } else {
+                    link.style.color = '#333';
+                    link.style.fontWeight = '500';
+                }
+            });
+        }
+        
+        // Handle hash navigation on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.substring(1);
+            if (hash) {
+                setTimeout(() => {
+                    scrollToSection(null, hash);
+                }, 100);
+            }
+            
+            // Update active nav link based on scroll position
+            window.addEventListener('scroll', () => {
+                const sections = ['hero', 'about', 'booking', 'gallery', 'contact'];
+                const navHeight = document.getElementById('main-nav').offsetHeight;
+                const scrollPos = window.scrollY + navHeight + 100;
+                
+                for (const sectionId of sections) {
+                    const section = document.getElementById(sectionId);
+                    if (section) {
+                        const sectionTop = section.offsetTop;
+                        const sectionBottom = sectionTop + section.offsetHeight;
+                        
+                        if (scrollPos >= sectionTop && scrollPos < sectionBottom) {
+                            updateActiveNavLink(sectionId);
+                            break;
+                        }
+                    }
+                }
+            });
+            
+            // Add hover effects to navigation links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    if (link.style.color !== 'rgb(246, 200, 199)') {
+                        link.style.color = '#f6c8c7';
+                    }
+                });
+                link.addEventListener('mouseleave', () => {
+                    const href = link.getAttribute('href');
+                    const currentHash = window.location.hash;
+                    if (href !== currentHash && !(href === '#' && !currentHash)) {
+                        link.style.color = '#333';
+                    }
+                });
+            });
+            
+            // Mobile navigation hover effects
+            const mobileNavLinks = document.querySelectorAll('#mobile-nav-menu a');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    link.style.background = 'rgba(246, 200, 199, 0.1)';
+                });
+                link.addEventListener('mouseleave', () => {
+                    link.style.background = 'transparent';
+                });
+            });
+        });
+        
+        // Handle responsive navigation
+        function handleResponsiveNav() {
+            const navLinks = document.getElementById('nav-links');
+            const mobileToggle = document.getElementById('mobile-nav-toggle');
+            
+            if (window.innerWidth <= 768) {
+                navLinks.style.display = 'none';
+                mobileToggle.style.display = 'block';
+            } else {
+                navLinks.style.display = 'flex';
+                mobileToggle.style.display = 'none';
+                document.getElementById('mobile-nav-menu').style.display = 'none';
+            }
+        }
+        
+        // Initialize responsive navigation
+        window.addEventListener('resize', handleResponsiveNav);
+        window.addEventListener('DOMContentLoaded', handleResponsiveNav);
     </script>
 
     <!-- ========== Instagram-style Like Functionality for Images ========== -->
