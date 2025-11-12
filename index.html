@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AURA STUDIO - Pilates a tu medida</title>
-    <!-- FullCalendar CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css" rel="stylesheet">
+    <!-- FullCalendar v6.1.15 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
     <!-- Firebase SDK v10 via CDN - Authentication and Firestore -->
     <script type="module">
         // Firebase imports will be handled in the script section
@@ -1315,8 +1315,10 @@
         <p class="hours">Abre hoy: 06:00 a.m. – 08:00 p.m.</p>
     </section>
 
-    <!-- FullCalendar JS desde CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
+    <!-- FullCalendar v6.1.15 JS desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <!-- FullCalendar locales para español -->
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/es.global.min.js"></script>
     
     <!-- ========== Hamburger Menu Functionality ========== -->
     <script>
@@ -1460,13 +1462,22 @@
     
     <script>
         /*
-         * Implementación de FullCalendar para AURA Studio
+         * ========== FULLCALENDAR v6.1.15 + FIREBASE INTEGRATION ==========
+         * 
+         * Implementación de FullCalendar para AURA Studio con integración Firebase:
          * - Vista mensual inicial (dayGridMonth) con opción a vista semanal (timeGridWeek)
          * - Calendario en español (locale: 'es')
-         * - Eventos predefinidos de clases de pilates
-         * - Al hacer clic en un evento: muestra alerta con título y hora
-         * - Al hacer clic en una fecha: loguea la fecha en consola
+         * - Carga dinámica de eventos desde Firestore colección 'reservas'
+         * - Al hacer clic en una fecha: mostrar formulario de reservas
+         * - Filtrado admin vs público: admin@aura.com ve todo, otros ven clases públicas
+         * - Guarda reservas en Firestore y actualiza calendario en tiempo real
          * - Responsive y centrado con máximo 900px de ancho
+         * 
+         * DEBUGGING:
+         * - Verifica que el CDN de FullCalendar v6.1.15 esté cargado
+         * - Verifica que Firebase esté inicializado correctamente
+         * - Verifica que el div #calendar exista en el DOM
+         * - Revisa la consola para errores de red o permisos de Firestore
          */
         
         let calendar;
@@ -1476,6 +1487,9 @@
             bookedClasses: 0,
             bookedEvents: []
         };
+        
+        // Variable global para saber si el usuario es admin
+        let isAdmin = false;
 
         function selectPlan(classes, price) {
             selectedPlan.classes = classes;
@@ -1490,8 +1504,8 @@
             if (!calendar) {
                 initCalendar();
             } else {
-                // Remove all events
-                calendar.getEvents().forEach(event => event.remove());
+                // Reload events from Firestore
+                loadEventsFromFirestore();
             }
 
             alert(`Plan seleccionado: ${classes} clases por $${price}. Ahora puedes reservar tus clases en el calendario.`);
@@ -1501,145 +1515,311 @@
         }
 
         function initCalendar() {
+            console.log('Inicializando FullCalendar v6.1.15...');
+            
             const calendarEl = document.getElementById('calendar');
             
-            // Initialize FullCalendar with Spanish locale and monthly view
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth', // Vista mensual inicial
-                locale: 'es', // Configurar el calendario en español
-                headerToolbar: {
-                    left: 'prev,next today', // Botones de navegación
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek' // Opciones de vista: mensual y semanal
-                },
-                slotMinTime: '06:00:00',
-                slotMaxTime: '20:00:00',
-                slotDuration: '01:00:00',
-                slotLabelFormat: {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                    meridiem: 'short',
-                    hour12: true
-                },
-                dayHeaderFormat: {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short'
-                },
-                allDaySlot: false,
-                hiddenDays: [0], // Hide Sunday
-                selectable: true,
-                selectMirror: true,
-                selectMinDistance: 5,
-                nowIndicator: true,
-                height: 'auto',
-                expandRows: true,
-                select: function(info) {
-                    handleDateSelect(info);
-                },
-                // Al hacer clic en un evento, mostrar alerta con título y hora
-                eventClick: function(info) {
-                    const startTime = info.event.start.toLocaleTimeString('es-ES', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+            // DEBUG: Verificar que el elemento exista
+            if (!calendarEl) {
+                console.error('❌ ERROR: Div #calendar no encontrado en el DOM');
+                alert('Error: No se pudo inicializar el calendario. Verifica que el div #calendar exista.');
+                return;
+            }
+            
+            try {
+                // Initialize FullCalendar v6 with Spanish locale and monthly view
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth', // Vista mensual inicial
+                    locale: 'es', // Configurar el calendario en español
+                    headerToolbar: {
+                        left: 'prev,next today', // Botones de navegación
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek' // Opciones de vista: mensual y semanal
+                    },
+                    slotMinTime: '06:00:00',
+                    slotMaxTime: '20:00:00',
+                    slotDuration: '01:00:00',
+                    slotLabelFormat: {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        meridiem: 'short',
+                        hour12: true
+                    },
+                    dayHeaderFormat: {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'short'
+                    },
+                    allDaySlot: false,
+                    hiddenDays: [0], // Hide Sunday
+                    selectable: true,
+                    selectMirror: true,
+                    selectMinDistance: 5,
+                    nowIndicator: true,
+                    height: 'auto',
+                    expandRows: true,
+                    
+                    // Al hacer clic en una fecha: mostrar formulario de reservas
+                    select: function(info) {
+                        handleDateSelect(info);
+                    },
+                    
+                    // Al hacer clic en un evento existente: mostrar detalles
+                    eventClick: function(info) {
+                        const startTime = info.event.start ? info.event.start.toLocaleTimeString('es-ES', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        }) : '';
+                        const endTime = info.event.end ? info.event.end.toLocaleTimeString('es-ES', { 
+                            hour: '2-digit', 
+                            minute: '2-digit' 
+                        }) : '';
+                        const timeRange = endTime ? `${startTime} - ${endTime}` : startTime;
+                        
+                        let message = `Evento: ${info.event.title}\nHora: ${timeRange}`;
+                        
+                        // Si es admin, mostrar más información
+                        if (isAdmin && info.event.extendedProps) {
+                            if (info.event.extendedProps.email) {
+                                message += `\nEmail: ${info.event.extendedProps.email}`;
+                            }
+                            if (info.event.extendedProps.notas) {
+                                message += `\nNotas: ${info.event.extendedProps.notas}`;
+                            }
+                        }
+                        
+                        alert(message);
+                    },
+                    
+                    // Al hacer clic en una fecha (sin seleccionar rango)
+                    dateClick: function(info) {
+                        console.log('Fecha seleccionada:', info.dateStr);
+                    },
+                    
+                    selectAllow: function(selectInfo) {
+                        const day = selectInfo.start.getDay();
+                        const hour = selectInfo.start.getHours();
+                        
+                        // Only Monday to Saturday
+                        if (day === 0) {
+                            return false;
+                        }
+                        
+                        // Only specific hours (si está en vista semanal)
+                        if (calendar.view.type === 'timeGridWeek') {
+                            const allowedHours = [6, 7, 8, 9, 10, 17, 18, 19];
+                            return allowedHours.includes(hour);
+                        }
+                        
+                        return true;
+                    },
+                    
+                    businessHours: [
+                        {
+                            daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday - Saturday
+                            startTime: '06:00',
+                            endTime: '11:00'
+                        },
+                        {
+                            daysOfWeek: [1, 2, 3, 4, 5, 6],
+                            startTime: '17:00',
+                            endTime: '20:00'
+                        }
+                    ],
+                    
+                    validRange: {
+                        start: new Date()
+                    },
+                    
+                    // Los eventos se cargarán dinámicamente desde Firestore
+                    events: []
+                });
+                
+                calendar.render();
+                console.log('✅ FullCalendar v6.1.15 inicializado correctamente');
+                
+                // Cargar eventos desde Firestore
+                loadEventsFromFirestore();
+                
+            } catch (error) {
+                console.error('❌ ERROR al inicializar FullCalendar:', error);
+                alert('Error al inicializar el calendario. Por favor, recarga la página.');
+            }
+        }
+
+        /**
+         * Cargar eventos desde Firebase Firestore
+         * - Si el usuario es admin@aura.com: muestra todas las reservas
+         * - Si no es admin: muestra solo clases públicas fijas de pilates
+         */
+        async function loadEventsFromFirestore() {
+            if (!calendar) {
+                console.warn('⚠️ Calendario no inicializado aún');
+                return;
+            }
+            
+            console.log('Cargando eventos desde Firestore...');
+            
+            try {
+                // Verificar si Firebase está disponible
+                if (typeof window.db === 'undefined') {
+                    console.warn('⚠️ Firebase Firestore no está disponible aún. Esperando inicialización...');
+                    
+                    // Intentar de nuevo después de 1 segundo
+                    setTimeout(loadEventsFromFirestore, 1000);
+                    return;
+                }
+                
+                // Limpiar eventos existentes
+                calendar.getEvents().forEach(event => event.remove());
+                
+                // Si es admin, cargar todas las reservas desde Firestore
+                if (isAdmin) {
+                    console.log('Usuario admin: cargando todas las reservas desde Firestore');
+                    
+                    const { getDocs, collection, query, orderBy } = window.firestoreExports;
+                    const q = query(collection(window.db, 'reservas'), orderBy('timestamp', 'desc'));
+                    const querySnapshot = await getDocs(q);
+                    
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        
+                        // Intentar parsear fechaHora para obtener start date
+                        // Formato esperado: "lunes, 15 de noviembre de 2025 a las 10:00"
+                        let startDate = null;
+                        
+                        if (data.fechaHora) {
+                            // Intentar diferentes formatos
+                            startDate = parseFechaHora(data.fechaHora);
+                        }
+                        
+                        // Si no se pudo parsear, usar timestamp como fallback
+                        if (!startDate && data.timestamp) {
+                            startDate = data.timestamp.toDate();
+                        }
+                        
+                        if (startDate) {
+                            calendar.addEvent({
+                                id: doc.id,
+                                title: data.nombre || 'Reserva',
+                                start: startDate,
+                                backgroundColor: '#fbe3e3',
+                                borderColor: '#e8cccc',
+                                textColor: '#333',
+                                extendedProps: {
+                                    email: data.email,
+                                    notas: data.notas,
+                                    firebaseId: doc.id
+                                }
+                            });
+                        }
                     });
-                    const endTime = info.event.end ? info.event.end.toLocaleTimeString('es-ES', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    }) : '';
-                    const timeRange = endTime ? `${startTime} - ${endTime}` : startTime;
                     
-                    alert(`Evento: ${info.event.title}\nHora: ${timeRange}`);
-                },
-                // Al hacer clic en una fecha, loguear en consola
-                dateClick: function(info) {
-                    console.log('Fecha seleccionada:', info.dateStr);
-                },
-                selectAllow: function(selectInfo) {
-                    const day = selectInfo.start.getDay();
-                    const hour = selectInfo.start.getHours();
+                    console.log(`✅ ${querySnapshot.size} reservas cargadas desde Firestore`);
                     
-                    // Only Monday to Saturday
-                    if (day === 0) {
-                        return false;
-                    }
+                } else {
+                    // Usuario no admin: mostrar solo clases públicas fijas
+                    console.log('Usuario público: mostrando clases fijas de pilates');
                     
-                    // Only specific hours
-                    const allowedHours = [6, 7, 8, 9, 10, 17, 18, 19];
-                    return allowedHours.includes(hour);
-                },
-                businessHours: [
-                    {
-                        daysOfWeek: [1, 2, 3, 4, 5, 6], // Monday - Saturday
-                        startTime: '06:00',
-                        endTime: '11:00'
-                    },
-                    {
-                        daysOfWeek: [1, 2, 3, 4, 5, 6],
-                        startTime: '17:00',
-                        endTime: '20:00'
-                    }
-                ],
-                validRange: {
-                    start: new Date()
-                },
-                // Eventos predefinidos para clases de pilates
-                events: [
-                    {
-                        title: 'Clase de Pilates - Básico',
-                        start: '2025-11-15T10:00:00',
-                        end: '2025-11-15T11:00:00',
-                        backgroundColor: '#f6c8c7',
-                        borderColor: '#e8cccc',
-                        textColor: '#333'
-                    },
-                    {
-                        title: 'Clase Reservada',
-                        start: '2025-11-18T18:00:00',
-                        end: '2025-11-18T19:00:00',
-                        backgroundColor: '#fbe3e3',
-                        borderColor: '#e8cccc',
-                        textColor: '#333'
-                    }
-                ]
-            });
-            
-            calendar.render();
-            
-            // Hide non-business hour slots after render
-            hideUnavailableSlots();
+                    // Agregar clases públicas recurrentes (ejemplo)
+                    const publicClasses = [
+                        {
+                            title: 'Clase de Pilates - Básico',
+                            daysOfWeek: [1, 3, 5], // Lunes, Miércoles, Viernes
+                            startTime: '08:00:00',
+                            endTime: '09:00:00',
+                            backgroundColor: '#f6c8c7',
+                            borderColor: '#e8cccc',
+                            textColor: '#333'
+                        },
+                        {
+                            title: 'Clase de Pilates - Intermedio',
+                            daysOfWeek: [2, 4], // Martes, Jueves
+                            startTime: '18:00:00',
+                            endTime: '19:00:00',
+                            backgroundColor: '#f6c8c7',
+                            borderColor: '#e8cccc',
+                            textColor: '#333'
+                        },
+                        {
+                            title: 'Clase de Pilates - Avanzado',
+                            daysOfWeek: [6], // Sábado
+                            startTime: '10:00:00',
+                            endTime: '11:00:00',
+                            backgroundColor: '#f6c8c7',
+                            borderColor: '#e8cccc',
+                            textColor: '#333'
+                        }
+                    ];
+                    
+                    publicClasses.forEach(cls => {
+                        calendar.addEvent(cls);
+                    });
+                    
+                    console.log('✅ Clases públicas cargadas');
+                }
+                
+            } catch (error) {
+                console.error('❌ ERROR al cargar eventos desde Firestore:', error);
+                console.error('Detalles del error:', error.message);
+                
+                // Si es un error de permisos, mostrar mensaje específico
+                if (error.code === 'permission-denied') {
+                    console.error('Error de permisos: verifica las reglas de seguridad de Firestore');
+                }
+            }
         }
 
-        function hideUnavailableSlots() {
-            // This function is called after calendar renders
-            // The CSS will handle hiding the slots
-            const unavailableSlots = document.querySelectorAll(
-                '.fc-timegrid-slot[data-time*="11:00"],' +
-                '.fc-timegrid-slot[data-time*="12:00"],' +
-                '.fc-timegrid-slot[data-time*="13:00"],' +
-                '.fc-timegrid-slot[data-time*="14:00"],' +
-                '.fc-timegrid-slot[data-time*="15:00"],' +
-                '.fc-timegrid-slot[data-time*="16:00"]'
-            );
-            unavailableSlots.forEach(slot => {
-                slot.style.display = 'none';
-            });
-        }
-
-        function updateBookingStatus() {
-            const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
-            if (remaining > 0) {
-                alert(`Clase cancelada. Clases restantes: ${remaining}\nClases agendadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}`);
-            } else {
-                alert(`Clase cancelada. Clases agendadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}`);
+        /**
+         * Parsear fechaHora desde formato de texto a objeto Date
+         * Formato esperado: "lunes, 15 de noviembre de 2025 a las 10:00"
+         */
+        function parseFechaHora(fechaHoraStr) {
+            try {
+                // Extraer la fecha y hora del string
+                // Ejemplo: "lunes, 15 de noviembre de 2025 a las 10:00"
+                const regex = /(\d+)\s+de\s+(\w+)\s+de\s+(\d{4})\s+a\s+las\s+(\d{1,2}):(\d{2})/i;
+                const match = fechaHoraStr.match(regex);
+                
+                if (match) {
+                    const day = parseInt(match[1]);
+                    const monthName = match[2].toLowerCase();
+                    const year = parseInt(match[3]);
+                    const hour = parseInt(match[4]);
+                    const minute = parseInt(match[5]);
+                    
+                    // Mapear nombres de meses en español a números
+                    const months = {
+                        'enero': 0, 'febrero': 1, 'marzo': 2, 'abril': 3,
+                        'mayo': 4, 'junio': 5, 'julio': 6, 'agosto': 7,
+                        'septiembre': 8, 'octubre': 9, 'noviembre': 10, 'diciembre': 11
+                    };
+                    
+                    const month = months[monthName];
+                    
+                    if (month !== undefined) {
+                        return new Date(year, month, day, hour, minute);
+                    }
+                }
+                
+                // Intentar parsear como ISO date
+                const isoDate = new Date(fechaHoraStr);
+                if (!isNaN(isoDate.getTime())) {
+                    return isoDate;
+                }
+                
+                return null;
+                
+            } catch (error) {
+                console.error('Error al parsear fechaHora:', fechaHoraStr, error);
+                return null;
             }
         }
 
         function handleDateSelect(info) {
             const day = info.start.getDay();
             const hour = info.start.getHours();
-            const allowedHours = [6, 7, 8, 9, 10, 17, 18, 19];
-
+            
             // Check if Sunday
             if (day === 0) {
                 alert('❌ No hay clases los domingos');
@@ -1647,11 +1827,14 @@
                 return;
             }
 
-            // Check if hour is allowed
-            if (!allowedHours.includes(hour)) {
-                alert('❌ Horario no disponible.\n\nPor favor selecciona:\n🌅 Mañana: 6:00 AM - 11:00 AM\n🌆 Tarde: 5:00 PM - 8:00 PM');
-                calendar.unselect();
-                return;
+            // En vista semanal, validar horarios
+            if (calendar.view.type === 'timeGridWeek') {
+                const allowedHours = [6, 7, 8, 9, 10, 17, 18, 19];
+                if (!allowedHours.includes(hour)) {
+                    alert('❌ Horario no disponible.\n\nPor favor selecciona:\n🌅 Mañana: 6:00 AM - 11:00 AM\n🌆 Tarde: 5:00 PM - 8:00 PM');
+                    calendar.unselect();
+                    return;
+                }
             }
 
             // Check if plan is selected
@@ -1668,33 +1851,86 @@
                 return;
             }
 
-            // Format date and time for confirmation
+            // Mostrar formulario de reservas
+            showBookingForm(info);
+        }
+
+        /**
+         * Mostrar formulario de reservas y guardar en Firestore
+         */
+        async function showBookingForm(info) {
+            // Solicitar datos del cliente
+            const nombre = prompt('Por favor, ingresa tu nombre completo:');
+            if (!nombre) {
+                calendar.unselect();
+                return;
+            }
+
+            const email = prompt('Por favor, ingresa tu correo electrónico:');
+            if (!email) {
+                calendar.unselect();
+                return;
+            }
+
+            const notas = prompt('¿Alguna nota especial para tu clase? (opcional):') || '';
+
+            // Format date and time for confirmation and storage
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const timeOptions = { hour: '2-digit', minute: '2-digit' };
             const dateStr = info.start.toLocaleDateString('es-ES', dateOptions);
             const timeStr = info.start.toLocaleTimeString('es-ES', timeOptions);
+            const fechaHoraStr = `${dateStr} a las ${timeStr}`;
 
-            // Add event
-            const eventId = Date.now().toString();
-            calendar.addEvent({
-                id: eventId,
-                title: '✓ Clase Reservada',
-                start: info.startStr,
-                end: info.endStr,
-                backgroundColor: '#fbe3e3',
-                borderColor: '#e8cccc',
-                textColor: '#333'
-            });
+            try {
+                // Verificar que Firebase esté disponible
+                if (typeof window.saveReservationToFirestore !== 'function') {
+                    console.error('❌ Firebase no está disponible');
+                    alert('❌ Error: Sistema de reservas no disponible. Por favor, recarga la página.');
+                    calendar.unselect();
+                    return;
+                }
+                
+                // Guardar en Firestore
+                console.log('Guardando reserva en Firestore...');
+                const reservaId = await window.saveReservationToFirestore(nombre, email, fechaHoraStr, notas);
+                console.log('✅ Reserva guardada con ID:', reservaId);
+                
+                // Add event to calendar
+                const eventId = Date.now().toString();
+                calendar.addEvent({
+                    id: eventId,
+                    title: `✓ ${nombre}`,
+                    start: info.startStr,
+                    end: info.endStr,
+                    backgroundColor: '#fbe3e3',
+                    borderColor: '#e8cccc',
+                    textColor: '#333',
+                    extendedProps: {
+                        firebaseId: reservaId,
+                        email: email,
+                        notas: notas
+                    }
+                });
 
-            selectedPlan.bookedClasses++;
-            selectedPlan.bookedEvents.push(eventId);
+                selectedPlan.bookedClasses++;
+                selectedPlan.bookedEvents.push(eventId);
 
-            const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
+                const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
 
-            if (selectedPlan.bookedClasses >= selectedPlan.classes) {
-                alert(`✅ ¡Reserva Completada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nHas reservado todas tus ${selectedPlan.classes} clases.`);
-            } else {
-                alert(`✅ ¡Clase Reservada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nClases reservadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}`);
+                if (selectedPlan.bookedClasses >= selectedPlan.classes) {
+                    alert(`✅ ¡Reserva Completada y Guardada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nHas reservado todas tus ${selectedPlan.classes} clases.\n\nRecibirás una confirmación en ${email}`);
+                } else {
+                    alert(`✅ ¡Clase Reservada y Guardada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nClases reservadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}\n\nRecibirás una confirmación en ${email}`);
+                }
+                
+                // Si el usuario es admin, recargar el panel de admin
+                if (isAdmin && typeof window.loadReservationsFromFirestore === 'function') {
+                    await window.loadReservationsFromFirestore();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error al guardar la reserva:', error);
+                alert('❌ Error al guardar la reserva. Por favor, inténtalo de nuevo o contacta con nosotros.');
             }
 
             calendar.unselect();
@@ -1764,10 +2000,15 @@
          */
 
         // ========== IMPORTAR FIREBASE SDK v10 ==========
+        // Importar Firebase con manejo de errores para debugging
+        console.log('Importando Firebase SDK v10...');
+        
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        console.log('✅ Firebase SDK v10 importado correctamente');
 
         // ========== CONFIGURACIÓN DE FIREBASE ==========
         // Your web app's Firebase configuration
@@ -1785,15 +2026,35 @@
         // ========== INICIALIZAR FIREBASE ==========
         let app, auth, db, analytics;
         try {
+            console.log('Inicializando Firebase con configuración...');
+            
             // Initialize Firebase
             app = initializeApp(firebaseConfig);
             analytics = getAnalytics(app);
             auth = getAuth(app);
             db = getFirestore(app);
-            console.log('Firebase inicializado correctamente');
+            
+            // Exponer variables globalmente para acceso desde otros scripts
+            window.db = db;
+            window.auth = auth;
+            
+            // Exponer funciones de Firestore para el calendario
+            window.firestoreExports = {
+                collection,
+                addDoc,
+                query,
+                orderBy,
+                getDocs,
+                serverTimestamp
+            };
+            
+            console.log('✅ Firebase inicializado correctamente');
+            console.log('✅ Firestore DB disponible globalmente');
+            
         } catch (error) {
-            console.error('Error al inicializar Firebase:', error);
-            console.log('Por favor, configura Firebase según las instrucciones en el código.');
+            console.error('❌ Error al inicializar Firebase:', error);
+            console.error('Detalles:', error.message);
+            alert('Error al conectar con Firebase. Por favor, recarga la página o contacta al administrador.');
         }
 
         // ========== VARIABLES GLOBALES ==========
@@ -1973,6 +2234,10 @@
                     
                     // Si es admin, mostrar panel y cerrar modal
                     if (user.email === 'admin@aura.com') {
+                        // Establecer flag de admin globalmente para el calendario
+                        window.isAdmin = true;
+                        isAdmin = true;
+                        
                         adminLoginModal.style.display = 'none';
                         adminPanel.style.display = 'block';
                         
@@ -1986,19 +2251,36 @@
                         // Cargar reservas
                         await loadReservations();
                         
+                        // Recargar eventos del calendario si está inicializado
+                        if (typeof calendar !== 'undefined' && calendar) {
+                            console.log('Recargando eventos del calendario como admin...');
+                            loadEventsFromFirestore();
+                        }
+                        
                         // Scroll al panel de admin
                         setTimeout(() => {
                             adminPanel.scrollIntoView({ behavior: 'smooth' });
                         }, 300);
                     } else {
                         // Usuario normal (no admin) - cerrar modal de login
+                        window.isAdmin = false;
+                        isAdmin = false;
+                        
                         adminLoginModal.style.display = 'none';
                         adminPanel.style.display = 'none';
+                        
+                        // Recargar eventos del calendario como usuario público
+                        if (typeof calendar !== 'undefined' && calendar) {
+                            console.log('Recargando eventos del calendario como usuario público...');
+                            loadEventsFromFirestore();
+                        }
                     }
                     
                 } else {
                     // No hay usuario autenticado
                     currentUser = null;
+                    window.isAdmin = false;
+                    isAdmin = false;
                     
                     // Ocultar botón de logout
                     menuLogout.style.display = 'none';
@@ -2009,6 +2291,12 @@
                     
                     // Ocultar panel de admin
                     adminPanel.style.display = 'none';
+                    
+                    // Recargar eventos del calendario como usuario no autenticado
+                    if (typeof calendar !== 'undefined' && calendar) {
+                        console.log('Recargando eventos del calendario sin autenticación...');
+                        loadEventsFromFirestore();
+                    }
                 }
             });
         }
@@ -2104,104 +2392,7 @@
             }
         }
 
-        /**
-         * Modificar la función handleDateSelect para guardar en Firestore
-         * Esto reemplaza la función existente en el código anterior
-         */
-        window.handleDateSelectWithFirestore = async function(info) {
-            const day = info.start.getDay();
-            const hour = info.start.getHours();
-            const allowedHours = [6, 7, 8, 9, 10, 17, 18, 19];
 
-            // Check if Sunday
-            if (day === 0) {
-                alert('❌ No hay clases los domingos');
-                calendar.unselect();
-                return;
-            }
-
-            // Check if hour is allowed
-            if (!allowedHours.includes(hour)) {
-                alert('❌ Horario no disponible.\n\nPor favor selecciona:\n🌅 Mañana: 6:00 AM - 11:00 AM\n🌆 Tarde: 5:00 PM - 8:00 PM');
-                calendar.unselect();
-                return;
-            }
-
-            // Check if plan is selected
-            if (selectedPlan.classes === 0) {
-                alert('⚠️ Por favor, selecciona un plan primero');
-                calendar.unselect();
-                return;
-            }
-
-            // Check if limit reached
-            if (selectedPlan.bookedClasses >= selectedPlan.classes) {
-                alert('✅ Ya has reservado todas las clases de tu plan.\n\nSi deseas cambiar una clase, haz clic en ella para cancelarla.');
-                calendar.unselect();
-                return;
-            }
-
-            // Solicitar datos del cliente para guardar en Firestore
-            const nombre = prompt('Por favor, ingresa tu nombre completo:');
-            if (!nombre) {
-                calendar.unselect();
-                return;
-            }
-
-            const email = prompt('Por favor, ingresa tu correo electrónico:');
-            if (!email) {
-                calendar.unselect();
-                return;
-            }
-
-            const notas = prompt('¿Alguna nota especial para tu clase? (opcional):') || '';
-
-            // Format date and time for confirmation and storage
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit' };
-            const dateStr = info.start.toLocaleDateString('es-ES', dateOptions);
-            const timeStr = info.start.toLocaleTimeString('es-ES', timeOptions);
-            const fechaHoraStr = `${dateStr} a las ${timeStr}`;
-
-            try {
-                // Guardar en Firestore
-                const reservaId = await saveReservation(nombre, email, fechaHoraStr, notas);
-                
-                // Add event to calendar
-                const eventId = Date.now().toString();
-                calendar.addEvent({
-                    id: eventId,
-                    title: `✓ ${nombre}`,
-                    start: info.startStr,
-                    end: info.endStr,
-                    backgroundColor: '#fbe3e3',
-                    borderColor: '#e8cccc',
-                    textColor: '#333',
-                    extendedProps: {
-                        firebaseId: reservaId,
-                        email: email,
-                        notas: notas
-                    }
-                });
-
-                selectedPlan.bookedClasses++;
-                selectedPlan.bookedEvents.push(eventId);
-
-                const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
-
-                if (selectedPlan.bookedClasses >= selectedPlan.classes) {
-                    alert(`✅ ¡Reserva Completada y Guardada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nHas reservado todas tus ${selectedPlan.classes} clases.\n\nRecibirás una confirmación en ${email}`);
-                } else {
-                    alert(`✅ ¡Clase Reservada y Guardada!\n\n📅 ${dateStr}\n🕐 ${timeStr}\n\nClases reservadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}\n\nRecibirás una confirmación en ${email}`);
-                }
-                
-            } catch (error) {
-                console.error('Error al guardar la reserva:', error);
-                alert('❌ Error al guardar la reserva. Por favor, inténtalo de nuevo o contacta con nosotros.');
-            }
-
-            calendar.unselect();
-        }
 
         // ========== REGLAS DE SEGURIDAD DE FIRESTORE ==========
         /*
@@ -2251,29 +2442,14 @@
             // Observar cambios de autenticación
             setupAuthObserver();
             
-            // Exponer función para poder usarla desde el código del calendario
+            // Exponer funciones globalmente para acceso desde el calendario
             window.saveReservationToFirestore = saveReservation;
             window.loadReservationsFromFirestore = loadReservations;
-        });
-
-        // Nota: Para integrar con el calendario existente, reemplaza la función handleDateSelect
-        // en el código del calendario con handleDateSelectWithFirestore
-    </script>
-
-    <script>
-        // Modificar el calendario para usar la nueva función con Firestore
-        // Esta modificación se hace después de que el módulo Firebase se carga
-        document.addEventListener('DOMContentLoaded', () => {
-            // Esperar un momento para que Firebase se inicialice
-            setTimeout(() => {
-                // Si el calendario ya está inicializado, actualizar su configuración
-                if (calendar && typeof window.handleDateSelectWithFirestore === 'function') {
-                    // Reemplazar el handler de select
-                    calendar.setOption('select', window.handleDateSelectWithFirestore);
-                    console.log('Calendario integrado con Firestore');
-                }
-            }, 1000);
+            
+            console.log('✅ Sistema de autenticación y reservas inicializado');
         });
     </script>
+
+
 </body>
 </html>
