@@ -982,6 +982,44 @@
             position: relative;
         }
 
+        /* ========== Admin Calendar Styles ========== */
+        #admin-calendar-view {
+            margin-top: 20px;
+        }
+
+        #admin-calendar {
+            min-height: 600px;
+        }
+
+        .view-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.5);
+        }
+
+        .view-toggle-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Admin calendar event styling */
+        #admin-calendar .fc-event {
+            font-size: 0.9rem;
+            padding: 3px 5px;
+            cursor: pointer;
+        }
+
+        #admin-calendar .fc-event-title {
+            font-weight: 600;
+        }
+
+        /* Admin calendar time grid */
+        #admin-calendar .fc-timegrid-slot {
+            height: 3rem;
+        }
+
+        #admin-calendar .fc-timegrid-slot-label {
+            font-size: 0.9rem;
+        }
+
         /* ========== Responsive Design ========== */
         @media (max-width: 768px) {
             .hero-content h1 {
@@ -1179,6 +1217,25 @@
 
             .like-burst {
                 font-size: 100px;
+            }
+
+            /* Admin calendar mobile adjustments */
+            #admin-calendar .fc-timegrid-slot {
+                height: 2.5rem;
+            }
+
+            #admin-calendar .fc-timegrid-slot-label {
+                font-size: 0.8rem;
+            }
+
+            #admin-calendar .fc-event {
+                font-size: 0.75rem;
+                padding: 2px 3px;
+            }
+
+            .view-toggle-btn {
+                font-size: 0.85rem !important;
+                padding: 8px 15px !important;
             }
         }
 
@@ -1566,10 +1623,28 @@
         <button id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px;">Cerrar Sesión</button>
         
         <div style="max-width: 1200px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
-            <h3 style="color: #333; margin-bottom: 20px; font-size: 1.8rem; font-weight: 600;">Reservas</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h3 style="color: #333; margin: 0; font-size: 1.8rem; font-weight: 600;">Reservas</h3>
+                <div style="display: flex; gap: 10px;">
+                    <button id="view-calendar-btn" class="view-toggle-btn" style="background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 10px 20px; border: none; border-radius: 25px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(246, 200, 199, 0.3);">
+                        📅 Vista Calendario
+                    </button>
+                    <button id="view-table-btn" class="view-toggle-btn" style="background: #e0e0e0; color: #666; padding: 10px 20px; border: none; border-radius: 25px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+                        📋 Vista Tabla
+                    </button>
+                </div>
+            </div>
+            
             <div id="reservations-loading" style="text-align: center; padding: 40px; color: #666;">
                 <p>Cargando reservas...</p>
             </div>
+            
+            <!-- Calendar View for Admin -->
+            <div id="admin-calendar-view" style="display: none;">
+                <div id="admin-calendar"></div>
+            </div>
+            
+            <!-- Table View (existing) -->
             <div id="reservations-container" style="display: none; overflow-x: auto;">
                 <table id="reservations-table" style="width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 15px; overflow: hidden;">
                     <thead>
@@ -3034,6 +3109,9 @@
                         // Cargar reservas
                         await loadReservations();
                         
+                        // Configurar botones de cambio de vista
+                        setupViewToggleButtons();
+                        
                         // Recargar eventos del calendario si está inicializado
                         if (typeof calendar !== 'undefined' && calendar) {
                             console.log('Recargando eventos del calendario como admin...');
@@ -3223,10 +3301,220 @@
                     containerDiv.style.display = 'block';
                 }
                 
+                // También cargar el calendario de admin si está inicializado
+                if (window.adminCalendar) {
+                    await loadAdminCalendarReservations();
+                }
+                
             } catch (error) {
                 console.error('Error al cargar reservas:', error);
                 loadingDiv.innerHTML = '<p style="color: #f6c8c7;">Error al cargar reservas. Por favor, recarga la página.</p>';
             }
+        }
+
+        /**
+         * Extraer el primer nombre de un nombre completo
+         * Ejemplo: "Ketzy Gallegos" -> "Ketzy"
+         */
+        function extractFirstName(fullName) {
+            if (!fullName || typeof fullName !== 'string') {
+                return '';
+            }
+            const trimmed = fullName.trim();
+            const parts = trimmed.split(/\s+/);
+            return parts[0] || trimmed;
+        }
+
+        /**
+         * Inicializar calendario del panel de administrador
+         */
+        let adminCalendar = null;
+        
+        function initAdminCalendar() {
+            console.log('Inicializando calendario de administrador...');
+            
+            const calendarEl = document.getElementById('admin-calendar');
+            
+            if (!calendarEl) {
+                console.error('❌ ERROR: Div #admin-calendar no encontrado');
+                return;
+            }
+            
+            try {
+                adminCalendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    locale: 'es',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'timeGridWeek,timeGridDay'
+                    },
+                    slotMinTime: '06:00:00',
+                    slotMaxTime: '20:00:00',
+                    allDaySlot: false,
+                    expandRows: true,
+                    height: 'auto',
+                    nowIndicator: true,
+                    slotDuration: '00:30:00',
+                    slotLabelInterval: '01:00',
+                    
+                    eventClick: function(info) {
+                        const event = info.event;
+                        const props = event.extendedProps;
+                        
+                        let message = `Cliente: ${props.fullName || event.title}\n`;
+                        message += `Email: ${props.email || '-'}\n`;
+                        message += `Hora: ${event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}\n`;
+                        if (props.notas) {
+                            message += `Notas: ${props.notas}`;
+                        }
+                        
+                        alert(message);
+                    },
+                    
+                    events: []
+                });
+                
+                adminCalendar.render();
+                console.log('✅ Calendario de administrador inicializado');
+                
+                // Cargar reservas
+                loadAdminCalendarReservations();
+                
+            } catch (error) {
+                console.error('❌ ERROR al inicializar calendario de admin:', error);
+            }
+        }
+
+        /**
+         * Cargar reservas en el calendario de administrador
+         */
+        async function loadAdminCalendarReservations() {
+            if (!adminCalendar) {
+                console.warn('⚠️ Calendario de admin no inicializado');
+                return;
+            }
+            
+            console.log('Cargando reservas en calendario de admin...');
+            
+            try {
+                // Limpiar eventos existentes
+                adminCalendar.getEvents().forEach(event => event.remove());
+                
+                const q = query(collection(db, 'reservas'), orderBy('timestamp', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    
+                    // Parsear fechaHora
+                    let startDate = null;
+                    if (data.fechaHora) {
+                        startDate = parseFechaHora(data.fechaHora);
+                    }
+                    
+                    if (!startDate && data.timestamp) {
+                        startDate = data.timestamp.toDate();
+                    }
+                    
+                    if (startDate) {
+                        // Extraer solo el primer nombre
+                        const firstName = extractFirstName(data.nombre);
+                        
+                        // Calcular hora de fin (1 hora después)
+                        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+                        
+                        adminCalendar.addEvent({
+                            id: doc.id,
+                            title: firstName || 'Reserva',
+                            start: startDate,
+                            end: endDate,
+                            backgroundColor: '#f6c8c7',
+                            borderColor: '#e8cccc',
+                            textColor: '#333',
+                            extendedProps: {
+                                fullName: data.nombre,
+                                email: data.email,
+                                notas: data.notas,
+                                firebaseId: doc.id
+                            }
+                        });
+                    }
+                });
+                
+                console.log(`✅ ${querySnapshot.size} reservas cargadas en calendario de admin`);
+                
+            } catch (error) {
+                console.error('❌ Error al cargar reservas en calendario de admin:', error);
+            }
+        }
+
+        /**
+         * Configurar botones de cambio de vista
+         */
+        function setupViewToggleButtons() {
+            const viewCalendarBtn = document.getElementById('view-calendar-btn');
+            const viewTableBtn = document.getElementById('view-table-btn');
+            const calendarView = document.getElementById('admin-calendar-view');
+            const tableView = document.getElementById('reservations-container');
+            const noReservations = document.getElementById('no-reservations');
+            
+            if (!viewCalendarBtn || !viewTableBtn) {
+                console.warn('⚠️ Botones de vista no encontrados');
+                return;
+            }
+            
+            // Vista calendario por defecto
+            let currentView = 'calendar';
+            
+            viewCalendarBtn.addEventListener('click', () => {
+                if (currentView === 'calendar') return;
+                
+                currentView = 'calendar';
+                calendarView.style.display = 'block';
+                tableView.style.display = 'none';
+                noReservations.style.display = 'none';
+                
+                // Actualizar estilos de botones
+                viewCalendarBtn.style.background = 'linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%)';
+                viewCalendarBtn.style.color = '#fff';
+                viewTableBtn.style.background = '#e0e0e0';
+                viewTableBtn.style.color = '#666';
+                
+                // Inicializar calendario si aún no existe
+                if (!adminCalendar) {
+                    initAdminCalendar();
+                } else {
+                    // Refrescar calendario
+                    adminCalendar.render();
+                }
+            });
+            
+            viewTableBtn.addEventListener('click', () => {
+                if (currentView === 'table') return;
+                
+                currentView = 'table';
+                calendarView.style.display = 'none';
+                
+                // Mostrar tabla o mensaje de sin reservas según corresponda
+                const tbody = document.getElementById('reservations-tbody');
+                if (tbody && tbody.rows.length > 0) {
+                    tableView.style.display = 'block';
+                    noReservations.style.display = 'none';
+                } else {
+                    tableView.style.display = 'none';
+                    noReservations.style.display = 'block';
+                }
+                
+                // Actualizar estilos de botones
+                viewTableBtn.style.background = 'linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%)';
+                viewTableBtn.style.color = '#fff';
+                viewCalendarBtn.style.background = '#e0e0e0';
+                viewCalendarBtn.style.color = '#666';
+            });
+            
+            // Inicializar vista calendario por defecto
+            viewCalendarBtn.click();
         }
 
 
@@ -3279,6 +3567,8 @@
          * Cargar reservas y exponer función globalmente
          */
         window.loadReservationsFromFirestore = loadReservations;
+        window.loadAdminCalendarReservations = loadAdminCalendarReservations;
+        window.initAdminCalendar = initAdminCalendar;
         
         /**
          * Inicializar todo cuando el DOM esté listo
