@@ -1171,6 +1171,9 @@
         
         <!-- Menú desplegable -->
         <div id="menu-dropdown" role="menu" aria-hidden="true" style="display: none; position: absolute; top: 60px; right: 0; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); border: 2px solid rgba(246, 200, 199, 0.3); min-width: 200px; overflow: hidden;">
+            <button id="menu-user-login" role="menuitem" aria-label="Iniciar Sesión" style="display: block; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease; border-bottom: 1px solid rgba(246, 200, 199, 0.2);">
+                🔓 Iniciar Sesión
+            </button>
             <button id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease; border-bottom: 1px solid rgba(246, 200, 199, 0.2);">
                 📝 Registrarse
             </button>
@@ -1204,6 +1207,33 @@
                         Registrarse
                     </button>
                     <button type="button" id="register-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para Login de Usuario Normal -->
+    <div id="user-login-modal" role="dialog" aria-labelledby="user-login-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
+            <h2 id="user-login-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Iniciar Sesión</h2>
+            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Accede a tu cuenta para reservar clases</p>
+            <div id="user-login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
+            <form id="user-login-form">
+                <div style="margin-bottom: 15px;">
+                    <label for="user-login-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
+                    <input type="email" id="user-login-email" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="user-login-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
+                    <input type="password" id="user-login-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.3);">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button" id="user-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
                         Cancelar
                     </button>
                 </div>
@@ -1474,12 +1504,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             const hamburgerBtn = document.getElementById('hamburger-btn');
             const menuDropdown = document.getElementById('menu-dropdown');
+            const menuUserLogin = document.getElementById('menu-user-login');
             const menuRegister = document.getElementById('menu-register');
             const menuAdminLogin = document.getElementById('menu-admin-login');
             const menuLogout = document.getElementById('menu-logout');
             
             const registerModal = document.getElementById('register-modal');
             const registerCancel = document.getElementById('register-cancel');
+            const userLoginModal = document.getElementById('user-login-modal');
+            const userLoginCancel = document.getElementById('user-login-cancel');
             const adminLoginModal = document.getElementById('admin-login-modal');
             const adminLoginCancel = document.getElementById('admin-login-cancel');
             
@@ -1501,7 +1534,7 @@
             });
             
             // Hover effects for menu items
-            const menuItems = [menuRegister, menuAdminLogin, menuLogout];
+            const menuItems = [menuUserLogin, menuRegister, menuAdminLogin, menuLogout];
             menuItems.forEach(item => {
                 item.addEventListener('mouseenter', () => {
                     item.style.background = 'linear-gradient(135deg, #fef5f5 0%, #fbe3e3 100%)';
@@ -1509,6 +1542,15 @@
                 item.addEventListener('mouseleave', () => {
                     item.style.background = 'transparent';
                 });
+            });
+            
+            // Show user login modal
+            menuUserLogin.addEventListener('click', () => {
+                menuDropdown.style.display = 'none';
+                hamburgerBtn.setAttribute('aria-expanded', 'false');
+                menuDropdown.setAttribute('aria-hidden', 'true');
+                userLoginModal.style.display = 'flex';
+                document.getElementById('user-login-email').focus();
             });
             
             // Show register modal
@@ -1527,6 +1569,13 @@
                 menuDropdown.setAttribute('aria-hidden', 'true');
                 adminLoginModal.style.display = 'flex';
                 document.getElementById('admin-email').focus();
+            });
+            
+            // Close user login modal
+            userLoginCancel.addEventListener('click', () => {
+                userLoginModal.style.display = 'none';
+                document.getElementById('user-login-form').reset();
+                document.getElementById('user-login-error').style.display = 'none';
             });
             
             // Close register modal
@@ -1556,6 +1605,7 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     registerModal.style.display = 'none';
+                    userLoginModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
                     timeModal.style.display = 'none';
                     menuDropdown.style.display = 'none';
@@ -1571,6 +1621,14 @@
                     document.getElementById('register-form').reset();
                     document.getElementById('register-error').style.display = 'none';
                     document.getElementById('register-success').style.display = 'none';
+                }
+            });
+            
+            userLoginModal.addEventListener('click', (e) => {
+                if (e.target === userLoginModal) {
+                    userLoginModal.style.display = 'none';
+                    document.getElementById('user-login-form').reset();
+                    document.getElementById('user-login-error').style.display = 'none';
                 }
             });
             
@@ -2566,7 +2624,55 @@
         }
 
         /**
-         * Manejar el envío del formulario de login
+         * Manejar el envío del formulario de login de usuario normal
+         */
+        function setupUserLogin() {
+            const loginForm = document.getElementById('user-login-form');
+            const loginError = document.getElementById('user-login-error');
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('user-login-email').value;
+                const password = document.getElementById('user-login-password').value;
+                
+                // Ocultar error previo
+                loginError.style.display = 'none';
+                
+                try {
+                    // Autenticar con Firebase
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    
+                    console.log('Login exitoso:', userCredential.user.email);
+                    
+                    // Cerrar modal después de login exitoso
+                    document.getElementById('user-login-modal').style.display = 'none';
+                    document.getElementById('user-login-form').reset();
+                    
+                } catch (error) {
+                    console.error('Error de autenticación:', error);
+                    
+                    // Mostrar mensaje de error
+                    let errorMessage = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'Usuario no encontrado. Por favor, verifica tu email o regístrate.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Contraseña incorrecta. Por favor, inténtalo de nuevo.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Email inválido. Por favor, ingresa un email válido.';
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    
+                    loginError.textContent = errorMessage;
+                    loginError.style.display = 'block';
+                }
+            });
+        }
+
+        /**
+         * Manejar el envío del formulario de login de administrador
          */
         function setupAdminLogin() {
             const loginForm = document.getElementById('admin-login-form');
@@ -2663,6 +2769,7 @@
                 const loginForm = document.getElementById('admin-login-form');
                 const loginError = document.getElementById('login-error');
                 const menuLogout = document.getElementById('menu-logout');
+                const menuUserLogin = document.getElementById('menu-user-login');
                 const menuRegister = document.getElementById('menu-register');
                 const menuAdminLogin = document.getElementById('menu-admin-login');
                 
@@ -2673,6 +2780,7 @@
                     menuLogout.style.display = 'block';
                     
                     // Ocultar opciones de registro y login cuando hay sesión
+                    menuUserLogin.style.display = 'none';
                     menuRegister.style.display = 'none';
                     menuAdminLogin.style.display = 'none';
                     
@@ -2730,6 +2838,7 @@
                     menuLogout.style.display = 'none';
                     
                     // Mostrar opciones de registro y login
+                    menuUserLogin.style.display = 'block';
                     menuRegister.style.display = 'block';
                     menuAdminLogin.style.display = 'block';
                     
@@ -2948,6 +3057,7 @@
             
             // Configurar registro, login y logout
             setupUserRegistration();
+            setupUserLogin();
             setupAdminLogin();
             setupLogout();
             
