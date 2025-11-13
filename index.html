@@ -787,6 +787,124 @@
             overflow: hidden;
         }
 
+        /* ========== Reglamento Link Styles ========== */
+        .reglamento-link {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
+        }
+
+        .reglamento-link a {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-decoration: underline;
+            color: #f6c8c7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .reglamento-link a:hover {
+            color: #e8cccc;
+            transform: scale(1.05);
+        }
+
+        /* Modal for Reglamento */
+        .reglamento-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .reglamento-content {
+            background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid rgba(246, 200, 199, 0.3);
+            position: relative;
+        }
+
+        .reglamento-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .reglamento-content h3 {
+            color: #f6c8c7;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .reglamento-content p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .reglamento-content strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .reglamento-close {
+            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
+            color: #fff;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.3);
+        }
+
+        .reglamento-close:hover {
+            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(246, 200, 199, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .reglamento-content {
+                padding: 30px 20px;
+                max-height: 85vh;
+            }
+
+            .reglamento-content h2 {
+                font-size: 1.6rem;
+            }
+
+            .reglamento-content h3 {
+                font-size: 1.2rem;
+            }
+
+            .reglamento-link a {
+                font-size: 1.1rem;
+            }
+        }
+
         .contact-section::before {
             content: '';
             position: absolute;
@@ -1485,6 +1603,86 @@
         <p class="hours">Abre hoy: 06:00 a.m. – 08:00 p.m.</p>
     </section>
 
+    <!-- ========== 8. Reglamento Link Section ========== -->
+    <section class="reglamento-link">
+        <a id="reglamento-link" href="javascript:void(0);">Leer Reglamento Aura</a>
+    </section>
+
+    <!-- ========== Reglamento Modal ========== -->
+    <div id="reglamento-modal" class="reglamento-modal">
+        <div class="reglamento-content">
+            <h2>REGLAMENTO AURA STUDIO</h2>
+            <p>El objetivo de estas reglas es asegurar un ambiente seguro, respetuoso y óptimo para la práctica de Pilates de todos nuestros alumnos.</p>
+            
+            <h3>Salud y seguridad Tu bienestar es lo primero!</h3>
+            <p>Es obligatorio notificar a tu instructor sobre cualquier lesión, dolor crónico, embarazo o condición médica antes de iniciar la clase. Esto permite adaptar los ejercicios a tus necesidades.</p>
+            
+            <h3>Escucha a tu cuerpo</h3>
+            <p>Si sientes dolor, mareo o malestar, detente inmediatamente e informa a tu instructor. Los ejercicios no son obligatorios si causan incomodidad.</p>
+            
+            <h3>Uso del equipo</h3>
+            <p>Utiliza el equipo siguiendo estrictamente las indicaciones del instructor para evitar accidentes y daños al material.</p>
+            
+            <h3>Calcetines antideslizantes</h3>
+            <p>Es imprescindible usar calcetines antideslizantes en todo momento dentro del estudio, por motivos de higiene y seguridad.</p>
+            
+            <h3>Ropa adecuada</h3>
+            <p>Asiste con ropa deportiva cómoda y limpia. Se recomienda ropa ajustada para que el instructor pueda observar mejor tu alineación.</p>
+            
+            <h3>Limpieza del equipo</h3>
+            <p>Al finalizar tu sesión, por favor limpia el equipo que utilizaste (Reformer, accesorios, etc.) con los productos de higiene que el estudio proporciona.</p>
+            
+            <h3>Toalla personal</h3>
+            <p>Te sugerimos traer una toalla de mano para el sudor, y en algunos casos, para colocar sobre el equipo.</p>
+            
+            <h3>Hidratación</h3>
+            <p>Solo se permite ingresar al estudio con botellas de agua cerradas y con tapa.</p>
+            
+            <h3>Locker y pertenencias</h3>
+            <p>Los lockers se pueden usar durante el tiempo que el alumno permanezca en las instalaciones del estudio. No se permite dejar objetos personales después de finalizar su clase. De lo contrario, Aura Studio no se hace responsable por pérdidas.</p>
+            
+            <h3>Ingreso exclusivo para usuarios inscritos</h3>
+            <p>Es obligatorio registrar la entrada y no se permite el ingreso de acompañantes, para mayor comodidad de todos.</p>
+            
+            <h3>Reservaciones</h3>
+            <p>Al momento de reservar se debe depositar el pago de la clase/paquete, de lo contrario no se tomará en cuenta su reservación. Reserva de clases Es obligatorio reservar las clases con antelación.</p>
+            
+            <h3>CLASES NO TRANSFERIBLES</h3>
+            <p>Las reservas y las cuotas suelen ser personales e intransferibles, por ninguna circunstancia.</p>
+            
+            <h3>Pago Anticipado</h3>
+            <p>Los pagos de nuevos paquetes deben ser cubiertos en un lapso de 1-2 días antes de que este inicie.</p>
+            
+            <h3>Clases NO Reembolsables</h3>
+            <p>Las clases no son reembolsables ni transferibles, en dado caso de no asistir, clase perdida.</p>
+            
+            <h3>Clases no modificables</h3>
+            <p>Responsabilidad a la hora de agendar, porque los horarios no pueden ser modificados.</p>
+            
+            <h3>Teléfono Móvil</h3>
+            <p>Debe estar en silencio o apagado durante toda la sesión, para evitar interrupciones y fomentar la concentración.</p>
+            
+            <h3>Respeto</h3>
+            <p>Mantener comportamiento respetuoso hacia los instructores, personal y demás clientes.</p>
+            
+            <h3>Equipos y espacios</h3>
+            <p>Cuida los aparatos, NO azotar las máquinas ni dejar caer el material de entrenamiento.</p>
+            
+            <h3>Sanciones</h3>
+            <p>El incumplimiento del reglamento puede acarrear llamados de atención, suspensión temporal o cancelación de la membresía.</p>
+            
+            <h3>Grabaciones</h3>
+            <p>Por respeto a la privacidad y derechos de autor, no se permite grabar las clases completas.</p>
+            
+            <h3>Tolerancia</h3>
+            <p>Las clases comienzan a la hora establecida. Tolerancia de 5 minutos para ingresar, y no se permite el acceso después de ese tiempo para evitar interrupciones y, lo más importante, asegurar que el alumno realice el calentamiento completo para prevenir lesiones.</p>
+            
+            <p style="text-align: center; margin-top: 30px; font-weight: 600;">Agradecemos su comprensión.<br>Aura Studio</p>
+            
+            <button class="reglamento-close" id="reglamento-close">Cerrar</button>
+        </div>
+    </div>
+
     <!-- FullCalendar v6.1.15 JS desde CDN -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <!-- FullCalendar locales para español -->
@@ -1599,6 +1797,39 @@
             
             timeCancel.addEventListener('click', () => {
                 timeModal.style.display = 'none';
+            });
+
+            // ========== Reglamento Modal Functionality ==========
+            const reglamentoLink = document.getElementById('reglamento-link');
+            const reglamentoModal = document.getElementById('reglamento-modal');
+            const reglamentoClose = document.getElementById('reglamento-close');
+
+            // Open reglamento modal
+            reglamentoLink.addEventListener('click', () => {
+                reglamentoModal.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            });
+
+            // Close reglamento modal
+            reglamentoClose.addEventListener('click', () => {
+                reglamentoModal.style.display = 'none';
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            });
+
+            // Close modal when clicking outside the content
+            reglamentoModal.addEventListener('click', (e) => {
+                if (e.target === reglamentoModal) {
+                    reglamentoModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+
+            // Close modal with ESC key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && reglamentoModal.style.display === 'flex') {
+                    reglamentoModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
             });
             
             // Close modals on ESC key
