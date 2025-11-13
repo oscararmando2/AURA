@@ -985,26 +985,38 @@
         /* ========== Admin Calendar Styles ========== */
         #admin-calendar-view {
             margin-top: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border: 2px solid rgba(246, 200, 199, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        #admin-calendar-view:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
         }
 
         #admin-calendar {
             min-height: 600px;
-        }
-
-        .view-toggle-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.5);
-        }
-
-        .view-toggle-btn:active {
-            transform: translateY(0);
+            border-radius: 15px;
+            overflow: hidden;
         }
 
         /* Admin calendar event styling */
         #admin-calendar .fc-event {
             font-size: 0.9rem;
-            padding: 3px 5px;
+            padding: 5px 8px;
             cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        #admin-calendar .fc-event:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.4);
         }
 
         #admin-calendar .fc-event-title {
@@ -1014,10 +1026,69 @@
         /* Admin calendar time grid */
         #admin-calendar .fc-timegrid-slot {
             height: 3rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #admin-calendar .fc-timegrid-slot:hover {
+            background-color: rgba(251, 227, 227, 0.1);
         }
 
         #admin-calendar .fc-timegrid-slot-label {
             font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Enhanced admin calendar toolbar */
+        #admin-calendar .fc-toolbar-title {
+            font-size: 1.8rem;
+            color: #333;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        #admin-calendar .fc-button {
+            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 12px rgba(246, 200, 199, 0.3);
+        }
+
+        #admin-calendar .fc-button:hover {
+            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 18px rgba(246, 200, 199, 0.5);
+        }
+
+        #admin-calendar .fc-button-active {
+            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%) !important;
+            box-shadow: 0 5px 18px rgba(246, 200, 199, 0.6) !important;
+        }
+
+        /* Admin calendar day headers */
+        #admin-calendar .fc-col-header-cell {
+            background: linear-gradient(135deg, #fef5f5 0%, #ffffff 100%);
+            padding: 15px 5px;
+            font-weight: 600;
+            color: #333;
+            border-color: rgba(246, 200, 199, 0.3);
+        }
+
+        #admin-calendar .fc-day-today {
+            background-color: rgba(251, 227, 227, 0.15) !important;
+        }
+
+        /* Admin calendar grid lines */
+        #admin-calendar .fc-timegrid-col {
+            border-color: rgba(246, 200, 199, 0.2);
+        }
+
+        #admin-calendar .fc-timegrid-axis {
+            background-color: #fefefe;
         }
 
         /* ========== Responsive Design ========== */
@@ -1220,6 +1291,11 @@
             }
 
             /* Admin calendar mobile adjustments */
+            #admin-calendar-view {
+                padding: 20px;
+                margin-top: 15px;
+            }
+
             #admin-calendar .fc-timegrid-slot {
                 height: 2.5rem;
             }
@@ -1230,12 +1306,16 @@
 
             #admin-calendar .fc-event {
                 font-size: 0.75rem;
-                padding: 2px 3px;
+                padding: 3px 5px;
             }
 
-            .view-toggle-btn {
-                font-size: 0.85rem !important;
-                padding: 8px 15px !important;
+            #admin-calendar .fc-toolbar-title {
+                font-size: 1.2rem;
+            }
+
+            #admin-calendar .fc-button {
+                padding: 8px 15px;
+                font-size: 0.85rem;
             }
         }
 
@@ -1622,21 +1702,13 @@
         <p style="margin-bottom: 10px;">Bienvenido, <strong id="admin-email-display"></strong></p>
         <button id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px;">Cerrar Sesión</button>
         
-        <div style="max-width: 1200px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
-                <h3 style="color: #333; margin: 0; font-size: 1.8rem; font-weight: 600;">Reservas</h3>
-                <div style="display: flex; gap: 10px;">
-                    <button id="view-calendar-btn" class="view-toggle-btn" style="background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 10px 20px; border: none; border-radius: 25px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(246, 200, 199, 0.3);">
-                        📅 Vista Calendario
-                    </button>
-                    <button id="view-table-btn" class="view-toggle-btn" style="background: #e0e0e0; color: #666; padding: 10px 20px; border: none; border-radius: 25px; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
-                        📋 Vista Tabla
-                    </button>
-                </div>
+        <div style="max-width: 1200px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 25px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); border: 2px solid rgba(246, 200, 199, 0.3);">
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #333; margin: 0; font-size: 2rem; font-weight: 600; text-align: center; letter-spacing: 1px;">📅 Calendario de Reservas</h3>
             </div>
             
             <div id="reservations-loading" style="text-align: center; padding: 40px; color: #666;">
-                <p>Cargando reservas...</p>
+                <p style="font-size: 1.1rem;">Cargando reservas...</p>
             </div>
             
             <!-- Calendar View for Admin -->
@@ -1644,25 +1716,8 @@
                 <div id="admin-calendar"></div>
             </div>
             
-            <!-- Table View (existing) -->
-            <div id="reservations-container" style="display: none; overflow-x: auto;">
-                <table id="reservations-table" style="width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 15px; overflow: hidden;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff;">
-                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Nombre</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Email</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Fecha y Hora</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Notas</th>
-                            <th style="padding: 15px; text-align: left; font-weight: 600; border-bottom: 2px solid #e8cccc;">Fecha de Reserva</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reservations-tbody">
-                        <!-- Reservations will be loaded here dynamically -->
-                    </tbody>
-                </table>
-            </div>
             <div id="no-reservations" style="display: none; text-align: center; padding: 40px; color: #666;">
-                <p>No hay reservas en este momento.</p>
+                <p style="font-size: 1.1rem;">No hay reservas en este momento.</p>
             </div>
         </div>
     </section>
@@ -3106,11 +3161,8 @@
                         loginForm.reset();
                         loginError.style.display = 'none';
                         
-                        // Cargar reservas
+                        // Cargar reservas (que inicializa el calendario automáticamente)
                         await loadReservations();
-                        
-                        // Configurar botones de cambio de vista
-                        setupViewToggleButtons();
                         
                         // Recargar eventos del calendario si está inicializado
                         if (typeof calendar !== 'undefined' && calendar) {
@@ -3222,17 +3274,14 @@
 
         /**
          * Cargar todas las reservas desde Firestore
-         * Formatea fechaHora desde ISO a formato legible español
+         * Carga directamente en el calendario de administrador
          */
         async function loadReservations() {
             const loadingDiv = document.getElementById('reservations-loading');
-            const containerDiv = document.getElementById('reservations-container');
             const noReservationsDiv = document.getElementById('no-reservations');
-            const tbody = document.getElementById('reservations-tbody');
             
             // Mostrar loading
             loadingDiv.style.display = 'block';
-            containerDiv.style.display = 'none';
             noReservationsDiv.style.display = 'none';
             
             try {
@@ -3240,70 +3289,20 @@
                 const q = query(collection(db, 'reservas'), orderBy('timestamp', 'desc'));
                 const querySnapshot = await getDocs(q);
                 
-                // Limpiar tabla
-                tbody.innerHTML = '';
-                
                 if (querySnapshot.empty) {
                     // No hay reservas
                     loadingDiv.style.display = 'none';
                     noReservationsDiv.style.display = 'block';
                 } else {
-                    // Hay reservas, llenar la tabla
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const row = tbody.insertRow();
-                        
-                        // Formatear fecha y hora de la reserva
-                        let fechaHoraFormatted = '-';
-                        if (data.fechaHora) {
-                            // Parsear desde ISO format (YYYY-MM-DDTHH:mm:ss)
-                            const parsedDate = parseFechaHora(data.fechaHora);
-                            if (parsedDate) {
-                                fechaHoraFormatted = parsedDate.toLocaleString('es-ES', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                });
-                            } else {
-                                // Si no se puede parsear, mostrar el valor crudo
-                                fechaHoraFormatted = data.fechaHora;
-                                console.warn('⚠️ No se pudo parsear fechaHora:', data.fechaHora);
-                            }
-                        }
-                        
-                        // Formatear timestamp de cuando se hizo la reserva
-                        let timestampFormatted = '-';
-                        if (data.timestamp) {
-                            const date = data.timestamp.toDate();
-                            timestampFormatted = date.toLocaleString('es-ES', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            });
-                        }
-                        
-                        // Insertar celdas
-                        row.innerHTML = `
-                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${data.nombre || '-'}</td>
-                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${data.email || '-'}</td>
-                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${fechaHoraFormatted}</td>
-                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${data.notas || '-'}</td>
-                            <td style="padding: 15px; border-bottom: 1px solid rgba(246, 200, 199, 0.3);">${timestampFormatted}</td>
-                        `;
-                    });
-                    
+                    // Hay reservas, cargar en el calendario
                     loadingDiv.style.display = 'none';
-                    containerDiv.style.display = 'block';
-                }
-                
-                // También cargar el calendario de admin si está inicializado
-                if (window.adminCalendar) {
-                    await loadAdminCalendarReservations();
+                    
+                    // Inicializar y cargar el calendario de admin
+                    if (!window.adminCalendar) {
+                        initAdminCalendar();
+                    } else {
+                        await loadAdminCalendarReservations();
+                    }
                 }
                 
             } catch (error) {
@@ -3358,6 +3357,13 @@
                     slotDuration: '00:30:00',
                     slotLabelInterval: '01:00',
                     
+                    // Enhanced visual configuration
+                    buttonText: {
+                        today: 'Hoy',
+                        week: 'Semana',
+                        day: 'Día'
+                    },
+                    
                     eventClick: function(info) {
                         const event = info.event;
                         const props = event.extendedProps;
@@ -3377,6 +3383,9 @@
                 
                 adminCalendar.render();
                 console.log('✅ Calendario de administrador inicializado');
+                
+                // Show calendar view
+                document.getElementById('admin-calendar-view').style.display = 'block';
                 
                 // Cargar reservas
                 loadAdminCalendarReservations();
@@ -3447,74 +3456,6 @@
             } catch (error) {
                 console.error('❌ Error al cargar reservas en calendario de admin:', error);
             }
-        }
-
-        /**
-         * Configurar botones de cambio de vista
-         */
-        function setupViewToggleButtons() {
-            const viewCalendarBtn = document.getElementById('view-calendar-btn');
-            const viewTableBtn = document.getElementById('view-table-btn');
-            const calendarView = document.getElementById('admin-calendar-view');
-            const tableView = document.getElementById('reservations-container');
-            const noReservations = document.getElementById('no-reservations');
-            
-            if (!viewCalendarBtn || !viewTableBtn) {
-                console.warn('⚠️ Botones de vista no encontrados');
-                return;
-            }
-            
-            // Vista calendario por defecto
-            let currentView = 'calendar';
-            
-            viewCalendarBtn.addEventListener('click', () => {
-                if (currentView === 'calendar') return;
-                
-                currentView = 'calendar';
-                calendarView.style.display = 'block';
-                tableView.style.display = 'none';
-                noReservations.style.display = 'none';
-                
-                // Actualizar estilos de botones
-                viewCalendarBtn.style.background = 'linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%)';
-                viewCalendarBtn.style.color = '#fff';
-                viewTableBtn.style.background = '#e0e0e0';
-                viewTableBtn.style.color = '#666';
-                
-                // Inicializar calendario si aún no existe
-                if (!adminCalendar) {
-                    initAdminCalendar();
-                } else {
-                    // Refrescar calendario
-                    adminCalendar.render();
-                }
-            });
-            
-            viewTableBtn.addEventListener('click', () => {
-                if (currentView === 'table') return;
-                
-                currentView = 'table';
-                calendarView.style.display = 'none';
-                
-                // Mostrar tabla o mensaje de sin reservas según corresponda
-                const tbody = document.getElementById('reservations-tbody');
-                if (tbody && tbody.rows.length > 0) {
-                    tableView.style.display = 'block';
-                    noReservations.style.display = 'none';
-                } else {
-                    tableView.style.display = 'none';
-                    noReservations.style.display = 'block';
-                }
-                
-                // Actualizar estilos de botones
-                viewTableBtn.style.background = 'linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%)';
-                viewTableBtn.style.color = '#fff';
-                viewCalendarBtn.style.background = '#e0e0e0';
-                viewCalendarBtn.style.color = '#666';
-            });
-            
-            // Inicializar vista calendario por defecto
-            viewCalendarBtn.click();
         }
 
 
