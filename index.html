@@ -1688,6 +1688,12 @@
         let isAdmin = false;
 
         async function selectPlan(classes, price) {
+            // REQUISITO: Verificar autenticación antes de permitir reservas
+            if (!window.auth || !window.auth.currentUser) {
+                alert('⚠️ Debes iniciar sesión para hacer reservas.\n\nPor favor, usa el menú (☰) en la esquina superior derecha para:\n\n1. Registrarte (si es tu primera vez)\n2. O iniciar sesión (si ya tienes cuenta)\n\nDespués podrás seleccionar tu plan y hacer reservas.');
+                return;
+            }
+            
             selectedPlan.classes = classes;
             selectedPlan.price = price;
             selectedPlan.bookedClasses = 0;
@@ -1752,6 +1758,13 @@
         function initCalendar() {
             console.log('Inicializando FullCalendar v6.1.15...');
             
+            // REQUISITO: Verificar que Firebase esté inicializado antes de inicializar el calendario
+            if (!window.firebaseReady) {
+                console.warn('⚠️ Firebase no está listo aún. Esperando...');
+                setTimeout(initCalendar, 500); // Reintentar después de 500ms
+                return;
+            }
+            
             const calendarEl = document.getElementById('calendar');
             
             // DEBUG: Verificar que el elemento exista
@@ -1813,8 +1826,12 @@
 
         /**
          * Cargar eventos desde Firebase Firestore
-         * - Si el usuario es admin@aura.com: muestra todas las reservas
-         * - Si no es admin: muestra solo clases públicas fijas de pilates
+         * REQUISITO: Si admin, mostrar todos los eventos; si no, clases públicas fijas
+         * 
+         * - Si el usuario es admin@aura.com: muestra todas las reservas desde Firestore
+         * - Si no es admin: muestra solo clases públicas fijas de pilates (recurrentes)
+         * 
+         * Las reservas se cargan con fechaHora en formato ISO (YYYY-MM-DDTHH:mm:ss)
          */
         async function loadEventsFromFirestore() {
             if (!calendar) {
@@ -1936,11 +1953,15 @@
 
         /**
          * Parsear fechaHora a objeto Date
-         * Formato esperado: ISO (YYYY-MM-DDTHH:mm:ss) o texto español (fallback)
+         * REQUISITO: Formato esperado es ISO (YYYY-MM-DDTHH:mm:ss)
          * 
-         * Prioridad:
-         * 1. ISO format (YYYY-MM-DDTHH:mm:ss) - formato estándar
-         * 2. Formato español legacy - compatibilidad con datos antiguos
+         * Prioridad de parseo:
+         * 1. ISO format (YYYY-MM-DDTHH:mm:ss) - formato requerido y estándar
+         * 2. Formato español legacy - compatibilidad con datos antiguos (fallback)
+         * 
+         * Ejemplos de formato ISO válido:
+         * - "2025-11-15T10:00:00"
+         * - "2025-12-25T18:30:00"
          */
         function parseFechaHora(fechaHoraStr) {
             try {
@@ -1997,6 +2018,7 @@
 
         /**
          * Manejar click en una fecha del calendario
+         * REQUISITO: Solo usuarios autenticados pueden agendar (currentUser no nulo)
          */
         function handleDateClick(info) {
             console.log('Fecha clickeada:', info.dateStr);
@@ -2015,6 +2037,12 @@
             today.setHours(0, 0, 0, 0);
             if (clickedDate < today) {
                 alert('❌ No puedes seleccionar fechas pasadas');
+                return;
+            }
+            
+            // REQUISITO: Verificar que el usuario esté autenticado
+            if (!window.auth || !window.auth.currentUser) {
+                alert('⚠️ Debes iniciar sesión para hacer reservas.\n\nPor favor, usa el menú (☰) en la esquina superior derecha para registrarte o iniciar sesión.');
                 return;
             }
 
@@ -2153,23 +2181,24 @@
 
         /**
          * Seleccionar horario y agregar al calendario
+         * REQUISITO: fechaHora se guarda en formato ISO (YYYY-MM-DDTHH:mm:ss)
          */
         async function selectTimeSlot(dateStr, time) {
             // Cerrar modal
             document.getElementById('time-selection-modal').style.display = 'none';
             
-            // Crear fecha y hora completa en formato ISO
+            // REQUISITO: Crear fecha y hora completa en formato ISO (YYYY-MM-DDTHH:mm:ss)
             const dateTimeStr = `${dateStr}T${time}:00`;
             const dateTime = new Date(dateTimeStr);
             const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
             
-            // Format date and time for display only
+            // Format date and time for display only (human-readable)
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const timeOptions = { hour: '2-digit', minute: '2-digit' };
             const dateFormatted = dateTime.toLocaleDateString('es-ES', dateOptions);
             const timeFormatted = dateTime.toLocaleTimeString('es-ES', timeOptions);
             
-            // Store fechaHora in ISO format (YYYY-MM-DDTHH:mm:ss) as required
+            // REQUISITO: Store fechaHora in ISO format (YYYY-MM-DDTHH:mm:ss) as specified
             const fechaHoraISO = dateTimeStr; // ISO format: YYYY-MM-DDTHH:mm:ss
             
             // Agregar evento al calendario temporalmente
@@ -2212,6 +2241,7 @@
         /**
          * Guardar todas las reservas en Firestore
          * Guarda fechaHora en formato ISO (YYYY-MM-DDTHH:mm:ss) como especificado en los requisitos
+         * REQUISITO: Solo usuarios autenticados pueden guardar reservas (currentUser no nulo)
          */
         async function saveAllReservations() {
             if (!selectedPlan.userInfo || selectedPlan.bookedEvents.length === 0) {
@@ -2221,6 +2251,15 @@
             
             try {
                 console.log('🔍 Verificando disponibilidad de Firebase...');
+                
+                // REQUISITO: Verificar que el usuario esté autenticado
+                if (!window.auth || !window.auth.currentUser) {
+                    console.error('❌ Usuario no autenticado');
+                    alert('❌ Error: Debes iniciar sesión o registrarte para hacer reservas.\n\nPor favor, usa el menú (☰) en la esquina superior derecha para registrarte o iniciar sesión.');
+                    return;
+                }
+                
+                console.log('✅ Usuario autenticado:', window.auth.currentUser.email);
                 
                 // Verificar que Firebase esté disponible
                 if (!window.firebaseReady) {
@@ -2858,7 +2897,9 @@
          * 
          * Estas reglas permiten:
          * - Lectura de la colección 'reservas' SOLO al usuario admin@aura.com
-         * - Escritura pública en 'reservas' para que cualquier usuario pueda hacer reservas
+         * - Escritura en 'reservas' SOLO para usuarios autenticados (request.auth != null)
+         * - Lectura de 'usuarios' SOLO para admin@aura.com
+         * - Escritura en 'usuarios' SOLO para usuarios autenticados
          * 
          * REGLAS DE FIRESTORE (copiar en Firebase Console):
          * 
@@ -2869,8 +2910,16 @@
          *     match /reservas/{document=**} {
          *       // Lectura solo para el administrador
          *       allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
-         *       // Escritura pública para permitir reservas
-         *       allow write: if true;
+         *       // Escritura solo para usuarios autenticados
+         *       allow write: if request.auth != null;
+         *     }
+         *     
+         *     // Colección de usuarios
+         *     match /usuarios/{document=**} {
+         *       // Lectura solo para el administrador
+         *       allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+         *       // Escritura solo para usuarios autenticados
+         *       allow write: if request.auth != null;
          *     }
          *     
          *     // Todas las demás colecciones: acceso denegado por defecto
