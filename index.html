@@ -2220,32 +2220,69 @@
             }
             
             try {
+                console.log('🔍 Verificando disponibilidad de Firebase...');
+                
                 // Verificar que Firebase esté disponible
+                if (!window.firebaseReady) {
+                    console.error('❌ Firebase no está listo');
+                    alert('❌ Error: Sistema de reservas no está listo. Por favor, espera unos segundos y vuelve a intentarlo.');
+                    return;
+                }
+                
                 if (typeof window.saveReservationToFirestore !== 'function') {
-                    console.error('❌ Firebase no está disponible');
+                    console.error('❌ Función saveReservationToFirestore no está disponible');
                     alert('❌ Error: Sistema de reservas no disponible. Por favor, recarga la página.');
+                    return;
+                }
+                
+                if (!window.db) {
+                    console.error('❌ Firestore DB no está disponible');
+                    alert('❌ Error: Base de datos no disponible. Por favor, recarga la página.');
                     return;
                 }
                 
                 const { nombre, email, notas } = selectedPlan.userInfo;
                 
-                // Guardar cada reserva en Firestore con fechaHora en formato ISO
-                console.log('Guardando todas las reservas en Firestore con formato ISO...');
-                const savedReservations = [];
+                console.log(`📝 Guardando ${selectedPlan.bookedEvents.length} reservas para ${nombre}...`);
                 
-                for (const booking of selectedPlan.bookedEvents) {
-                    // booking.fechaHora ya está en formato ISO (YYYY-MM-DDTHH:mm:ss)
-                    const reservaId = await window.saveReservationToFirestore(
-                        nombre, 
-                        email, 
-                        booking.fechaHora, // ISO format: YYYY-MM-DDTHH:mm:ss
-                        notas
-                    );
-                    savedReservations.push(reservaId);
-                    console.log('✅ Reserva guardada con ID:', reservaId, '- fechaHora:', booking.fechaHora);
+                // Guardar cada reserva en Firestore con fechaHora en formato ISO
+                const savedReservations = [];
+                const failedReservations = [];
+                
+                for (let i = 0; i < selectedPlan.bookedEvents.length; i++) {
+                    const booking = selectedPlan.bookedEvents[i];
+                    try {
+                        console.log(`💾 Guardando reserva ${i + 1}/${selectedPlan.bookedEvents.length}...`);
+                        
+                        // booking.fechaHora ya está en formato ISO (YYYY-MM-DDTHH:mm:ss)
+                        const reservaId = await window.saveReservationToFirestore(
+                            nombre, 
+                            email, 
+                            booking.fechaHora, // ISO format: YYYY-MM-DDTHH:mm:ss
+                            notas
+                        );
+                        savedReservations.push(reservaId);
+                        console.log(`✅ Reserva ${i + 1} guardada con ID:`, reservaId, '- fechaHora:', booking.fechaHora);
+                    } catch (reservaError) {
+                        console.error(`❌ Error al guardar reserva ${i + 1}:`, reservaError);
+                        failedReservations.push({
+                            booking,
+                            error: reservaError.message
+                        });
+                    }
                 }
                 
-                alert(`✅ ¡Reservas Completadas y Guardadas!\n\n${savedReservations.length} clases reservadas para ${nombre}\n\nRecibirás una confirmación en ${email}`);
+                // Mostrar resultados
+                if (savedReservations.length === selectedPlan.bookedEvents.length) {
+                    // Todo se guardó exitosamente
+                    alert(`✅ ¡Reservas Completadas y Guardadas!\n\n${savedReservations.length} clases reservadas para ${nombre}\n\nRecibirás una confirmación en ${email}`);
+                } else if (savedReservations.length > 0) {
+                    // Algunas reservas fallaron
+                    alert(`⚠️ Reservas Parcialmente Guardadas\n\n${savedReservations.length} de ${selectedPlan.bookedEvents.length} clases guardadas para ${nombre}\n\n${failedReservations.length} reservas fallaron. Por favor, contacta con nosotros para completar tu reserva.`);
+                } else {
+                    // Todas las reservas fallaron
+                    throw new Error('No se pudo guardar ninguna reserva');
+                }
                 
                 // Si el usuario es admin, recargar el panel de admin
                 if (isAdmin && typeof window.loadReservationsFromFirestore === 'function') {
@@ -2257,19 +2294,45 @@
                     loadEventsFromFirestore();
                 }
                 
-                // Resetear el plan seleccionado
-                selectedPlan.classes = 0;
-                selectedPlan.price = 0;
-                selectedPlan.bookedClasses = 0;
-                selectedPlan.bookedEvents = [];
-                selectedPlan.userInfo = null;
-                
-                // Ocultar calendario
-                document.getElementById('calendar-container').style.display = 'none';
+                // Resetear el plan seleccionado solo si se guardó al menos una reserva
+                if (savedReservations.length > 0) {
+                    selectedPlan.classes = 0;
+                    selectedPlan.price = 0;
+                    selectedPlan.bookedClasses = 0;
+                    selectedPlan.bookedEvents = [];
+                    selectedPlan.userInfo = null;
+                    
+                    // Ocultar calendario
+                    document.getElementById('calendar-container').style.display = 'none';
+                }
                 
             } catch (error) {
                 console.error('❌ Error al guardar las reservas:', error);
-                alert('❌ Error al guardar las reservas. Por favor, inténtalo de nuevo o contacta con nosotros.');
+                console.error('❌ Detalles completos del error:', {
+                    message: error.message,
+                    code: error.code,
+                    stack: error.stack,
+                    firebaseReady: window.firebaseReady,
+                    dbAvailable: !!window.db,
+                    functionAvailable: typeof window.saveReservationToFirestore === 'function'
+                });
+                
+                // Proporcionar un mensaje de error más específico
+                let errorMessage = '❌ Error al guardar las reservas.\n\n';
+                
+                if (!window.firebaseReady) {
+                    errorMessage += 'El sistema aún se está inicializando. Por favor, espera unos segundos y vuelve a intentarlo.\n\n';
+                } else if (error.code === 'permission-denied') {
+                    errorMessage += 'Error de permisos. Por favor, contacta con el administrador.\n\n';
+                } else if (error.code === 'unavailable') {
+                    errorMessage += 'Servicio temporalmente no disponible. Por favor, verifica tu conexión a internet.\n\n';
+                } else if (error.message) {
+                    errorMessage += `Error: ${error.message}\n\n`;
+                }
+                
+                errorMessage += 'Si el problema persiste, por favor contacta con nosotros.';
+                
+                alert(errorMessage);
             }
         }
     </script>
@@ -2388,10 +2451,15 @@
             console.log('✅ Firebase inicializado correctamente');
             console.log('✅ Firestore DB disponible globalmente');
             
+            // Set a flag to indicate Firebase is ready
+            window.firebaseReady = true;
+            console.log('✅ Firebase está listo para guardar reservas (window.firebaseReady = true)');
+            
         } catch (error) {
             console.error('❌ Error al inicializar Firebase:', error);
             console.error('Detalles:', error.message);
             alert('Error al conectar con Firebase. Por favor, recarga la página o contacta al administrador.');
+            window.firebaseReady = false;
         }
 
         // ========== VARIABLES GLOBALES ==========
@@ -2650,10 +2718,22 @@
          */
         async function saveReservation(nombre, email, fechaHora, notas = '') {
             try {
+                console.log('💾 Intentando guardar reserva:', { nombre, email, fechaHora, notas });
+                
+                // Validar que Firebase esté inicializado
+                if (!db) {
+                    throw new Error('❌ Firebase Firestore no está inicializado. Por favor, recarga la página.');
+                }
+                
                 // Validar que fechaHora esté en formato ISO
                 const dateTest = new Date(fechaHora);
                 if (isNaN(dateTest.getTime())) {
                     throw new Error('❌ Formato de fecha inválido. Se requiere formato ISO (YYYY-MM-DDTHH:mm:ss)');
+                }
+                
+                // Validar datos requeridos
+                if (!nombre || !email) {
+                    throw new Error('❌ Nombre y email son requeridos');
                 }
                 
                 const docRef = await addDoc(collection(db, 'reservas'), {
@@ -2669,9 +2749,19 @@
                 
             } catch (error) {
                 console.error('❌ Error al guardar reserva:', error);
+                console.error('❌ Detalles del error:', {
+                    code: error.code,
+                    message: error.message,
+                    stack: error.stack
+                });
                 throw error;
             }
         }
+        
+        // Exponer función globalmente inmediatamente después de definirla
+        // Esto asegura que esté disponible antes de que el usuario intente usarla
+        window.saveReservationToFirestore = saveReservation;
+        console.log('✅ Función saveReservationToFirestore expuesta globalmente');
 
         /**
          * Cargar todas las reservas desde Firestore
@@ -2797,6 +2887,11 @@
         // ========== INICIALIZACIÓN ==========
         
         /**
+         * Cargar reservas y exponer función globalmente
+         */
+        window.loadReservationsFromFirestore = loadReservations;
+        
+        /**
          * Inicializar todo cuando el DOM esté listo
          */
         document.addEventListener('DOMContentLoaded', () => {
@@ -2809,10 +2904,6 @@
             
             // Observar cambios de autenticación
             setupAuthObserver();
-            
-            // Exponer funciones globalmente para acceso desde el calendario
-            window.saveReservationToFirestore = saveReservation;
-            window.loadReservationsFromFirestore = loadReservations;
             
             console.log('✅ Sistema de autenticación y reservas inicializado');
         });
