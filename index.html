@@ -563,13 +563,23 @@
             background-color: #fefefe;
         }
 
-        /* Hide non-business hour slots */
+        /* Hide non-business hour slots for public calendar */
         .fc .fc-timegrid-slot[data-time*="11:00"],
         .fc .fc-timegrid-slot[data-time*="12:00"],
         .fc .fc-timegrid-slot[data-time*="13:00"],
         .fc .fc-timegrid-slot[data-time*="14:00"],
         .fc .fc-timegrid-slot[data-time*="15:00"],
         .fc .fc-timegrid-slot[data-time*="16:00"] {
+            display: none;
+        }
+
+        /* Hide non-business hour slots for admin calendar (hours 11:00-16:00) */
+        #admin-calendar .fc-timegrid-slot[data-time*="11:00"],
+        #admin-calendar .fc-timegrid-slot[data-time*="12:00"],
+        #admin-calendar .fc-timegrid-slot[data-time*="13:00"],
+        #admin-calendar .fc-timegrid-slot[data-time*="14:00"],
+        #admin-calendar .fc-timegrid-slot[data-time*="15:00"],
+        #admin-calendar .fc-timegrid-slot[data-time*="16:00"] {
             display: none;
         }
 
@@ -3756,8 +3766,14 @@
             }
             
             try {
+                // Detect if mobile device (max-width: 768px)
+                const isMobile = window.innerWidth <= 768;
+                const initialView = isMobile ? 'timeGridDay' : 'timeGridWeek';
+                
+                console.log(`📱 Dispositivo: ${isMobile ? 'Móvil' : 'Escritorio'} - Vista inicial: ${initialView}`);
+                
                 adminCalendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'timeGridWeek',
+                    initialView: initialView,
                     locale: 'es',
                     headerToolbar: {
                         left: 'prev,next today',
