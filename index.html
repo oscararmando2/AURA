@@ -986,11 +986,14 @@
         #admin-calendar-view {
             margin-top: 20px;
             background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
-            padding: 30px;
+            padding: 40px;
             border-radius: 20px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
             border: 2px solid rgba(246, 200, 199, 0.3);
             transition: all 0.4s ease;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
         }
 
         #admin-calendar-view:hover {
@@ -999,15 +1002,16 @@
         }
 
         #admin-calendar {
-            min-height: 600px;
+            min-height: 800px;
             border-radius: 15px;
             overflow: hidden;
+            width: 100%;
         }
 
         /* Admin calendar event styling */
         #admin-calendar .fc-event {
-            font-size: 0.9rem;
-            padding: 5px 8px;
+            font-size: 1rem;
+            padding: 8px 10px;
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.3s ease;
@@ -1021,11 +1025,12 @@
 
         #admin-calendar .fc-event-title {
             font-weight: 600;
+            font-size: 1rem;
         }
 
         /* Admin calendar time grid */
         #admin-calendar .fc-timegrid-slot {
-            height: 3rem;
+            height: 4rem;
             transition: background-color 0.3s ease;
         }
 
@@ -1034,14 +1039,14 @@
         }
 
         #admin-calendar .fc-timegrid-slot-label {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #666;
             font-weight: 500;
         }
 
         /* Enhanced admin calendar toolbar */
         #admin-calendar .fc-toolbar-title {
-            font-size: 1.8rem;
+            font-size: 2rem;
             color: #333;
             font-weight: 600;
             letter-spacing: 0.5px;
@@ -1051,9 +1056,10 @@
             background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
             border: none;
             color: #fff;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 12px;
             font-weight: 500;
+            font-size: 1rem;
             transition: all 0.3s ease;
             box-shadow: 0 3px 12px rgba(246, 200, 199, 0.3);
         }
@@ -1072,8 +1078,9 @@
         /* Admin calendar day headers */
         #admin-calendar .fc-col-header-cell {
             background: linear-gradient(135deg, #fef5f5 0%, #ffffff 100%);
-            padding: 15px 5px;
+            padding: 18px 8px;
             font-weight: 600;
+            font-size: 1.1rem;
             color: #333;
             border-color: rgba(246, 200, 199, 0.3);
         }
@@ -1292,30 +1299,39 @@
 
             /* Admin calendar mobile adjustments */
             #admin-calendar-view {
-                padding: 20px;
+                padding: 15px;
                 margin-top: 15px;
             }
 
+            #admin-calendar {
+                min-height: 600px;
+            }
+
             #admin-calendar .fc-timegrid-slot {
-                height: 2.5rem;
+                height: 3rem;
             }
 
             #admin-calendar .fc-timegrid-slot-label {
-                font-size: 0.8rem;
+                font-size: 0.85rem;
             }
 
             #admin-calendar .fc-event {
-                font-size: 0.75rem;
-                padding: 3px 5px;
+                font-size: 0.85rem;
+                padding: 5px 7px;
             }
 
             #admin-calendar .fc-toolbar-title {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
             }
 
             #admin-calendar .fc-button {
-                padding: 8px 15px;
-                font-size: 0.85rem;
+                padding: 10px 18px;
+                font-size: 0.9rem;
+            }
+
+            #admin-calendar .fc-col-header-cell {
+                font-size: 0.95rem;
+                padding: 12px 5px;
             }
         }
 
@@ -3352,6 +3368,7 @@
                     slotMaxTime: '20:00:00',
                     allDaySlot: false,
                     expandRows: true,
+                    contentHeight: 'auto',
                     height: 'auto',
                     nowIndicator: true,
                     slotDuration: '00:30:00',
