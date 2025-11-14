@@ -411,8 +411,15 @@
 <body>
     <!-- Cabecera -->
     <div class="header">
-        <h1>🛒 EL MEXIQUENSE MARKET</h1>
-        <p>Sistema de Facturación Profesional</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div>
+                <h1>🛒 EL MEXIQUENSE MARKET</h1>
+                <p>Sistema de Facturación Profesional</p>
+            </div>
+            <a href="index.html" style="background: rgba(255, 255, 255, 0.2); color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+                ← Volver a AURA Studio
+            </a>
+        </div>
     </div>
 
     <div class="container">
