@@ -302,6 +302,72 @@
             }
         }
 
+        /* ========== Button Shine Effect ========== */
+        .btn-shine {
+            padding: 12px 48px;
+            color: #fff;
+            background: linear-gradient(to right, #CC99CC 0, #CC99CC 10%, #FFFF 20%);
+            background-position: 0;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s infinite linear;
+            animation-fill-mode: forwards;
+            -webkit-text-size-adjust: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-decoration: none;
+            white-space: nowrap;
+            font-family: "Poppins", sans-serif;
+        }
+
+        @-moz-keyframes shine {
+            0% {
+                background-position: 0;
+            }
+            60% {
+                background-position: 180px;
+            }
+            100% {
+                background-position: 180px;
+            }
+        }
+
+        @-webkit-keyframes shine {
+            0% {
+                background-position: 0;
+            }
+            60% {
+                background-position: 180px;
+            }
+            100% {
+                background-position: 180px;
+            }
+        }
+
+        @-o-keyframes shine {
+            0% {
+                background-position: 0;
+            }
+            60% {
+                background-position: 180px;
+            }
+            100% {
+                background-position: 180px;
+            }
+        }
+
+        @keyframes shine {
+            0% {
+                background-position: 0;
+            }
+            60% {
+                background-position: 180px;
+            }
+            100% {
+                background-position: 180px;
+            }
+        }
+
         /* ========== 1. Welcome Section (Hero Section) ========== */
         .hero-section {
             height: 100vh;
@@ -2194,7 +2260,7 @@
             <h1>Bienvenida</h1>
             <h2>Pilates a tu medida</h2>
             <p>Fortalece tu cuerpo y mente con Pilates.</p>
-            <a href="#booking" class="hero-btn">Reserva tu clase</a>
+            <a href="#booking" class="hero-btn btn-shine">Reserva tu clase</a>
         </div>
     </section>
 
@@ -2239,7 +2305,7 @@
                     <div class="blob"></div>
                     <h3>1 Clase</h3>
                     <div class="price">$150</div>
-                    <button class="plan-btn" onclick="selectPlan(1, 150)">Seleccionar</button>
+                    <button class="plan-btn btn-shine" onclick="selectPlan(1, 150)">Seleccionar</button>
                 </div>
 
                 <div class="plan-card">
@@ -2248,7 +2314,7 @@
                     <h3>4 Clases</h3>
                     <div class="price">$450</div>
                     <div class="savings">Ahorras $150</div>
-                    <button class="plan-btn" onclick="selectPlan(4, 450)">Seleccionar</button>
+                    <button class="plan-btn btn-shine" onclick="selectPlan(4, 450)">Seleccionar</button>
                 </div>
 
                 <div class="plan-card">
@@ -2257,7 +2323,7 @@
                     <h3>8 Clases</h3>
                     <div class="price">$1000</div>
                     <div class="savings">Ahorras $200</div>
-                    <button class="plan-btn" onclick="selectPlan(8, 1000)">Seleccionar</button>
+                    <button class="plan-btn btn-shine" onclick="selectPlan(8, 1000)">Seleccionar</button>
                 </div>
 
                 <div class="plan-card">
@@ -2266,7 +2332,7 @@
                     <h3>12 Clases</h3>
                     <div class="price">$1400</div>
                     <div class="savings">Ahorras $400</div>
-                    <button class="plan-btn" onclick="selectPlan(12, 1400)">Seleccionar</button>
+                    <button class="plan-btn btn-shine" onclick="selectPlan(12, 1400)">Seleccionar</button>
                 </div>
 
                 <div class="plan-card">
@@ -2275,7 +2341,7 @@
                     <h3>15 Clases</h3>
                     <div class="price">$1700</div>
                     <div class="savings">Ahorras $550</div>
-                    <button class="plan-btn" onclick="selectPlan(15, 1700)">Seleccionar</button>
+                    <button class="plan-btn btn-shine" onclick="selectPlan(15, 1700)">Seleccionar</button>
                 </div>
             </div>
 
@@ -2492,7 +2558,7 @@
         <p>¿Preguntas?</p>
         <p>¡Estamos aquí para ti!</p>
         <p>Escríbenos y nuestro equipo te dará seguimiento exclusivo.</p>
-        <a href="https://wa.me/+527151596586" class="contact-btn" target="_blank">Envíanos un mensaje</a>
+        <a href="https://wa.me/+527151596586" class="contact-btn btn-shine" target="_blank">Envíanos un mensaje</a>
         <p class="hours">Abre hoy: 06:00 a.m. – 08:00 p.m.</p>
     </section>
 
