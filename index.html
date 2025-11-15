@@ -4099,6 +4099,9 @@
                         day: 'Día'
                     },
                     
+                    // Custom day header format - show only first letter (L M M J V S D)
+                    dayHeaderFormat: { weekday: 'narrow' },
+                    
                     eventClick: function(info) {
                         showEventDetailModal(info.event);
                     },
