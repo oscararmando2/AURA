@@ -1,6 +1,9 @@
 # Video Assets
 
-## Required Video File
+## ⚠️ REQUIRED: Download Video File
+
+**El video en index.html NO se reproduce sin este archivo.**
+**The video in index.html WILL NOT play without this file.**
 
 Please download the following video file and place it in this directory:
 
@@ -14,7 +17,23 @@ Please download the following video file and place it in this directory:
 - Resolution: 1920x1080 (HD) recommended
 - The video will automatically play from second 1 to second 25 and loop
 
-**Download Instructions:**
+## 🚀 Quick Download (Recommended)
+
+### Using the Download Scripts:
+
+**Bash (Linux/Mac):**
+```bash
+./download-video.sh
+```
+
+**Python (Windows/Mac/Linux):**
+```bash
+python download-video.py
+```
+
+These scripts will automatically download the video and place it in the correct location.
+
+## 📖 Manual Download Instructions:
 
 ### Option 1: Direct Download (Recommended)
 1. Visit https://www.pexels.com/video/8746842/download/
