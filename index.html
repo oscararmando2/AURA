@@ -1794,6 +1794,17 @@
                 font-size: 1rem;
             }
 
+            /* Video background on mobile - ensure it covers properly */
+            .hero-video-background {
+                object-fit: cover;
+                object-position: center center;
+            }
+
+            /* Stronger overlay on mobile for better text visibility */
+            .hero-overlay {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(254, 245, 245, 0.5) 50%, rgba(251, 227, 227, 0.5) 100%);
+            }
+
             .about-section {
                 padding: 60px 20px;
             }
