@@ -1845,8 +1845,11 @@
 
             /* Admin calendar mobile adjustments */
             #admin-calendar-view {
-                padding: 20px;
+                padding: 10px;
                 margin-top: 20px;
+                margin-left: 5px;
+                margin-right: 5px;
+                border-radius: 10px;
             }
 
             #admin-calendar {
@@ -1885,7 +1888,7 @@
             .admin-calendar-controls {
                 flex-direction: column;
                 gap: 12px;
-                padding: 20px;
+                padding: 15px;
             }
             
             .admin-stats-summary {
@@ -1899,6 +1902,14 @@
                 width: 100%;
             }
 
+            /* Admin panel container on mobile - maximize width */
+            #admin-panel-section > div {
+                padding: 15px !important;
+                margin-left: 5px !important;
+                margin-right: 5px !important;
+                max-width: calc(100% - 10px) !important;
+            }
+            
             .admin-stats-summary {
                 grid-template-columns: 1fr;
             }
