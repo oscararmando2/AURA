@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Faltante - AURA Studio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #fef5f5 50%, #fbe3e3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(246, 200, 199, 0.3);
+        }
+        
+        .icon {
+            text-align: center;
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #f6c8c7;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+        
+        .alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .alert-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .alert-text {
+            color: #856404;
+            line-height: 1.6;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step {
+            background: linear-gradient(135deg, #fef5f5 0%, #ffffff 100%);
+            border-left: 4px solid #f6c8c7;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #f6c8c7;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .step-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .step-content {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .code-box {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .download-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
+            color: #fff;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(246, 200, 199, 0.4);
+            transition: all 0.4s ease;
+            margin: 20px auto;
+            display: block;
+            max-width: 300px;
+        }
+        
+        .download-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(246, 200, 199, 0.6);
+            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: #f6c8c7;
+            border-bottom-color: #f6c8c7;
+        }
+        
+        .tab:hover {
+            color: #f6c8c7;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border: 2px solid #2196F3;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .info-box-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+        
+        .info-box-text {
+            color: #1565C0;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .icon {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🎬</div>
+        <h1>Video Faltante / Missing Video</h1>
+        <p class="subtitle">El video de fondo no se reproduce porque falta el archivo<br>
+        Background video doesn't play because the file is missing</p>
+        
+        <div class="alert">
+            <div class="alert-title">⚠️ Acción Requerida / Action Required</div>
+            <div class="alert-text">
+                <strong>ES:</strong> Para que el video se reproduzca en index.html, debes descargar el archivo de video y colocarlo en la ubicación correcta.<br><br>
+                <strong>EN:</strong> To make the video play in index.html, you need to download the video file and place it in the correct location.
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                <span>🚀</span>
+                <span>Descarga Rápida / Quick Download</span>
+            </div>
+            
+            <a href="https://www.pexels.com/video/8746842/download/" class="download-button" target="_blank">
+                📥 Descargar Video / Download Video
+            </a>
+            
+            <div style="text-align: center; color: #666; margin-top: 10px;">
+                <strong>Nombre del archivo / File name:</strong> pilates-background.mp4<br>
+                <strong>Ubicación / Location:</strong> assets/videos/
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                <span>📖</span>
+                <span>Instrucciones Paso a Paso / Step-by-Step Instructions</span>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('windows')">Windows</button>
+                <button class="tab" onclick="showTab('mac')">Mac/Linux</button>
+                <button class="tab" onclick="showTab('script')">Scripts</button>
+            </div>
+            
+            <div id="windows" class="tab-content active">
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Haz clic en el botón de descarga arriba
+                    </div>
+                    <div class="step-content">
+                        El navegador descargará el video (usualmente en tu carpeta Descargas)<br>
+                        The browser will download the video (usually to your Downloads folder)
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Renombra el archivo
+                    </div>
+                    <div class="step-content">
+                        Cambia el nombre a: <strong>pilates-background.mp4</strong><br>
+                        Rename to: <strong>pilates-background.mp4</strong>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Mueve el archivo
+                    </div>
+                    <div class="step-content">
+                        Colócalo en: <strong>[Tu Repositorio]/assets/videos/pilates-background.mp4</strong><br>
+                        Place it in: <strong>[Your Repository]/assets/videos/pilates-background.mp4</strong>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Abre index.html
+                    </div>
+                    <div class="step-content">
+                        Abre index.html en tu navegador y el video debería reproducirse<br>
+                        Open index.html in your browser and the video should play
+                    </div>
+                </div>
+            </div>
+            
+            <div id="mac" class="tab-content">
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Abre Terminal
+                    </div>
+                    <div class="step-content">
+                        Usa Spotlight (Cmd+Space) y escribe "Terminal"<br>
+                        Use Spotlight (Cmd+Space) and type "Terminal"
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Navega al repositorio
+                    </div>
+                    <div class="step-content">
+                        <div class="code-box">cd /ruta/a/tu/repositorio/AURA</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Descarga el video
+                    </div>
+                    <div class="step-content">
+                        <div class="code-box">curl -L -o assets/videos/pilates-background.mp4 "https://www.pexels.com/video/8746842/download/"</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">4</span>
+                        Verifica y abre
+                    </div>
+                    <div class="step-content">
+                        Verifica que el archivo existe y abre index.html<br>
+                        Verify the file exists and open index.html
+                        <div class="code-box">ls -lh assets/videos/pilates-background.mp4</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="script" class="tab-content">
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">1</span>
+                        Usa el script de descarga automática
+                    </div>
+                    <div class="step-content">
+                        Hemos incluido scripts para descargar automáticamente el video:<br>
+                        We've included scripts to automatically download the video:
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">2</span>
+                        Bash (Linux/Mac)
+                    </div>
+                    <div class="step-content">
+                        <div class="code-box">./download-video.sh</div>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-title">
+                        <span class="step-number">3</span>
+                        Python (Windows/Mac/Linux)
+                    </div>
+                    <div class="step-content">
+                        <div class="code-box">python download-video.py</div>
+                        O con Python 3:<br>
+                        Or with Python 3:
+                        <div class="code-box">python3 download-video.py</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <div class="info-box-title">ℹ️ Información del Video / Video Information</div>
+            <div class="info-box-text">
+                <strong>Fuente / Source:</strong> Pexels (Gratis / Free)<br>
+                <strong>ID del Video / Video ID:</strong> 8746842<br>
+                <strong>Licencia / License:</strong> Pexels License (Uso libre / Free to use)<br>
+                <strong>Resolución / Resolution:</strong> 1920x1080 HD<br>
+                <strong>Formato / Format:</strong> MP4<br><br>
+                
+                <strong>ES:</strong> El video se reproduce del segundo 1 al 25 en bucle continuo.<br>
+                <strong>EN:</strong> The video plays from second 1 to 25 in continuous loop.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Deactivate all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activate selected tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
