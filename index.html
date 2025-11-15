@@ -4198,6 +4198,8 @@
                 const q = query(collection(db, 'reservas'), orderBy('timestamp', 'desc'));
                 const querySnapshot = await getDocs(q);
                 
+                // First, collect all reservations
+                const reservations = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     
@@ -4218,31 +4220,86 @@
                         // Calcular hora de fin (1 hora después)
                         const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
                         
-                        const eventData = {
+                        reservations.push({
                             id: doc.id,
-                            title: firstName || 'Reserva',
+                            firstName: firstName || 'Reserva',
                             start: startDate,
                             end: endDate,
+                            fullName: data.nombre,
+                            email: data.email,
+                            notas: data.notas,
+                            firebaseId: doc.id
+                        });
+                    }
+                });
+                
+                // Group reservations by date and time slot
+                const groupedReservations = new Map();
+                
+                reservations.forEach((reservation) => {
+                    // Create a key based on start time (year-month-day-hour-minute)
+                    const key = `${reservation.start.getFullYear()}-${reservation.start.getMonth()}-${reservation.start.getDate()}-${reservation.start.getHours()}-${reservation.start.getMinutes()}`;
+                    
+                    if (!groupedReservations.has(key)) {
+                        groupedReservations.set(key, []);
+                    }
+                    groupedReservations.get(key).push(reservation);
+                });
+                
+                // Create calendar events from grouped reservations
+                groupedReservations.forEach((group, key) => {
+                    const firstReservation = group[0];
+                    
+                    let eventData;
+                    if (group.length === 1) {
+                        // Single reservation - keep existing format
+                        eventData = {
+                            id: firstReservation.id,
+                            title: firstReservation.firstName,
+                            start: firstReservation.start,
+                            end: firstReservation.end,
                             backgroundColor: '#f6c8c7',
                             borderColor: '#e8cccc',
                             textColor: '#333',
                             extendedProps: {
-                                fullName: data.nombre,
-                                email: data.email,
-                                notas: data.notas,
-                                firebaseId: doc.id
+                                fullName: firstReservation.fullName,
+                                email: firstReservation.email,
+                                notas: firstReservation.notas,
+                                firebaseId: firstReservation.firebaseId,
+                                isGrouped: false
                             }
                         };
-                        
-                        // Store for filtering
-                        allReservationsData.push(eventData);
-                        
-                        // Add to calendar
-                        adminCalendar.addEvent(eventData);
+                    } else {
+                        // Multiple reservations at same time - create grouped event
+                        eventData = {
+                            id: key,
+                            title: `${group.length} Personas`,
+                            start: firstReservation.start,
+                            end: firstReservation.end,
+                            backgroundColor: '#f6c8c7',
+                            borderColor: '#e8cccc',
+                            textColor: '#333',
+                            extendedProps: {
+                                isGrouped: true,
+                                count: group.length,
+                                participants: group.map(r => ({
+                                    fullName: r.fullName,
+                                    email: r.email,
+                                    notas: r.notas,
+                                    firebaseId: r.firebaseId
+                                }))
+                            }
+                        };
                     }
+                    
+                    // Store for filtering
+                    allReservationsData.push(eventData);
+                    
+                    // Add to calendar
+                    adminCalendar.addEvent(eventData);
                 });
                 
-                console.log(`✅ ${querySnapshot.size} reservas cargadas en calendario de admin`);
+                console.log(`✅ ${querySnapshot.size} reservas cargadas en calendario de admin (${groupedReservations.size} eventos)`);
                 
                 // Update statistics
                 updateAdminStatistics();
@@ -4269,30 +4326,57 @@
             endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
             endOfWeek.setHours(23, 59, 59, 999);
             
-            // Total reservations
-            const total = allReservationsData.length;
+            // Count total reservations (including grouped participants)
+            let totalReservations = 0;
+            let thisWeekCount = 0;
+            let upcomingCount = 0;
+            const uniqueEmails = new Set();
             
-            // This week
-            const thisWeek = allReservationsData.filter(event => {
+            allReservationsData.forEach(event => {
                 const eventDate = new Date(event.start);
-                return eventDate >= startOfWeek && eventDate <= endOfWeek;
-            }).length;
-            
-            // Unique clients
-            const uniqueEmails = new Set(allReservationsData.map(e => e.extendedProps.email).filter(Boolean));
-            const uniqueClients = uniqueEmails.size;
-            
-            // Upcoming (future reservations)
-            const upcoming = allReservationsData.filter(event => {
-                const eventDate = new Date(event.start);
-                return eventDate >= now;
-            }).length;
+                
+                if (event.extendedProps.isGrouped && event.extendedProps.participants) {
+                    // Count each participant in grouped events
+                    const participantCount = event.extendedProps.participants.length;
+                    totalReservations += participantCount;
+                    
+                    // Count this week
+                    if (eventDate >= startOfWeek && eventDate <= endOfWeek) {
+                        thisWeekCount += participantCount;
+                    }
+                    
+                    // Count upcoming
+                    if (eventDate >= now) {
+                        upcomingCount += participantCount;
+                    }
+                    
+                    // Add unique emails
+                    event.extendedProps.participants.forEach(p => {
+                        if (p.email) uniqueEmails.add(p.email);
+                    });
+                } else {
+                    // Single reservation
+                    totalReservations += 1;
+                    
+                    if (eventDate >= startOfWeek && eventDate <= endOfWeek) {
+                        thisWeekCount += 1;
+                    }
+                    
+                    if (eventDate >= now) {
+                        upcomingCount += 1;
+                    }
+                    
+                    if (event.extendedProps.email) {
+                        uniqueEmails.add(event.extendedProps.email);
+                    }
+                }
+            });
             
             // Update UI
-            document.getElementById('stat-total-reservations').textContent = total;
-            document.getElementById('stat-this-week').textContent = thisWeek;
-            document.getElementById('stat-unique-clients').textContent = uniqueClients;
-            document.getElementById('stat-upcoming').textContent = upcoming;
+            document.getElementById('stat-total-reservations').textContent = totalReservations;
+            document.getElementById('stat-this-week').textContent = thisWeekCount;
+            document.getElementById('stat-unique-clients').textContent = uniqueEmails.size;
+            document.getElementById('stat-upcoming').textContent = upcomingCount;
         }
         
         /**
@@ -4347,9 +4431,24 @@
             const filteredEvents = allReservationsData.filter(event => {
                 // Search filter
                 if (searchText) {
-                    const fullName = (event.extendedProps.fullName || '').toLowerCase();
-                    const email = (event.extendedProps.email || '').toLowerCase();
-                    if (!fullName.includes(searchText) && !email.includes(searchText)) {
+                    let matchFound = false;
+                    
+                    // Check if grouped event
+                    if (event.extendedProps.isGrouped && event.extendedProps.participants) {
+                        // Search in all participants
+                        matchFound = event.extendedProps.participants.some(participant => {
+                            const fullName = (participant.fullName || '').toLowerCase();
+                            const email = (participant.email || '').toLowerCase();
+                            return fullName.includes(searchText) || email.includes(searchText);
+                        });
+                    } else {
+                        // Single event search
+                        const fullName = (event.extendedProps.fullName || '').toLowerCase();
+                        const email = (event.extendedProps.email || '').toLowerCase();
+                        matchFound = fullName.includes(searchText) || email.includes(searchText);
+                    }
+                    
+                    if (!matchFound) {
                         return false;
                     }
                 }
@@ -4379,7 +4478,7 @@
                 adminCalendar.addEvent(event);
             });
             
-            console.log(`🔍 Filtro aplicado: ${filteredEvents.length} de ${allReservationsData.length} reservas`);
+            console.log(`🔍 Filtro aplicado: ${filteredEvents.length} de ${allReservationsData.length} eventos`);
         }
         
         /**
@@ -4405,13 +4504,25 @@
             let csv = 'Cliente,Email,Fecha,Hora,Notas\n';
             
             allReservationsData.forEach(event => {
-                const fullName = event.extendedProps.fullName || '';
-                const email = event.extendedProps.email || '';
                 const date = event.start.toLocaleDateString('es-ES');
                 const time = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-                const notes = (event.extendedProps.notas || '').replace(/,/g, ';');
                 
-                csv += `"${fullName}","${email}","${date}","${time}","${notes}"\n`;
+                // Check if grouped event
+                if (event.extendedProps.isGrouped && event.extendedProps.participants) {
+                    // Export each participant as a separate row
+                    event.extendedProps.participants.forEach(participant => {
+                        const fullName = participant.fullName || '';
+                        const email = participant.email || '';
+                        const notes = (participant.notas || '').replace(/,/g, ';');
+                        csv += `"${fullName}","${email}","${date}","${time}","${notes}"\n`;
+                    });
+                } else {
+                    // Single reservation
+                    const fullName = event.extendedProps.fullName || '';
+                    const email = event.extendedProps.email || '';
+                    const notes = (event.extendedProps.notas || '').replace(/,/g, ';');
+                    csv += `"${fullName}","${email}","${date}","${time}","${notes}"\n`;
+                }
             });
             
             // Download CSV
@@ -4436,10 +4547,7 @@
         function showEventDetailModal(event) {
             const props = event.extendedProps;
             
-            // Populate modal
-            document.getElementById('detail-client-name').textContent = props.fullName || event.title;
-            document.getElementById('detail-client-email').textContent = props.email || '-';
-            
+            // Format date and time (common for both single and grouped)
             const date = event.start.toLocaleDateString('es-ES', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -4452,17 +4560,78 @@
             const endTime = event.end ? event.end.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
             document.getElementById('detail-time').textContent = endTime ? `${startTime} - ${endTime}` : startTime;
             
-            // Notes (optional)
-            const notesRow = document.getElementById('detail-notes-row');
-            if (props.notas && props.notas.trim()) {
-                document.getElementById('detail-notes').textContent = props.notas;
-                notesRow.style.display = 'flex';
+            // Check if this is a grouped event
+            if (props.isGrouped && props.participants && props.participants.length > 0) {
+                // Handle grouped event - show all participants
+                const modalHeader = document.querySelector('.event-detail-header h3');
+                modalHeader.textContent = `👥 Detalle de Reserva - ${props.count} Personas`;
+                
+                // Create participant list HTML
+                let participantsHTML = '<div class="participants-list">';
+                props.participants.forEach((participant, index) => {
+                    participantsHTML += `
+                        <div class="participant-item" style="padding: 10px; margin-bottom: 10px; border-left: 3px solid #f6c8c7; background-color: #fef5f5; border-radius: 5px;">
+                            <div style="font-weight: 600; color: #333; margin-bottom: 5px;">
+                                <span style="color: #f6c8c7; margin-right: 5px;">👤</span>${participant.fullName || '-'}
+                            </div>
+                            <div style="font-size: 14px; color: #666; margin-bottom: 3px;">
+                                <span style="color: #f6c8c7; margin-right: 5px;">📧</span>${participant.email || '-'}
+                            </div>
+                            ${participant.notas && participant.notas.trim() ? `
+                                <div style="font-size: 13px; color: #777; font-style: italic;">
+                                    <span style="color: #f6c8c7; margin-right: 5px;">📝</span>${participant.notas}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                participantsHTML += '</div>';
+                
+                // Replace client name/email section with participants list
+                document.getElementById('detail-client-name').innerHTML = participantsHTML;
+                document.getElementById('detail-client-email').style.display = 'none';
+                document.querySelector('.event-detail-row:has(#detail-client-email)').style.display = 'none';
+                
+                // Hide single client row, show only participants
+                const clientRow = document.querySelector('.event-detail-row:has(#detail-client-name)');
+                clientRow.querySelector('.event-detail-icon').style.display = 'none';
+                clientRow.querySelector('.event-detail-label').textContent = 'Participantes';
+                
+                // Hide notes row for grouped events (notes shown per participant)
+                document.getElementById('detail-notes-row').style.display = 'none';
+                
+                // Hide contact button for grouped events (multiple emails)
+                document.getElementById('detail-contact-btn').style.display = 'none';
+                window.currentEventEmail = null;
             } else {
-                notesRow.style.display = 'none';
+                // Handle single event - show one client
+                const modalHeader = document.querySelector('.event-detail-header h3');
+                modalHeader.textContent = '👤 Detalle de Reserva';
+                
+                // Show client name and email normally
+                document.getElementById('detail-client-name').textContent = props.fullName || event.title;
+                document.getElementById('detail-client-email').textContent = props.email || '-';
+                document.getElementById('detail-client-email').style.display = 'block';
+                document.querySelector('.event-detail-row:has(#detail-client-email)').style.display = 'flex';
+                
+                // Restore client row styling
+                const clientRow = document.querySelector('.event-detail-row:has(#detail-client-name)');
+                clientRow.querySelector('.event-detail-icon').style.display = 'flex';
+                clientRow.querySelector('.event-detail-label').textContent = 'Cliente';
+                
+                // Notes (optional)
+                const notesRow = document.getElementById('detail-notes-row');
+                if (props.notas && props.notas.trim()) {
+                    document.getElementById('detail-notes').textContent = props.notas;
+                    notesRow.style.display = 'flex';
+                } else {
+                    notesRow.style.display = 'none';
+                }
+                
+                // Show contact button and store email
+                document.getElementById('detail-contact-btn').style.display = 'inline-block';
+                window.currentEventEmail = props.email;
             }
-            
-            // Store email for contact button
-            window.currentEventEmail = props.email;
             
             // Show modal
             document.getElementById('event-detail-modal').style.display = 'flex';
