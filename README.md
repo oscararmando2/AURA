@@ -19,7 +19,19 @@ Website profesional con sistema de reservas integrado con Firebase.
 - Guárdalo como: `pilates-background.mp4`
 - Colócalo en: `assets/videos/pilates-background.mp4`
 
-📖 **[Instrucciones completas en DOWNLOAD_VIDEO_FIRST.md →](DOWNLOAD_VIDEO_FIRST.md)**
+⚡ **Solución Rápida:**
+```bash
+# Opción 1: Script automático (Bash)
+./download-video.sh
+
+# Opción 2: Script automático (Python)
+python download-video.py
+```
+
+📖 **Guías completas:**
+- [⚡ QUICKSTART_VIDEO.md](QUICKSTART_VIDEO.md) - Solución en 30 segundos
+- [📖 DOWNLOAD_VIDEO_FIRST.md](DOWNLOAD_VIDEO_FIRST.md) - Instrucciones detalladas
+- [🌐 video-missing.html](video-missing.html) - Guía visual interactiva
 
 **Características:**
 - ✅ Sistema de reservas en línea con Firebase Firestore
