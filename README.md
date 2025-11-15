@@ -11,12 +11,35 @@ Este repositorio contiene **dos sistemas independientes**:
 
 Website profesional con sistema de reservas integrado con Firebase.
 
+### ⚠️ ACCIÓN REQUERIDA: Descarga el Video de Fondo
+
+**El video en index.html NO se reproduce porque falta el archivo de video.**
+
+🎬 **Descarga el video AQUÍ:** https://www.pexels.com/video/8746842/download/
+- Guárdalo como: `pilates-background.mp4`
+- Colócalo en: `assets/videos/pilates-background.mp4`
+
+⚡ **Solución Rápida:**
+```bash
+# Opción 1: Script automático (Bash)
+./download-video.sh
+
+# Opción 2: Script automático (Python)
+python download-video.py
+```
+
+📖 **Guías completas:**
+- [⚡ QUICKSTART_VIDEO.md](QUICKSTART_VIDEO.md) - Solución en 30 segundos
+- [📖 DOWNLOAD_VIDEO_FIRST.md](DOWNLOAD_VIDEO_FIRST.md) - Instrucciones detalladas
+- [🌐 video-missing.html](video-missing.html) - Guía visual interactiva
+
 **Características:**
 - ✅ Sistema de reservas en línea con Firebase Firestore
 - ✅ Calendario interactivo con FullCalendar
 - ✅ Panel de administración para gestión de reservas
 - ✅ Autenticación de usuarios con Firebase Auth
 - ✅ Diseño responsive y moderno
+- 🎬 Video de fondo en hero section (descarga requerida)
 
 **[Ver documentación completa de Pilates →](PILATES_README.md)**
 
