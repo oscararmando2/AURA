@@ -200,44 +200,121 @@
                 height: 250px;
             }
 
+            /* Make moon bigger on tablet */
+            .loader-content .planet {
+                width: 75%;
+                height: 75%;
+            }
+
+            /* Adjust spot positions for tablet to stay within moon */
+            .loader-content .planet .spots span:nth-child(1) {
+                top: 18px;
+                right: 45px;
+            }
+
+            .loader-content .planet .spots span:nth-child(2) {
+                top: 35px;
+                left: 45px;
+            }
+
+            .loader-content .planet .spots span:nth-child(3) {
+                top: 70px;
+                left: 18px;
+            }
+
+            .loader-content .planet .spots span:nth-child(4) {
+                top: 75px;
+                left: 80px;
+            }
+
+            .loader-content .planet .spots span:nth-child(5) {
+                top: 140px;
+                left: 60px;
+            }
+
+            .loader-content .planet .spots span:nth-child(6) {
+                top: 143px;
+                left: 110px;
+            }
+
+            .loader-content .planet .spots span:nth-child(7) {
+                top: 85px;
+                left: 135px;
+            }
+
             .loader-content p {
                 font-size: 12px;
                 width: 90px;
+                bottom: -40px; /* Move text lower */
             }
         }
 
         @media (max-width: 480px) {
             .loader-content {
-                width: 200px;
-                height: 200px;
+                width: 240px;
+                height: 240px;
             }
 
-            .loader-content .planet .spots span {
-                width: 20px;
-                height: 20px;
+            /* Make moon bigger on mobile */
+            .loader-content .planet {
+                width: 80%;
+                height: 80%;
             }
 
-            .loader-content .planet .spots span:nth-child(2),
-            .loader-content .planet .spots span:nth-child(5),
-            .loader-content .planet .spots span:nth-child(6),
-            .loader-content .planet .spots span:nth-child(7) {
+            /* Adjust spot positions to stay within moon boundaries */
+            .loader-content .planet .spots span:nth-child(1) {
+                top: 15px;
+                right: 35px;
+                width: 18px;
+                height: 18px;
+            }
+
+            .loader-content .planet .spots span:nth-child(2) {
+                top: 30px;
+                left: 30px;
                 width: 10px;
                 height: 10px;
             }
 
             .loader-content .planet .spots span:nth-child(3) {
+                top: 60px;
+                left: 15px;
                 width: 18px;
                 height: 18px;
             }
 
             .loader-content .planet .spots span:nth-child(4) {
-                width: 30px;
-                height: 30px;
+                top: 65px;
+                left: 70px;
+                width: 28px;
+                height: 28px;
+            }
+
+            .loader-content .planet .spots span:nth-child(5) {
+                top: 125px;
+                left: 50px;
+                width: 10px;
+                height: 10px;
+            }
+
+            .loader-content .planet .spots span:nth-child(6) {
+                top: 128px;
+                left: 95px;
+                width: 8px;
+                height: 8px;
+            }
+
+            .loader-content .planet .spots span:nth-child(7) {
+                top: 75px;
+                left: 120px;
+                width: 12px;
+                height: 12px;
             }
 
             .loader-content p {
                 font-size: 11px;
                 width: 80px;
+                bottom: -50px; /* Move text lower on mobile */
             }
         }
 
