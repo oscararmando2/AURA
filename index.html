@@ -877,25 +877,18 @@
         }
 
         .fc .fc-button {
-            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
-            border: none;
+            background: #f6c8c7;
+            border: 1px solid #ccc;
             color: #fff;
             padding: 10px 20px;
-            border-radius: 12px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(246, 200, 199, 0.3);
         }
 
         .fc .fc-button:hover {
-            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.5);
+            background: #e8cccc;
         }
 
         .fc .fc-button-active {
-            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%) !important;
-            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.6) !important;
+            background: #e8cccc !important;
         }
 
         /* Time slots styling - Aumentado para mejor visibilidad */
@@ -1477,24 +1470,19 @@
 
         .admin-calendar-controls button {
             padding: 14px 28px;
-            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
+            background: #f6c8c7;
             color: white;
-            border: none;
-            border-radius: 12px;
+            border: 1px solid #ccc;
             font-size: 1rem;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(246, 200, 199, 0.3);
         }
 
         .admin-calendar-controls button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.5);
+            background: #e8cccc;
         }
 
         .admin-calendar-controls button:active {
-            transform: translateY(0);
+            background: #e8cccc;
         }
 
         /* Stats summary */
@@ -1699,23 +1687,18 @@
         .event-detail-actions button {
             flex: 1;
             padding: 12px;
-            border: none;
-            border-radius: 12px;
+            border: 1px solid #ccc;
             font-size: 1rem;
-            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
         }
 
         .event-detail-actions .btn-primary {
-            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
+            background: #f6c8c7;
             color: white;
-            box-shadow: 0 2px 10px rgba(246, 200, 199, 0.3);
         }
 
         .event-detail-actions .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(246, 200, 199, 0.5);
+            background: #e8cccc;
         }
 
         .event-detail-actions .btn-secondary {
@@ -1753,26 +1736,19 @@
         }
 
         #admin-calendar .fc-button {
-            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
-            border: none;
+            background: #f6c8c7;
+            border: 1px solid #ccc;
             color: #fff;
             padding: 14px 26px;
-            border-radius: 12px;
-            font-weight: 500;
             font-size: 1.05rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 12px rgba(246, 200, 199, 0.3);
         }
 
         #admin-calendar .fc-button:hover {
-            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 18px rgba(246, 200, 199, 0.5);
+            background: #e8cccc;
         }
 
         #admin-calendar .fc-button-active {
-            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%) !important;
-            box-shadow: 0 5px 18px rgba(246, 200, 199, 0.6) !important;
+            background: #e8cccc !important;
         }
 
         /* Admin calendar day headers */
@@ -2256,24 +2232,24 @@
     <!-- Menú hamburguesa en la esquina superior derecha -->
     <div id="hamburger-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
         <!-- Botón hamburguesa (tres líneas) -->
-        <button id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); border: none; border-radius: 12px; padding: 12px 15px; cursor: pointer; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.4); transition: all 0.3s ease;">
-            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0; transition: 0.3s;"></div>
-            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0; transition: 0.3s;"></div>
-            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0; transition: 0.3s;"></div>
+        <button id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: #f6c8c7; border: 1px solid #ccc; padding: 12px 15px; cursor: pointer;">
+            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0;"></div>
+            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0;"></div>
+            <div style="width: 25px; height: 3px; background-color: white; margin: 5px 0;"></div>
         </button>
         
         <!-- Menú desplegable -->
         <div id="menu-dropdown" role="menu" aria-hidden="true" style="display: none; position: absolute; top: 60px; right: 0; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); border: 2px solid rgba(246, 200, 199, 0.3); min-width: 200px; overflow: hidden;">
-            <button id="menu-user-login" role="menuitem" aria-label="Iniciar Sesión" style="display: block; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease; border-bottom: 1px solid rgba(246, 200, 199, 0.2);">
+            <button id="menu-user-login" role="menuitem" aria-label="Iniciar Sesión" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 🔓 Iniciar Sesión
             </button>
-            <button id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease; border-bottom: 1px solid rgba(246, 200, 199, 0.2);">
+            <button id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 📝 Registrarse
             </button>
-            <button id="menu-admin-login" role="menuitem" aria-label="Login Admin" style="display: block; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease; border-bottom: 1px solid rgba(246, 200, 199, 0.2);">
+            <button id="menu-admin-login" role="menuitem" aria-label="Login Admin" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 🔐 Login Admin
             </button>
-            <button id="menu-logout" role="menuitem" aria-label="Cerrar Sesión" style="display: none; width: 100%; padding: 15px 20px; background: transparent; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; font-weight: 500; transition: background 0.3s ease;">
+            <button id="menu-logout" role="menuitem" aria-label="Cerrar Sesión" style="display: none; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem;">
                 🚪 Cerrar Sesión
             </button>
         </div>
@@ -2296,10 +2272,10 @@
                     <input type="password" id="register-password" required minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.3);">
+                    <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Registrarse
                     </button>
-                    <button type="button" id="register-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
+                    <button type="button" id="register-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Cancelar
                     </button>
                 </div>
@@ -2323,10 +2299,10 @@
                     <input type="password" id="user-login-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.3);">
+                    <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Iniciar Sesión
                     </button>
-                    <button type="button" id="user-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
+                    <button type="button" id="user-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Cancelar
                     </button>
                 </div>
@@ -2346,7 +2322,7 @@
                 </div>
             </div>
             <div style="display: flex; gap: 10px;">
-                <button type="button" id="time-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
+                <button type="button" id="time-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                     Cancelar
                 </button>
             </div>
@@ -2531,10 +2507,10 @@
                     <input type="password" id="admin-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="flex: 1; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.3);">
+                    <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Iniciar Sesión
                     </button>
-                    <button type="button" id="admin-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 25px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s ease;">
+                    <button type="button" id="admin-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Cancelar
                     </button>
                 </div>
@@ -3516,17 +3492,7 @@
         function createTimeSlotButton(dateStr, time) {
             const button = document.createElement('button');
             button.textContent = time;
-            button.style.cssText = 'padding: 15px; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; border: none; border-radius: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 10px rgba(246, 200, 199, 0.3);';
-            
-            button.addEventListener('mouseenter', () => {
-                button.style.transform = 'translateY(-2px)';
-                button.style.boxShadow = '0 4px 15px rgba(246, 200, 199, 0.5)';
-            });
-            
-            button.addEventListener('mouseleave', () => {
-                button.style.transform = 'translateY(0)';
-                button.style.boxShadow = '0 2px 10px rgba(246, 200, 199, 0.3)';
-            });
+            button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;';
             
             button.addEventListener('click', () => {
                 selectTimeSlot(dateStr, time);
