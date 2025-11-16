@@ -368,6 +368,30 @@
             }
         }
 
+        /* ========== Header Section ========== */
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .site-header .logo {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            color: #f6c8c7;
+            text-transform: uppercase;
+            margin: 0;
+        }
+
         /* ========== 1. Welcome Section (Hero Section) ========== */
         .hero-section {
             height: 100vh;
@@ -2222,6 +2246,11 @@
             <p>Aura Studio</p>
         </div>
     </div>
+
+    <!-- ========== Site Header ========== -->
+    <header class="site-header">
+        <h1 class="logo">Aura</h1>
+    </header>
 
     <!-- ========== Hamburger Menu ========== -->
     <!-- Menú hamburguesa en la esquina superior derecha -->
