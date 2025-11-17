@@ -1187,6 +1187,133 @@
             }
         }
 
+        /* ========== Custom Alert/Notification System ========== */
+        .custom-alert-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .custom-alert-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
+            border-radius: 25px;
+            padding: 40px 35px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(246, 200, 199, 0.4);
+            border: 3px solid #f6c8c7;
+            animation: slideInUp 0.4s ease;
+            position: relative;
+            text-align: center;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .custom-alert-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: pulse 1s ease infinite;
+        }
+
+        .custom-alert-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-family: 'Amita', serif;
+        }
+
+        .custom-alert-message {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            white-space: pre-line;
+        }
+
+        .custom-alert-button {
+            background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%);
+            color: #fff;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(246, 200, 199, 0.4);
+        }
+
+        .custom-alert-button:hover {
+            background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(246, 200, 199, 0.6);
+        }
+
+        .custom-alert-button:active {
+            transform: translateY(0);
+        }
+
+        /* Alert type variants */
+        .custom-alert-success .custom-alert-icon {
+            color: #4CAF50;
+        }
+
+        .custom-alert-error .custom-alert-icon {
+            color: #f44336;
+        }
+
+        .custom-alert-warning .custom-alert-icon {
+            color: #ff9800;
+        }
+
+        .custom-alert-info .custom-alert-icon {
+            color: #2196F3;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .custom-alert-card {
+                padding: 30px 25px;
+                max-width: 90%;
+            }
+
+            .custom-alert-icon {
+                font-size: 3rem;
+            }
+
+            .custom-alert-title {
+                font-size: 1.5rem;
+            }
+
+            .custom-alert-message {
+                font-size: 1rem;
+            }
+
+            .custom-alert-button {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+
         /* ========== 5. Contact Section ========== */
         .contact-section {
             background: linear-gradient(135deg, #fef5f5 0%, #ffffff 100%);
@@ -4921,6 +5048,102 @@
                 }
             }, 3000); // 3 seconds delay
         });
+    </script>
+
+    <!-- ========== Custom Alert Modal ========== -->
+    <div id="custom-alert-overlay" class="custom-alert-overlay">
+        <div id="custom-alert-card" class="custom-alert-card">
+            <span id="custom-alert-icon" class="custom-alert-icon">✓</span>
+            <h3 id="custom-alert-title" class="custom-alert-title">Título</h3>
+            <p id="custom-alert-message" class="custom-alert-message">Mensaje</p>
+            <button id="custom-alert-button" class="custom-alert-button">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- ========== Custom Alert Script ========== -->
+    <script>
+        /**
+         * Custom Alert System - Beautiful pink/white styled cards
+         * Replaces native browser alert() with styled modal cards
+         */
+        function showCustomAlert(message, type = 'info', title = '') {
+            const overlay = document.getElementById('custom-alert-overlay');
+            const card = document.getElementById('custom-alert-card');
+            const icon = document.getElementById('custom-alert-icon');
+            const titleEl = document.getElementById('custom-alert-title');
+            const messageEl = document.getElementById('custom-alert-message');
+            const button = document.getElementById('custom-alert-button');
+
+            // Set icon and title based on type
+            let iconChar = '✓';
+            let defaultTitle = 'Notificación';
+            
+            // Remove previous type classes
+            card.classList.remove('custom-alert-success', 'custom-alert-error', 'custom-alert-warning', 'custom-alert-info');
+            
+            if (type === 'success') {
+                iconChar = '✓';
+                defaultTitle = '¡Éxito!';
+                card.classList.add('custom-alert-success');
+            } else if (type === 'error') {
+                iconChar = '✕';
+                defaultTitle = 'Error';
+                card.classList.add('custom-alert-error');
+            } else if (type === 'warning') {
+                iconChar = '⚠';
+                defaultTitle = 'Atención';
+                card.classList.add('custom-alert-warning');
+            } else if (type === 'info') {
+                iconChar = 'ℹ';
+                defaultTitle = 'Información';
+                card.classList.add('custom-alert-info');
+            }
+
+            icon.textContent = iconChar;
+            titleEl.textContent = title || defaultTitle;
+            messageEl.textContent = message;
+
+            // Show overlay
+            overlay.style.display = 'flex';
+
+            // Button click handler
+            const closeAlert = () => {
+                overlay.style.display = 'none';
+                button.removeEventListener('click', closeAlert);
+                overlay.removeEventListener('click', outsideClickHandler);
+            };
+
+            // Close on button click
+            button.addEventListener('click', closeAlert);
+
+            // Close on overlay click (outside card)
+            const outsideClickHandler = (e) => {
+                if (e.target === overlay) {
+                    closeAlert();
+                }
+            };
+            overlay.addEventListener('click', outsideClickHandler);
+        }
+
+        // Override native alert function
+        window.alert = function(message) {
+            // Determine alert type based on message content
+            let type = 'info';
+            let title = '';
+
+            if (message.includes('✅') || message.includes('Completadas') || message.includes('exitoso') || message.includes('agregada')) {
+                type = 'success';
+                title = '¡Éxito!';
+            } else if (message.includes('❌') || message.includes('Error')) {
+                type = 'error';
+                title = 'Error';
+            } else if (message.includes('⚠️') || message.includes('Atención') || message.includes('Debes')) {
+                type = 'warning';
+                title = 'Atención';
+            }
+
+            showCustomAlert(message, type, title);
+        };
     </script>
 
 </body>
