@@ -60,13 +60,27 @@ Este documento proporciona instrucciones detalladas para configurar Firebase Aut
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Colección de reservas: lectura solo para admin@aura.com, escritura pública
-    match /reservas/{document=**} {
-      // Permitir lectura solo al usuario autenticado admin@aura.com
+    // Colección de reservas
+    match /reservas/{reservaId} {
+      // Lectura: admin puede leer todo, usuarios pueden leer sus propias reservas
+      allow read: if request.auth != null && 
+                   (request.auth.token.email == 'admin@aura.com' || 
+                    resource.data.email == request.auth.token.email);
+      // Escritura solo para usuarios autenticados
+      allow write: if request.auth != null;
+    }
+    
+    // Colección de usuarios
+    match /usuarios/{document=**} {
+      // Lectura solo para el administrador
       allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
-      
-      // Permitir escritura pública para que los clientes puedan crear reservas
-      allow write: if true;
+      // Escritura solo para usuarios autenticados
+      allow write: if request.auth != null;
+    }
+    
+    // Todas las demás colecciones: acceso denegado por defecto
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }
@@ -76,10 +90,27 @@ service cloud.firestore {
 5. Confirma la publicación de las reglas
 
 ### Explicación de las Reglas:
-- **`allow read`**: Solo el usuario `admin@aura.com` autenticado puede leer las reservas
-- **`allow write`**: Cualquier persona puede escribir (crear) reservas, permitiendo que los clientes hagan reservas públicamente
+- **`allow read`**: El administrador (`admin@aura.com`) puede leer todas las reservas, y los usuarios autenticados pueden leer solo sus propias reservas (donde `resource.data.email` coincide con su email)
+- **`allow write`**: Solo usuarios autenticados pueden crear o modificar reservas
 
-## 🌐 Paso 6: Obtener Configuración de Firebase
+## 📊 Paso 6: Configurar Índices de Firestore
+
+Firestore requiere índices compuestos para consultas que combinan `where` y `orderBy`. Sigue estos pasos:
+
+1. En **"Firestore Database"**, ve a la pestaña **"Indexes"** (Índices)
+2. Haz clic en **"Create index"** (Crear índice)
+3. Configura el índice con estos valores:
+   - **Collection ID:** `reservas`
+   - **Fields to index:**
+     - Campo 1: `email` - **Ascending**
+     - Campo 2: `timestamp` - **Descending**
+   - **Query scope:** Collection
+4. Haz clic en **"Create"** (Crear)
+5. Espera a que el índice se complete (puede tardar unos minutos)
+
+**Nota:** Si no creas este índice manualmente, Firebase te proporcionará un enlace automático en la consola del navegador cuando intentes cargar las clases de un usuario. Puedes hacer clic en ese enlace para crear el índice automáticamente.
+
+## 🌐 Paso 7: Obtener Configuración de Firebase
 
 1. En la parte superior izquierda, haz clic en el **ícono de engranaje ⚙️** junto a "Project Overview"
 2. Selecciona **"Project settings"** (Configuración del proyecto)
@@ -103,7 +134,7 @@ const firebaseConfig = {
 
 9. **Copia todo el objeto `firebaseConfig`** (solo el contenido entre las llaves `{}`)
 
-## 📝 Paso 7: Actualizar index.html
+## 📝 Paso 8: Actualizar index.html
 
 1. Abre el archivo `index.html` en tu editor de código
 2. Busca la sección que dice `// ========== CONFIGURACIÓN DE FIREBASE ==========`
@@ -136,7 +167,7 @@ const firebaseConfig = {
 };
 ```
 
-## 🚢 Paso 8: Desplegar en GitHub Pages
+## 🚢 Paso 9: Desplegar en GitHub Pages
 
 1. **Commit** y **push** tus cambios a GitHub:
    ```bash
@@ -155,7 +186,7 @@ const firebaseConfig = {
 7. Espera 1-2 minutos y recarga la página
 8. Verás la URL de tu sitio: `https://oscararmando2.github.io/AURA/`
 
-## ✅ Paso 9: Verificar la Instalación
+## ✅ Paso 10: Verificar la Instalación
 
 1. Abre tu sitio web en el navegador: `https://oscararmando2.github.io/AURA/`
 2. Desplázate hacia abajo hasta la sección **"Acceso de Administrador"**
@@ -167,7 +198,7 @@ const firebaseConfig = {
    - Aparecer el panel de administrador con la tabla de reservas
    - Un mensaje de bienvenida con tu email
 
-## 🧪 Paso 10: Probar el Sistema de Reservas
+## 🧪 Paso 11: Probar el Sistema de Reservas
 
 1. **Crea una reserva de prueba:**
    - En tu sitio web, desplázate a la sección **"Citas en Línea"**

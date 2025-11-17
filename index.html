@@ -4065,7 +4065,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         console.log('✅ Firebase SDK v10 importado correctamente');
 
@@ -4102,6 +4102,7 @@
                 collection,
                 addDoc,
                 query,
+                where,
                 orderBy,
                 getDocs,
                 serverTimestamp
@@ -5122,22 +5123,22 @@
                 console.log(`📚 Cargando clases para usuario: ${userEmail}`);
                 
                 // Query Firestore for reservations with this user's email
+                // Using where clause to filter at database level (required by security rules)
                 const q = query(
-                    collection(db, 'reservas'), 
+                    collection(db, 'reservas'),
+                    where('email', '==', userEmail),
                     orderBy('timestamp', 'desc')
                 );
                 const querySnapshot = await getDocs(q);
                 
-                // Filter reservations for this user
+                // Collect reservations for this user
                 const userReservations = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.email === userEmail) {
-                        userReservations.push({
-                            id: doc.id,
-                            ...data
-                        });
-                    }
+                    userReservations.push({
+                        id: doc.id,
+                        ...data
+                    });
                 });
                 
                 console.log(`✅ Encontradas ${userReservations.length} clases para ${userEmail}`);
