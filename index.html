@@ -3375,7 +3375,7 @@
             // Guardar información del cliente (usando email y nombre del usuario autenticado)
             selectedPlan.userInfo = {
                 nombre: nombre,
-                email: userEmail,
+                email: userEmail.toLowerCase().trim(),
                 notas: notas
             };
 
