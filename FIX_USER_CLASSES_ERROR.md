@@ -49,15 +49,14 @@ Cuando el código intentaba leer TODAS las reservas, Firestore denegaba el acces
 La solución fue agregar una cláusula `where` para filtrar las reservas **directamente en Firestore**, antes de intentar leerlas:
 
 ```javascript
-// ✅ DESPUÉS - Código corregido
+// ✅ DESPUÉS - Código corregido (sin orderBy para evitar índice compuesto)
 const q = query(
     collection(db, 'reservas'),
-    where('email', '==', userEmail),  // Filtrar en la base de datos
-    orderBy('timestamp', 'desc')
+    where('email', '==', userEmail)  // Filtrar en la base de datos
 );
 const querySnapshot = await getDocs(q);
 
-// Ya no es necesario filtrar en el cliente
+// Recolectar todas las reservas del usuario
 const userReservations = [];
 querySnapshot.forEach((doc) => {
     const data = doc.data();
@@ -66,6 +65,9 @@ querySnapshot.forEach((doc) => {
         ...data
     });
 });
+
+// El ordenamiento se realiza del lado del cliente en displayUserClasses()
+// Esto evita la necesidad de crear un índice compuesto en Firestore
 ```
 
 ### Cambios Realizados
@@ -95,33 +97,30 @@ querySnapshot.forEach((doc) => {
    - Corregir reglas de seguridad
    - Agregar instrucciones para crear el índice compuesto requerido
 
-## 📊 Índice Compuesto Requerido
+## 📊 Índice Compuesto - No Requerido
 
-Firestore requiere un **índice compuesto** para consultas que combinan `where` y `orderBy` en campos diferentes.
+**Actualización:** La versión actual del código **NO requiere** un índice compuesto en Firestore.
 
-### Opción 1: Crear Manualmente
+### Por qué no se necesita
 
-1. Ve a Firebase Console → Firestore Database → Indexes
-2. Crea un nuevo índice con:
-   - **Collection ID:** `reservas`
-   - **Field 1:** `email` (Ascending)
-   - **Field 2:** `timestamp` (Descending)
-   - **Query scope:** Collection
+La solución fue simplificada para evitar la complejidad de crear índices compuestos:
+- La consulta usa solo `where('email', '==', userEmail)` sin `orderBy`
+- El ordenamiento de las clases se realiza del lado del cliente en JavaScript
+- Esto elimina la necesidad de configurar índices adicionales en Firestore
 
-### Opción 2: Crear Automáticamente
+### Ventajas de este enfoque
 
-Si no creas el índice manualmente, cuando un usuario intente cargar sus clases por primera vez:
+1. ✅ **Simplicidad**: No requiere configuración adicional en Firebase
+2. ✅ **Funciona inmediatamente**: Sin esperar a que se creen índices (1-5 minutos)
+3. ✅ **Menos mantenimiento**: No hay índices adicionales que administrar
+4. ✅ **Mismo resultado**: El usuario ve sus clases ordenadas correctamente
 
-1. Firebase mostrará un error en la consola del navegador
-2. El error incluirá un **enlace directo** para crear el índice
-3. Haz clic en el enlace, espera a que el índice se cree (1-5 minutos)
-4. Recarga la página
+### Si anteriormente creaste el índice compuesto
 
-Ejemplo de error en consola:
-```
-Error: The query requires an index. You can create it here:
-https://console.firebase.google.com/v1/r/project/aura-studio-xxxxx/firestore/indexes?create_composite=...
-```
+Si ya habías creado el índice compuesto `(email, timestamp)`, no hay problema:
+- El índice no causará ningún conflicto
+- Simplemente no será utilizado por esta consulta
+- Puedes dejarlo o eliminarlo - ambas opciones son válidas
 
 ## 🧪 Cómo Verificar la Solución
 
