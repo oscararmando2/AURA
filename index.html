@@ -4455,7 +4455,7 @@
                 
                 const docRef = await addDoc(collection(db, 'reservas'), {
                     nombre: nombre,
-                    email: email,
+                    email: email.toLowerCase().trim(),
                     fechaHora: fechaHora, // Formato ISO: YYYY-MM-DDTHH:mm:ss
                     notas: notas,
                     timestamp: serverTimestamp()
@@ -5112,57 +5112,53 @@
             const loadingDiv = document.getElementById('my-classes-loading');
             const emptyDiv = document.getElementById('my-classes-empty');
             const gridDiv = document.getElementById('my-classes-grid');
-            
-            // Show section and loading state
+
             myClassesSection.style.display = 'block';
             loadingDiv.style.display = 'block';
             emptyDiv.style.display = 'none';
             gridDiv.innerHTML = '';
-            
+
             try {
-                console.log(`📚 Cargando clases para usuario: ${userEmail}`);
-                
-                // Query Firestore for reservations with this user's email
-                // Using where clause to filter at database level (required by security rules)
+                console.log(`Cargando clases para: ${userEmail}`);
+
+                // ← NUEVO: Normalizamos ambos emails a minúsculas y sin espacios
+                const userEmailLower = userEmail.toLowerCase().trim();
+
                 const q = query(
                     collection(db, 'reservas'),
-                    where('email', '==', userEmail),
                     orderBy('timestamp', 'desc')
                 );
+
                 const querySnapshot = await getDocs(q);
-                
-                // Collect reservations for this user
                 const userReservations = [];
+
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    userReservations.push({
-                        id: doc.id,
-                        ...data
-                    });
+                    const emailEnDoc = (data.email || '').toLowerCase().trim();
+
+                    if (emailEnDoc === userEmailLower) {
+                        userReservations.push({ id: doc.id, ...data });
+                    }
                 });
-                
-                console.log(`✅ Encontradas ${userReservations.length} clases para ${userEmail}`);
-                
-                // Hide loading
+
+                console.log(`Encontradas ${userReservations.length} clases`);
+
                 loadingDiv.style.display = 'none';
-                
+
                 if (userReservations.length === 0) {
-                    // Show empty state
                     emptyDiv.style.display = 'block';
                 } else {
-                    // Display classes
                     displayUserClasses(userReservations);
                 }
-                
+
             } catch (error) {
-                console.error('❌ Error al cargar clases del usuario:', error);
+                console.error('Error al cargar clases del usuario:', error);
                 loadingDiv.style.display = 'none';
                 gridDiv.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: #f6c8c7; grid-column: 1 / -1;">
-                        <p style="font-size: 1.2rem;">❌ Error al cargar tus clases</p>
-                        <p style="margin-top: 10px; color: #999;">Por favor, intenta recargar la página.</p>
-                    </div>
-                `;
+                    <div style="text-align:center;padding:40px;color:#f6c8c7;grid-column:1/-1">
+                        <p style="font-size:1.2rem">Error al cargar tus clases</p>
+                        <p style="margin-top:10px;color:#999">Intenta recargar la página</p>
+                    </div>`;
             }
         }
         
