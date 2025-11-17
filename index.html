@@ -1037,6 +1037,187 @@
             border: 2px solid #e8cccc;
         }
 
+        /* ========== 3.5. My Classes Section ========== */
+        .my-classes-section {
+            display: none; /* Hidden by default, shown when user is logged in */
+            background: linear-gradient(135deg, #fef5f5 0%, #ffffff 100%);
+            padding: 80px 20px;
+            position: relative;
+        }
+
+        .my-classes-section h2 {
+            font-size: 3rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .my-classes-section h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #f6c8c7, #fbe3e3);
+            margin: 20px auto 40px;
+            border-radius: 2px;
+        }
+
+        .my-classes-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .my-classes-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .my-classes-empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .my-classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .class-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            border: 2px solid rgba(246, 200, 199, 0.3);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .class-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #f6c8c7, #fbe3e3);
+        }
+
+        .class-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(246, 200, 199, 0.4);
+            border-color: #f6c8c7;
+        }
+
+        .class-card-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .class-card-date-icon {
+            font-size: 1.8rem;
+            color: #f6c8c7;
+        }
+
+        .class-card-time {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .class-card-time-icon {
+            font-size: 1.5rem;
+            color: #f6c8c7;
+        }
+
+        .class-card-info {
+            color: #777;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            padding: 15px;
+            background: rgba(246, 200, 199, 0.1);
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .class-card-status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .class-card-status.upcoming {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            color: #2e7d32;
+        }
+
+        .class-card-status.past {
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            color: #757575;
+        }
+
+        /* Loading spinner for my classes */
+        .my-classes-loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .my-classes-loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(246, 200, 199, 0.3);
+            border-top-color: #f6c8c7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .my-classes-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .class-card {
+                padding: 25px;
+            }
+
+            .class-card-date {
+                font-size: 1.1rem;
+            }
+
+            .class-card-time {
+                font-size: 1rem;
+            }
+        }
+
         /* ========== 4. Image Scroll Section ========== */
         .image-scroll-section {
             background: linear-gradient(180deg, #ffffff 0%, #fef5f5 50%, #ffffff 100%);
@@ -2540,6 +2721,32 @@
                     </div>
                 </div>
                 <div id="calendar"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 3.5. My Classes Section ========== -->
+    <section id="my-classes-section" class="my-classes-section">
+        <h2>📚 Mis Clases</h2>
+        <div class="my-classes-container">
+            <!-- Loading state -->
+            <div id="my-classes-loading" class="my-classes-loading" style="display: none;">
+                <div class="my-classes-loading-spinner"></div>
+                <p style="margin-top: 20px; font-size: 1.1rem;">Cargando tus clases...</p>
+            </div>
+
+            <!-- Empty state -->
+            <div id="my-classes-empty" class="my-classes-empty" style="display: none;">
+                <div class="my-classes-empty-icon">📅</div>
+                <p>No tienes clases agendadas aún.</p>
+                <p style="margin-top: 10px; font-size: 1rem; color: #999;">
+                    <a href="#booking" style="color: #f6c8c7; text-decoration: underline;">Agenda tu primera clase aquí</a>
+                </p>
+            </div>
+
+            <!-- Classes grid -->
+            <div id="my-classes-grid" class="my-classes-grid">
+                <!-- Classes will be dynamically loaded here -->
             </div>
         </div>
     </section>
@@ -4176,6 +4383,9 @@
                         adminLoginModal.style.display = 'none';
                         adminPanel.style.display = 'none';
                         
+                        // Load and show user's classes
+                        await loadUserClasses(user.email);
+                        
                         // Recargar eventos del calendario como usuario público
                         if (typeof calendar !== 'undefined' && calendar) {
                             console.log('Recargando eventos del calendario como usuario público...');
@@ -4199,6 +4409,9 @@
                     
                     // Ocultar panel de admin
                     adminPanel.style.display = 'none';
+                    
+                    // Hide My Classes section
+                    hideUserClasses();
                     
                     // Recargar eventos del calendario como usuario no autenticado
                     if (typeof calendar !== 'undefined' && calendar) {
@@ -4887,6 +5100,146 @@
             }
         }
 
+        // ========== MY CLASSES FUNCTIONALITY ==========
+        
+        /**
+         * Load user's classes from Firestore
+         * This function loads only the reservations for the currently logged-in user
+         */
+        async function loadUserClasses(userEmail) {
+            const myClassesSection = document.getElementById('my-classes-section');
+            const loadingDiv = document.getElementById('my-classes-loading');
+            const emptyDiv = document.getElementById('my-classes-empty');
+            const gridDiv = document.getElementById('my-classes-grid');
+            
+            // Show section and loading state
+            myClassesSection.style.display = 'block';
+            loadingDiv.style.display = 'block';
+            emptyDiv.style.display = 'none';
+            gridDiv.innerHTML = '';
+            
+            try {
+                console.log(`📚 Cargando clases para usuario: ${userEmail}`);
+                
+                // Query Firestore for reservations with this user's email
+                const q = query(
+                    collection(db, 'reservas'), 
+                    orderBy('timestamp', 'desc')
+                );
+                const querySnapshot = await getDocs(q);
+                
+                // Filter reservations for this user
+                const userReservations = [];
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.email === userEmail) {
+                        userReservations.push({
+                            id: doc.id,
+                            ...data
+                        });
+                    }
+                });
+                
+                console.log(`✅ Encontradas ${userReservations.length} clases para ${userEmail}`);
+                
+                // Hide loading
+                loadingDiv.style.display = 'none';
+                
+                if (userReservations.length === 0) {
+                    // Show empty state
+                    emptyDiv.style.display = 'block';
+                } else {
+                    // Display classes
+                    displayUserClasses(userReservations);
+                }
+                
+            } catch (error) {
+                console.error('❌ Error al cargar clases del usuario:', error);
+                loadingDiv.style.display = 'none';
+                gridDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #f6c8c7; grid-column: 1 / -1;">
+                        <p style="font-size: 1.2rem;">❌ Error al cargar tus clases</p>
+                        <p style="margin-top: 10px; color: #999;">Por favor, intenta recargar la página.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        /**
+         * Display user's classes in the grid
+         */
+        function displayUserClasses(reservations) {
+            const gridDiv = document.getElementById('my-classes-grid');
+            gridDiv.innerHTML = '';
+            
+            const now = new Date();
+            
+            // Sort by date (upcoming first)
+            reservations.sort((a, b) => {
+                const dateA = parseFechaHora(a.fechaHora);
+                const dateB = parseFechaHora(b.fechaHora);
+                return dateA - dateB;
+            });
+            
+            reservations.forEach((reservation, index) => {
+                const classDate = parseFechaHora(reservation.fechaHora);
+                
+                if (!classDate) {
+                    console.warn('Formato de fecha inválido:', reservation.fechaHora);
+                    return;
+                }
+                
+                // Determine if class is upcoming or past
+                const isUpcoming = classDate >= now;
+                
+                // Format date and time
+                const dateStr = classDate.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                const timeStr = classDate.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                // Create class card
+                const classCard = document.createElement('div');
+                classCard.className = 'class-card';
+                classCard.style.animationDelay = `${index * 0.1}s`;
+                
+                classCard.innerHTML = `
+                    <div class="class-card-date">
+                        <span class="class-card-date-icon">📅</span>
+                        <span>${dateStr}</span>
+                    </div>
+                    <div class="class-card-time">
+                        <span class="class-card-time-icon">🕐</span>
+                        <span>${timeStr}</span>
+                    </div>
+                    ${reservation.notas ? `
+                        <div class="class-card-info">
+                            <strong>📝 Notas:</strong> ${reservation.notas}
+                        </div>
+                    ` : ''}
+                    <div class="class-card-status ${isUpcoming ? 'upcoming' : 'past'}">
+                        ${isUpcoming ? '✨ Próxima clase' : '✓ Clase completada'}
+                    </div>
+                `;
+                
+                gridDiv.appendChild(classCard);
+            });
+        }
+        
+        /**
+         * Hide My Classes section
+         */
+        function hideUserClasses() {
+            const myClassesSection = document.getElementById('my-classes-section');
+            myClassesSection.style.display = 'none';
+        }
 
 
         // ========== REGLAS DE SEGURIDAD DE FIRESTORE ==========
@@ -4894,7 +5247,7 @@
          * INSTRUCCIONES: Copia y pega estas reglas en Firebase Console > Firestore Database > Rules
          * 
          * Estas reglas permiten:
-         * - Lectura de la colección 'reservas' SOLO al usuario admin@aura.com
+         * - Lectura de la colección 'reservas' para el admin y para usuarios que lean sus propias reservas
          * - Escritura en 'reservas' SOLO para usuarios autenticados (request.auth != null)
          * - Lectura de 'usuarios' SOLO para admin@aura.com
          * - Escritura en 'usuarios' SOLO para usuarios autenticados
@@ -4905,9 +5258,11 @@
          * service cloud.firestore {
          *   match /databases/{database}/documents {
          *     // Colección de reservas
-         *     match /reservas/{document=**} {
-         *       // Lectura solo para el administrador
-         *       allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+         *     match /reservas/{reservaId} {
+         *       // Lectura: admin puede leer todo, usuarios pueden leer sus propias reservas
+         *       allow read: if request.auth != null && 
+         *                    (request.auth.token.email == 'admin@aura.com' || 
+         *                     resource.data.email == request.auth.token.email);
          *       // Escritura solo para usuarios autenticados
          *       allow write: if request.auth != null;
          *     }
