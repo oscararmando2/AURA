@@ -70,10 +70,12 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
     
-    // Colección de usuarios
+    // Colección de usuarios (perfiles)
     match /usuarios/{document=**} {
-      // Lectura solo para el administrador
-      allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+      // Lectura: admin puede leer todo, usuarios pueden leer su propio perfil
+      allow read: if request.auth != null && 
+                   (request.auth.token.email == 'admin@aura.com' || 
+                    resource.data.email == request.auth.token.email);
       // Escritura solo para usuarios autenticados
       allow write: if request.auth != null;
     }
@@ -90,8 +92,17 @@ service cloud.firestore {
 5. Confirma la publicación de las reglas
 
 ### Explicación de las Reglas:
-- **`allow read`**: El administrador (`admin@aura.com`) puede leer todas las reservas, y los usuarios autenticados pueden leer solo sus propias reservas (donde `resource.data.email` coincide con su email)
-- **`allow write`**: Solo usuarios autenticados pueden crear o modificar reservas
+- **Colección `reservas`**:
+  - **`allow read`**: El administrador (`admin@aura.com`) puede leer todas las reservas, y los usuarios autenticados pueden leer solo sus propias reservas (donde `resource.data.email` coincide con su email)
+  - **`allow write`**: Solo usuarios autenticados pueden crear o modificar reservas
+- **Colección `usuarios`**:
+  - **`allow read`**: El administrador puede leer todos los perfiles, y los usuarios pueden leer solo su propio perfil (para recuperar su nombre al hacer reservas)
+  - **`allow write`**: Solo usuarios autenticados pueden crear o actualizar perfiles
+
+**⚠️ IMPORTANTE:** Estas reglas son críticas para que el sistema funcione correctamente:
+1. Los usuarios deben poder **leer su propio perfil** para recuperar su nombre al hacer reservas
+2. Los usuarios deben poder **escribir en usuarios** para guardar su perfil al registrarse
+3. Sin estas reglas, el sistema solicitará el nombre cada vez que se haga una reserva
 
 ## 📊 Paso 6: Configurar Índices de Firestore
 
