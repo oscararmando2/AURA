@@ -2538,6 +2538,10 @@
             <div id="register-success" style="display: none; background: linear-gradient(135deg, #c8f6c8 0%, #e3fbe3 100%); color: #2d5f2d; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
             <form id="register-form">
                 <div style="margin-bottom: 15px;">
+                    <label for="register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
+                    <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 15px;">
                     <label for="register-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
                     <input type="email" id="register-email" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
@@ -3330,24 +3334,48 @@
             selectedPlan.bookedEvents = [];
             selectedPlan.userInfo = null;
 
-            // Primero, solicitar información del cliente
-            const nombre = prompt('Por favor, ingresa tu nombre completo:');
+            // Obtener información del usuario autenticado
+            const currentUser = window.auth.currentUser;
+            const userEmail = currentUser.email;
+            
+            // Intentar obtener el perfil del usuario desde Firestore
+            let nombre = null;
+            try {
+                const userProfile = await window.getUserProfile(userEmail);
+                if (userProfile && userProfile.nombre) {
+                    nombre = userProfile.nombre;
+                    console.log('✅ Perfil de usuario obtenido:', nombre);
+                }
+            } catch (error) {
+                console.warn('⚠️ No se pudo obtener el perfil del usuario:', error);
+            }
+            
+            // Si no se encontró el nombre en Firestore, solicitarlo
             if (!nombre) {
-                return;
+                nombre = prompt('Por favor, ingresa tu nombre completo:');
+                if (!nombre) {
+                    return;
+                }
+                // Guardar el nombre en Firestore para uso futuro
+                try {
+                    await addDoc(collection(db, 'usuarios'), {
+                        nombre: nombre.trim(),
+                        email: userEmail.toLowerCase().trim(),
+                        timestamp: serverTimestamp()
+                    });
+                    console.log('✅ Perfil de usuario guardado');
+                } catch (error) {
+                    console.warn('⚠️ No se pudo guardar el perfil:', error);
+                }
             }
 
-            const email = prompt('Por favor, ingresa tu correo electrónico:');
-            if (!email || !email.includes('@')) {
-                alert('❌ Por favor ingresa un correo electrónico válido');
-                return;
-            }
-
+            // Solo preguntar por notas (opcional)
             const notas = prompt('¿Alguna nota especial para tus clases? (opcional):') || '';
 
-            // Guardar información del cliente
+            // Guardar información del cliente (usando email y nombre del usuario autenticado)
             selectedPlan.userInfo = {
                 nombre: nombre,
-                email: email,
+                email: userEmail,
                 notas: notas
             };
 
@@ -4138,6 +4166,7 @@
             registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
+                const nombre = document.getElementById('register-name').value.trim();
                 const email = document.getElementById('register-email').value;
                 const password = document.getElementById('register-password').value;
                 
@@ -4151,8 +4180,20 @@
                     
                     console.log('Usuario registrado exitosamente:', userCredential.user.email);
                     
+                    // Guardar perfil del usuario en Firestore
+                    try {
+                        await addDoc(collection(db, 'usuarios'), {
+                            nombre: nombre,
+                            email: email.toLowerCase().trim(),
+                            timestamp: serverTimestamp()
+                        });
+                        console.log('✅ Perfil de usuario guardado en Firestore');
+                    } catch (firestoreError) {
+                        console.warn('⚠️ No se pudo guardar el perfil, pero el usuario fue creado:', firestoreError);
+                    }
+                    
                     // Mostrar mensaje de éxito
-                    registerSuccess.textContent = `¡Registro exitoso! Bienvenido/a ${email}`;
+                    registerSuccess.textContent = `¡Registro exitoso! Bienvenido/a ${nombre}`;
                     registerSuccess.style.display = 'block';
                     
                     // Limpiar formulario
@@ -4479,6 +4520,31 @@
         // Esto asegura que esté disponible antes de que el usuario intente usarla
         window.saveReservationToFirestore = saveReservation;
         console.log('✅ Función saveReservationToFirestore expuesta globalmente');
+
+        /**
+         * Obtener perfil del usuario desde Firestore
+         * @param {string} email - Email del usuario
+         * @returns {Promise<Object|null>} Perfil del usuario o null si no existe
+         */
+        async function getUserProfile(email) {
+            try {
+                const emailLower = email.toLowerCase().trim();
+                const q = query(collection(db, 'usuarios'), where('email', '==', emailLower));
+                const querySnapshot = await getDocs(q);
+                
+                if (!querySnapshot.empty) {
+                    const userDoc = querySnapshot.docs[0];
+                    return userDoc.data();
+                }
+                return null;
+            } catch (error) {
+                console.error('Error al obtener perfil de usuario:', error);
+                return null;
+            }
+        }
+        
+        // Exponer función globalmente
+        window.getUserProfile = getUserProfile;
 
         /**
          * Cargar todas las reservas desde Firestore
