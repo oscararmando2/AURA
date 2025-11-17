@@ -5121,24 +5121,24 @@
             try {
                 console.log(`Cargando clases para: ${userEmail}`);
 
-                // ← NUEVO: Normalizamos ambos emails a minúsculas y sin espacios
+                // Normalize email to lowercase and trim spaces
                 const userEmailLower = userEmail.toLowerCase().trim();
 
+                // Query Firestore with where clause to filter by user email
+                // This is required by Firestore security rules which only allow users to read their own reservations
                 const q = query(
                     collection(db, 'reservas'),
+                    where('email', '==', userEmailLower),
                     orderBy('timestamp', 'desc')
                 );
 
                 const querySnapshot = await getDocs(q);
                 const userReservations = [];
 
+                // All documents returned already belong to this user
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const emailEnDoc = (data.email || '').toLowerCase().trim();
-
-                    if (emailEnDoc === userEmailLower) {
-                        userReservations.push({ id: doc.id, ...data });
-                    }
+                    userReservations.push({ id: doc.id, ...data });
                 });
 
                 console.log(`Encontradas ${userReservations.length} clases`);
