@@ -5192,10 +5192,11 @@
 
                 // Query Firestore with where clause to filter by user email
                 // This is required by Firestore security rules which only allow users to read their own reservations
+                // Note: We don't use orderBy here to avoid requiring a composite index in Firestore
+                // Sorting is done client-side in displayUserClasses()
                 const q = query(
                     collection(db, 'reservas'),
-                    where('email', '==', userEmailLower),
-                    orderBy('timestamp', 'desc')
+                    where('email', '==', userEmailLower)
                 );
 
                 const querySnapshot = await getDocs(q);
@@ -5219,11 +5220,23 @@
 
             } catch (error) {
                 console.error('Error al cargar clases del usuario:', error);
+                console.error('Detalles del error:', error.message);
                 loadingDiv.style.display = 'none';
+                
+                // Provide more helpful error message based on error type
+                let errorMessage = 'Error al cargar tus clases';
+                let errorDetails = 'Intenta recargar la página';
+                
+                if (error.code === 'permission-denied') {
+                    errorDetails = 'Verifica tu conexión y vuelve a iniciar sesión';
+                } else if (error.message && error.message.includes('index')) {
+                    errorDetails = 'Se está configurando la base de datos. Intenta nuevamente en unos minutos.';
+                }
+                
                 gridDiv.innerHTML = `
                     <div style="text-align:center;padding:40px;color:#f6c8c7;grid-column:1/-1">
-                        <p style="font-size:1.2rem">Error al cargar tus clases</p>
-                        <p style="margin-top:10px;color:#999">Intenta recargar la página</p>
+                        <p style="font-size:1.2rem">${errorMessage}</p>
+                        <p style="margin-top:10px;color:#999">${errorDetails}</p>
                     </div>`;
             }
         }
