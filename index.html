@@ -3344,28 +3344,42 @@
                 const userProfile = await window.getUserProfile(userEmail);
                 if (userProfile && userProfile.nombre) {
                     nombre = userProfile.nombre;
-                    console.log('✅ Perfil de usuario obtenido:', nombre);
+                    console.log('✅ Perfil de usuario obtenido desde Firestore:', nombre);
+                } else {
+                    console.warn('⚠️ No se encontró perfil en Firestore para:', userEmail);
                 }
             } catch (error) {
-                console.warn('⚠️ No se pudo obtener el perfil del usuario:', error);
+                console.error('❌ Error al obtener el perfil del usuario:', error);
             }
             
-            // Si no se encontró el nombre en Firestore, solicitarlo
+            // Si no se encontró el nombre en Firestore, solicitarlo UNA VEZ y guardarlo
             if (!nombre) {
                 nombre = prompt('Por favor, ingresa tu nombre completo:');
                 if (!nombre) {
+                    alert('⚠️ El nombre es requerido para continuar con la reserva.');
                     return;
                 }
-                // Guardar el nombre en Firestore para uso futuro
+                
+                // Guardar el nombre en Firestore para uso futuro (verificar que no exista primero)
                 try {
-                    await addDoc(collection(db, 'usuarios'), {
-                        nombre: nombre.trim(),
-                        email: userEmail.toLowerCase().trim(),
-                        timestamp: serverTimestamp()
-                    });
-                    console.log('✅ Perfil de usuario guardado');
+                    const emailLower = userEmail.toLowerCase().trim();
+                    const q = query(collection(db, 'usuarios'), where('email', '==', emailLower));
+                    const existingProfile = await getDocs(q);
+                    
+                    if (existingProfile.empty) {
+                        // Solo crear si no existe
+                        await addDoc(collection(db, 'usuarios'), {
+                            nombre: nombre.trim(),
+                            email: emailLower,
+                            timestamp: serverTimestamp()
+                        });
+                        console.log('✅ Perfil de usuario guardado en Firestore');
+                    } else {
+                        console.log('ℹ️ Perfil ya existe, no se crea duplicado');
+                    }
                 } catch (error) {
-                    console.warn('⚠️ No se pudo guardar el perfil:', error);
+                    console.error('❌ Error al guardar el perfil:', error);
+                    // Continuar con la reserva aunque no se haya podido guardar el perfil
                 }
             }
 
@@ -3981,6 +3995,17 @@
                     loadEventsFromFirestore();
                 }
                 
+                // Recargar las clases del usuario (si no es admin) para mostrar en "Mis Clases"
+                if (!isAdmin && currentUser && currentUser.email) {
+                    console.log('🔄 Recargando clases del usuario...');
+                    try {
+                        await loadUserClasses(currentUser.email);
+                        console.log('✅ Clases del usuario recargadas');
+                    } catch (error) {
+                        console.error('❌ Error al recargar clases del usuario:', error);
+                    }
+                }
+                
                 // Resetear el plan seleccionado solo si se guardó al menos una reserva
                 if (savedReservations.length > 0) {
                     selectedPlan.classes = 0;
@@ -4180,14 +4205,24 @@
                     
                     console.log('Usuario registrado exitosamente:', userCredential.user.email);
                     
-                    // Guardar perfil del usuario en Firestore
+                    // Guardar perfil del usuario en Firestore (verificar que no existe primero)
                     try {
-                        await addDoc(collection(db, 'usuarios'), {
-                            nombre: nombre,
-                            email: email.toLowerCase().trim(),
-                            timestamp: serverTimestamp()
-                        });
-                        console.log('✅ Perfil de usuario guardado en Firestore');
+                        const emailLower = email.toLowerCase().trim();
+                        // Verificar si ya existe un perfil para este email
+                        const q = query(collection(db, 'usuarios'), where('email', '==', emailLower));
+                        const existingProfile = await getDocs(q);
+                        
+                        if (existingProfile.empty) {
+                            // Solo crear si no existe
+                            await addDoc(collection(db, 'usuarios'), {
+                                nombre: nombre,
+                                email: emailLower,
+                                timestamp: serverTimestamp()
+                            });
+                            console.log('✅ Perfil de usuario guardado en Firestore');
+                        } else {
+                            console.log('ℹ️ Perfil de usuario ya existe, no se crea duplicado');
+                        }
                     } catch (firestoreError) {
                         console.warn('⚠️ No se pudo guardar el perfil, pero el usuario fue creado:', firestoreError);
                     }
@@ -4529,16 +4564,27 @@
         async function getUserProfile(email) {
             try {
                 const emailLower = email.toLowerCase().trim();
+                console.log('🔍 Buscando perfil de usuario para:', emailLower);
+                
                 const q = query(collection(db, 'usuarios'), where('email', '==', emailLower));
                 const querySnapshot = await getDocs(q);
                 
                 if (!querySnapshot.empty) {
+                    // Si hay múltiples perfiles (duplicados), usar el primero
+                    if (querySnapshot.docs.length > 1) {
+                        console.warn(`⚠️ Se encontraron ${querySnapshot.docs.length} perfiles para ${emailLower}. Usando el primero.`);
+                    }
                     const userDoc = querySnapshot.docs[0];
-                    return userDoc.data();
+                    const userData = userDoc.data();
+                    console.log('✅ Perfil encontrado:', userData.nombre);
+                    return userData;
+                } else {
+                    console.log('ℹ️ No se encontró perfil para:', emailLower);
                 }
                 return null;
             } catch (error) {
-                console.error('Error al obtener perfil de usuario:', error);
+                console.error('❌ Error al obtener perfil de usuario:', error);
+                console.error('Detalles del error:', error.message);
                 return null;
             }
         }
@@ -5343,13 +5389,15 @@
          *       allow write: if request.auth != null;
          *     }
          *     
-         *     // Colección de usuarios
+         *     // Colección de usuarios (perfiles)
          *     match /usuarios/{document=**} {
          *       // Lectura: admin puede leer todo, usuarios pueden leer su propio perfil
+         *       // IMPORTANTE: Los usuarios DEBEN poder leer su perfil para recuperar su nombre
          *       allow read: if request.auth != null && 
          *                    (request.auth.token.email == 'admin@aura.com' || 
          *                     resource.data.email == request.auth.token.email);
          *       // Escritura solo para usuarios autenticados
+         *       // IMPORTANTE: Los usuarios DEBEN poder escribir para guardar su perfil al registrarse
          *       allow write: if request.auth != null;
          *     }
          *     
