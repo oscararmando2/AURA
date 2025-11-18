@@ -52,9 +52,11 @@ Este documento proporciona instrucciones detalladas para configurar Firebase Aut
 
 ## 🛡️ Paso 5: Configurar Reglas de Seguridad de Firestore
 
+> **📖 Para una explicación detallada de las reglas y solución de problemas, consulta [FIRESTORE_RULES_SOLUTION.md](./FIRESTORE_RULES_SOLUTION.md)**
+
 1. En **"Firestore Database"**, ve a la pestaña **"Rules"** (Reglas)
 2. **Borra** todo el contenido existente
-3. **Copia y pega** las siguientes reglas de seguridad:
+3. **Copia y pega** las reglas del archivo `firestore.rules` o las siguientes:
 
 ```javascript
 rules_version = '2';
@@ -94,15 +96,20 @@ service cloud.firestore {
 ### Explicación de las Reglas:
 - **Colección `reservas`**:
   - **`allow read`**: El administrador (`admin@aura.com`) puede leer todas las reservas, y los usuarios autenticados pueden leer solo sus propias reservas (donde `resource.data.email` coincide con su email)
-  - **`allow write`**: Solo usuarios autenticados pueden crear o modificar reservas
+  - **`allow create`**: Cualquier usuario autenticado puede crear reservas
+  - **`allow update, delete`**: Los usuarios solo pueden actualizar/eliminar sus propias reservas
 - **Colección `usuarios`**:
   - **`allow read`**: El administrador puede leer todos los perfiles, y los usuarios pueden leer solo su propio perfil (para recuperar su nombre al hacer reservas)
-  - **`allow write`**: Solo usuarios autenticados pueden crear o actualizar perfiles
+  - **`allow create`**: Cualquier usuario autenticado puede crear su perfil
+  - **`allow update`**: Los usuarios solo pueden actualizar su propio perfil
 
 **⚠️ IMPORTANTE:** Estas reglas son críticas para que el sistema funcione correctamente:
 1. Los usuarios deben poder **leer su propio perfil** para recuperar su nombre al hacer reservas
 2. Los usuarios deben poder **escribir en usuarios** para guardar su perfil al registrarse
-3. Sin estas reglas, el sistema solicitará el nombre cada vez que se haga una reserva
+3. Los usuarios deben poder **leer sus propias reservas** para ver "Mis Clases"
+4. Sin estas reglas, el sistema no funcionará correctamente
+
+**🔍 Para más detalles sobre cómo funcionan estas reglas, consulta [FIRESTORE_RULES_SOLUTION.md](./FIRESTORE_RULES_SOLUTION.md)**
 
 ## 📊 Paso 6: Configurar Índices de Firestore
 
