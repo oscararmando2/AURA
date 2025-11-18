@@ -5232,19 +5232,15 @@
                 // Normalize email to lowercase and trim spaces
                 const userEmailLower = userEmail.toLowerCase().trim();
 
-                // Query Firestore without where clause to avoid index requirements
-                // Filter in JavaScript instead
-                const q = query(collection(db, 'reservas'));
+                // Query Firestore filtering by the user's email so rules allow the read
+                const q = query(collection(db, 'reservas'), where('email', '==', userEmailLower));
 
                 const querySnapshot = await getDocs(q);
                 const userReservations = [];
 
-                // Filter documents in JavaScript to match user email
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.email.toLowerCase().trim() === userEmailLower) {
-                        userReservations.push({ id: doc.id, ...data });
-                    }
+                    userReservations.push({ id: doc.id, ...data });
                 });
 
                 console.log(`Encontradas ${userReservations.length} clases`);
