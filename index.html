@@ -2504,12 +2504,12 @@
 
     <!-- ========== Hamburger Menu ========== -->
     <!-- Menú hamburguesa en la esquina superior derecha -->
-    <div id="hamburger-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <div id="hamburger-container" style="position: fixed; top: 0; right: 20px; z-index: 1000; height: 70px; display: flex; align-items: center;">
         <!-- Botón hamburguesa (tres líneas) -->
-        <button id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: transparent; border: none; padding: 10px; cursor: pointer; margin: auto 0;">
-            <div style="width: 30px; height: 3px; background-color: #ff69b4; margin: 6px 0; border-radius: 2px;"></div>
-            <div style="width: 30px; height: 3px; background-color: #ff69b4; margin: 6px 0; border-radius: 2px;"></div>
-            <div style="width: 30px; height: 3px; background-color: #ff69b4; margin: 6px 0; border-radius: 2px;"></div>
+        <button id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: transparent; border: none; padding: 10px; cursor: pointer; display: flex; flex-direction: column; justify-content: center;">
+            <div style="width: 30px; height: 3px; background-color: #f6c8c7; margin: 6px 0; border-radius: 2px;"></div>
+            <div style="width: 30px; height: 3px; background-color: #f6c8c7; margin: 6px 0; border-radius: 2px;"></div>
+            <div style="width: 30px; height: 3px; background-color: #f6c8c7; margin: 6px 0; border-radius: 2px;"></div>
         </button>
         
         <!-- Menú desplegable -->
