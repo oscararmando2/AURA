@@ -38,12 +38,19 @@ python download-video.py
 - ✅ Calendario interactivo con FullCalendar
 - ✅ Panel de administración para gestión de reservas
 - ✅ Autenticación de usuarios con Firebase Auth
+- ✅ Sección "Mis Clases" para que usuarios vean sus reservas
 - ✅ Diseño responsive y moderno
 - 🎬 Video de fondo en hero section (descarga requerida)
 
 **[Ver documentación completa de Pilates →](PILATES_README.md)**
 
+**Configuración de Firebase:**
+- 📖 **[FIREBASE_SETUP.md](FIREBASE_SETUP.md)** - Guía completa de configuración
+- ⚡ **[APPLY_FIRESTORE_RULES.md](APPLY_FIRESTORE_RULES.md)** - Aplicar reglas de seguridad (2-3 minutos)
+- 🔍 **[FIRESTORE_RULES_SOLUTION.md](FIRESTORE_RULES_SOLUTION.md)** - Explicación detallada de las reglas
+
 **Recientes actualizaciones:**
+- 🔧 **Reglas de Firestore para "Mis Clases" (2025-11-18)**: Solución para permitir que usuarios vean sus clases. Ver [FIRESTORE_RULES_SOLUTION.md](FIRESTORE_RULES_SOLUTION.md)
 - 🔧 **Corrección de reservas (2025-11-12)**: Solucionado el problema de guardado de reservas. Ver [RESERVATION_FIX_SUMMARY.md](RESERVATION_FIX_SUMMARY.md)
 
 ---

@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ====== RESERVAS ======
+    match /reservas/{reservaId} {
+      // Admin tiene acceso total
+      allow read, write: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+
+      // Usuario normal puede crear reservas (solo necesita estar logueado)
+      allow create: if request.auth != null;
+
+      // Usuario normal puede leer, actualizar y borrar SOLO sus propias reservas
+      // IMPORTANTE: Esta regla permite que los usuarios vean "Mis Clases"
+      allow read, update, delete: if request.auth != null && 
+          resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase();
+    }
+
+    // ====== PERFIL DE USUARIOS ======
+    match /usuarios/{userId} {
+      // Admin tiene acceso total
+      allow read, write: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+      
+      // Usuario normal puede crear su perfil
+      allow create: if request.auth != null;
+      
+      // Usuario normal puede leer y actualizar SOLO su propio perfil
+      // IMPORTANTE: Los usuarios necesitan leer su perfil para recuperar su nombre
+      allow read, update: if request.auth != null && 
+          resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase();
+    }
+
+    // Todo lo demás bloqueado
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
