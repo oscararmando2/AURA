@@ -4533,7 +4533,7 @@
                     nombre: nombre,
                     email: email.toLowerCase().trim(),
                     fechaHora: fechaHora, // Formato ISO: YYYY-MM-DDTHH:mm:ss
-                    notas: notas,
+                    notas: notas || '',
                     timestamp: serverTimestamp()
                 });
                 
