@@ -533,7 +533,7 @@
             background: #e8cccc;
         }
 
-        /* ========== 2. About Section ========== */
+        /* ========== 2. About Section (Pilates Studio Cards) ========== */
         .about-section {
             background-color: #ffffff;
             padding: 80px 20px;
@@ -551,71 +551,135 @@
             pointer-events: none;
         }
 
-        .about-item {
-            display: flex;
-            gap: 40px;
-            margin-bottom: 60px;
-            align-items: center;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            opacity: 0;
-            animation: fadeInUp 0.8s ease-out forwards;
-            position: relative;
-        }
-
-        .about-item:nth-child(1) {
-            animation-delay: 0.2s;
-        }
-
-        .about-item:nth-child(2) {
-            animation-delay: 0.4s;
-        }
-
-        .about-item:nth-child(3) {
-            animation-delay: 0.6s;
-        }
-
-        .about-item.reverse {
-            flex-direction: row-reverse;
-        }
-
-        .about-image {
-            flex: 1;
-            min-width: 300px;
-            overflow: hidden;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .about-image img {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-            border-radius: 20px;
-            transition: transform 0.6s ease;
-        }
-
-        .about-image:hover img {
-            transform: scale(1.1);
-        }
-
-        .about-text {
-            flex: 1;
-            background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%);
-            padding: 40px;
-            border-radius: 20px;
+        .about-section h2 {
+            font-size: 3rem;
             color: #333;
-            font-size: 1.1rem;
-            line-height: 1.8;
-            box-shadow: 0 5px 20px rgba(246, 200, 199, 0.2);
-            border: 1px solid rgba(246, 200, 199, 0.3);
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .about-section h2::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #f6c8c7, #fbe3e3);
+            margin: 20px auto 40px;
+            border-radius: 2px;
+        }
+
+        .pilates-cards-container {
+            display: flex;
+            gap: 25px;
+            overflow-x: auto;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            scroll-behavior: smooth;
+        }
+
+        .pilates-cards-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .pilates-cards-container::-webkit-scrollbar-track {
+            background: rgba(246, 200, 199, 0.1);
+            border-radius: 10px;
+        }
+
+        .pilates-cards-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #f6c8c7, #fbe3e3);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .pilates-cards-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #e8cccc, #f6c8c7);
+        }
+
+        .pilates-card {
+            position: relative;
+            width: 350px;
+            height: 450px;
+            flex-shrink: 0;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .pilates-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(246, 200, 199, 0.4);
+        }
+
+        .pilates-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             transition: all 0.4s ease;
         }
 
-        .about-text:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(246, 200, 199, 0.3);
+        .pilates-card.active img {
+            filter: brightness(0.4);
+        }
+
+        .pilates-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .pilates-card.active .pilates-card-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .pilates-card-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #f6c8c7;
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Amita', serif;
+        }
+
+        .pilates-card-text {
+            font-size: 1.1rem;
+            color: #ffffff;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .pilates-card {
+                width: 300px;
+                height: 400px;
+            }
+
+            .pilates-card-title {
+                font-size: 1.6rem;
+            }
+
+            .pilates-card-text {
+                font-size: 1rem;
+            }
         }
 
         /* ========== 3. Booking Section ========== */
@@ -2628,32 +2692,32 @@
         </div>
     </section>
 
-    <!-- ========== 2. About Section ========== -->
+    <!-- ========== 2. About Section (Pilates Studio Cards) ========== -->
     <section class="about-section">
-        <div class="about-item">
-            <div class="about-image">
+        <h2>Pilates Studio</h2>
+        <div class="pilates-cards-container">
+            <div class="pilates-card" onclick="togglePilatesCard(this)">
                 <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=400&fit=crop" alt="Pilates Studio">
+                <div class="pilates-card-overlay">
+                    <h3 class="pilates-card-title">Pilates Studio</h3>
+                    <p class="pilates-card-text">En Aura Studio, nuestra misión es promover el bienestar físico y mental a través del Pilates. Creemos que cada persona puede alcanzar su máximo potencial con las herramientas adecuadas.</p>
+                </div>
             </div>
-            <div class="about-text">
-                <p>En Aura Studio, nuestra misión es promover el bienestar físico y mental a través del Pilates. Creemos que cada persona puede alcanzar su máximo potencial con las herramientas adecuadas.</p>
-            </div>
-        </div>
 
-        <div class="about-item reverse">
-            <div class="about-image">
+            <div class="pilates-card" onclick="togglePilatesCard(this)">
                 <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=400&fit=crop" alt="Pilates Instructor">
+                <div class="pilates-card-overlay">
+                    <h3 class="pilates-card-title">Pilates Instructor</h3>
+                    <p class="pilates-card-text">Ofrecemos un enfoque personalizado en cada clase de Pilates, adaptando los ejercicios a las necesidades individuales de nuestras alumnas. Nuestro equipo de instructoras certificadas está comprometida con tu progreso y salud.</p>
+                </div>
             </div>
-            <div class="about-text">
-                <p>Ofrecemos un enfoque personalizado en cada clase de Pilates, adaptando los ejercicios a las necesidades individuales de nuestras alumnas. Nuestro equipo de instructoras certificadas está comprometida con tu progreso y salud.</p>
-            </div>
-        </div>
 
-        <div class="about-item">
-            <div class="about-image">
+            <div class="pilates-card" onclick="togglePilatesCard(this)">
                 <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop" alt="Pilates Practice">
-            </div>
-            <div class="about-text">
-                <p>Entrena con nosotras, mejora la flexibilidad, la fuerza y la postura. En Aura Studio, te enseñamos cómo estos beneficios pueden transformar tu vida diaria y ayudarte a lograr un equilibrio integral.</p>
+                <div class="pilates-card-overlay">
+                    <h3 class="pilates-card-title">Pilates Practice</h3>
+                    <p class="pilates-card-text">Entrena con nosotras, mejora la flexibilidad, la fuerza y la postura. En Aura Studio, te enseñamos cómo estos beneficios pueden transformar tu vida diaria y ayudarte a lograr un equilibrio integral.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -3282,6 +3346,24 @@
                     burst.remove();
                 }, 800);
             }
+        }
+
+        /**
+         * Toggle Pilates card to show/hide text overlay
+         * When clicked, shows text overlay on the image
+         * Click again to hide the text
+         */
+        function togglePilatesCard(card) {
+            // Close all other cards first
+            const allCards = document.querySelectorAll('.pilates-card');
+            allCards.forEach(c => {
+                if (c !== card) {
+                    c.classList.remove('active');
+                }
+            });
+            
+            // Toggle current card
+            card.classList.toggle('active');
         }
     </script>
     
