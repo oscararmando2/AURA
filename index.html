@@ -715,11 +715,31 @@
 
         .plans-grid {
             display: flex;
-            flex-wrap: wrap;
             gap: 25px;
-            justify-content: center;
-            margin-bottom: 50px;
-            margin-top: 50px;
+            overflow-x: auto;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 50px auto;
+            scroll-behavior: smooth;
+        }
+
+        .plans-grid::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .plans-grid::-webkit-scrollbar-track {
+            background: rgba(246, 200, 199, 0.1);
+            border-radius: 10px;
+        }
+
+        .plans-grid::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #f6c8c7, #fbe3e3);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .plans-grid::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #e8cccc, #f6c8c7);
         }
 
         .plan-card {
@@ -727,6 +747,7 @@
             border-radius: 20px;
             padding: 35px 25px;
             width: 220px;
+            flex-shrink: 0;
             text-align: center;
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
             border: 2px solid rgba(246, 200, 199, 0.3);
@@ -2176,14 +2197,13 @@
             }
 
             .plans-grid {
-                flex-direction: column;
-                align-items: center;
                 gap: 20px;
+                padding: 20px 10px;
             }
 
             .plan-card {
-                width: 100%;
-                max-width: 320px;
+                width: 280px;
+                flex-shrink: 0;
             }
 
             .booking-section h2,
