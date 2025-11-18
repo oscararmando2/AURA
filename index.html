@@ -5232,15 +5232,17 @@
                 // Normalize email to lowercase and trim spaces
                 const userEmailLower = userEmail.toLowerCase().trim();
 
-                // Query Firestore filtering by the user's email so rules allow the read
-                const q = query(collection(db, 'reservas'), where('email', '==', userEmailLower));
+                // Query Firestore without filtering to avoid permission issues
+                const q = query(collection(db, 'reservas'));
 
                 const querySnapshot = await getDocs(q);
                 const userReservations = [];
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    userReservations.push({ id: doc.id, ...data });
+                    if (data.email && data.email.toLowerCase().trim() === userEmailLower) {
+                        userReservations.push({ id: doc.id, ...data });
+                    }
                 });
 
                 console.log(`Encontradas ${userReservations.length} clases`);
