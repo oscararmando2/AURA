@@ -2542,9 +2542,14 @@
                     <input type="tel" id="register-phone" required placeholder="7151596586" pattern="[0-9]+" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                     <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
                 </div>
-                <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 15px;">
                     <label for="register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
                     <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="register-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
+                    <input type="password" id="register-password" required minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Mínimo 6 caracteres</small>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
@@ -2565,14 +2570,18 @@
             <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Ingresa tu número de teléfono para continuar</p>
             <div id="user-login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
             <form id="user-login-form">
-                <div style="margin-bottom: 20px;">
+                <div style="margin-bottom: 15px;">
                     <label for="user-login-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Número de Teléfono</label>
                     <input type="tel" id="user-login-email" required placeholder="7151596586" pattern="[0-9]+" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                     <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
                 </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="user-login-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
+                    <input type="password" id="user-login-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
-                        Continuar
+                        Iniciar Sesión
                     </button>
                     <button type="button" id="user-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Cancelar
@@ -4129,11 +4138,38 @@
         // ========== VARIABLES GLOBALES ==========
         let currentUser = null;
 
+        // ========== UTILIDADES DE CONTRASEÑA ==========
+
+        /**
+         * Hash password using SHA-256
+         * @param {string} password - Plain text password
+         * @returns {Promise<string>} - Hashed password in hex format
+         */
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        /**
+         * Verify password against stored hash
+         * @param {string} password - Plain text password to verify
+         * @param {string} storedHash - Stored password hash
+         * @returns {Promise<boolean>} - True if password matches
+         */
+        async function verifyPassword(password, storedHash) {
+            const passwordHash = await hashPassword(password);
+            return passwordHash === storedHash;
+        }
+
         // ========== FUNCIONES DE AUTENTICACIÓN ==========
 
         /**
          * Manejar el envío del formulario de registro
-         * SISTEMA SUPER SIMPLE: Solo teléfono y nombre completo
+         * Ahora incluye contraseña para autenticación segura
          */
         function setupUserRegistration() {
             const registerForm = document.getElementById('register-form');
@@ -4145,6 +4181,7 @@
                 
                 const telefono = document.getElementById('register-phone').value.trim();
                 const nombre = document.getElementById('register-name').value.trim();
+                const password = document.getElementById('register-password').value;
                 
                 // Validar que sea un número de teléfono válido (solo números)
                 if (!telefono || !/^\d+$/.test(telefono)) {
@@ -4156,6 +4193,13 @@
                 // Validar que el nombre no esté vacío
                 if (!nombre) {
                     registerError.textContent = 'Por favor, ingresa tu nombre completo';
+                    registerError.style.display = 'block';
+                    return;
+                }
+                
+                // Validar contraseña
+                if (!password || password.length < 6) {
+                    registerError.textContent = 'La contraseña debe tener al menos 6 caracteres';
                     registerError.style.display = 'block';
                     return;
                 }
@@ -4175,10 +4219,14 @@
                         return;
                     }
                     
+                    // Hash de la contraseña
+                    const passwordHash = await hashPassword(password);
+                    
                     // Guardar perfil del usuario en Firestore
                     await addDoc(collection(db, 'usuarios'), {
                         telefono: telefono,
                         nombre: nombre,
+                        passwordHash: passwordHash,
                         timestamp: serverTimestamp()
                     });
                     
@@ -4226,7 +4274,7 @@
 
         /**
          * Manejar el envío del formulario de login de usuario normal
-         * SISTEMA SUPER SIMPLE: Solo número de teléfono, guardado en localStorage
+         * Ahora verifica tanto el teléfono como la contraseña
          */
         function setupUserLogin() {
             const loginForm = document.getElementById('user-login-form');
@@ -4236,6 +4284,7 @@
                 e.preventDefault();
                 
                 const telefono = document.getElementById('user-login-email').value.trim();
+                const password = document.getElementById('user-login-password').value;
                 
                 // Validar que sea un número de teléfono válido (solo números)
                 if (!telefono || !/^\d+$/.test(telefono)) {
@@ -4244,19 +4293,50 @@
                     return;
                 }
                 
+                // Validar contraseña
+                if (!password) {
+                    loginError.textContent = 'Por favor, ingresa tu contraseña';
+                    loginError.style.display = 'block';
+                    return;
+                }
+                
                 // Ocultar error previo
                 loginError.style.display = 'none';
                 
                 try {
-                    // Buscar el usuario en Firestore para obtener su nombre
+                    // Buscar el usuario en Firestore
                     const q = query(collection(db, 'usuarios'), where('telefono', '==', telefono));
                     const querySnapshot = await getDocs(q);
                     
-                    let nombre = '';
-                    if (!querySnapshot.empty) {
-                        const userData = querySnapshot.docs[0].data();
-                        nombre = userData.nombre || '';
+                    if (querySnapshot.empty) {
+                        loginError.textContent = 'Número de teléfono no registrado. Por favor, regístrate primero.';
+                        loginError.style.display = 'block';
+                        return;
                     }
+                    
+                    const userDoc = querySnapshot.docs[0];
+                    const userData = userDoc.data();
+                    
+                    // Verificar si el usuario tiene contraseña guardada
+                    if (!userData.passwordHash) {
+                        // Usuario antiguo sin contraseña - permitir acceso y sugerir actualizar
+                        console.warn('⚠️ Usuario sin contraseña. Considera actualizar tu cuenta.');
+                        loginError.textContent = 'Tu cuenta necesita ser actualizada. Por favor, regístrate nuevamente para establecer una contraseña.';
+                        loginError.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Verificar la contraseña
+                    const passwordValid = await verifyPassword(password, userData.passwordHash);
+                    
+                    if (!passwordValid) {
+                        loginError.textContent = 'Contraseña incorrecta. Por favor, inténtalo de nuevo.';
+                        loginError.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Login exitoso
+                    const nombre = userData.nombre || '';
                     
                     // Guardar teléfono y nombre en localStorage
                     localStorage.setItem('userTelefono', telefono);
@@ -4265,7 +4345,7 @@
                     }
                     currentUser = { telefono: telefono, nombre: nombre };
                     
-                    console.log('Login exitoso con teléfono:', telefono, 'nombre:', nombre);
+                    console.log('✅ Login exitoso con teléfono:', telefono, 'nombre:', nombre);
                     
                     // Cerrar modal
                     document.getElementById('user-login-modal').style.display = 'none';
