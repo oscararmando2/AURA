@@ -579,10 +579,11 @@
             max-width: 1200px;
             margin: 0 auto;
             scroll-behavior: smooth;
+            scroll-snap-type: x mandatory;
         }
 
         .pilates-cards-container::-webkit-scrollbar {
-            height: 8px;
+            height: 10px;
         }
 
         .pilates-cards-container::-webkit-scrollbar-track {
@@ -602,30 +603,31 @@
 
         .pilates-card {
             position: relative;
-            width: 350px;
-            height: 450px;
+            width: 500px;
+            height: 600px;
             flex-shrink: 0;
-            border-radius: 20px;
+            border-radius: 25px;
             overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
             transition: all 0.4s ease;
             cursor: pointer;
+            scroll-snap-align: center;
         }
 
         .pilates-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(246, 200, 199, 0.4);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(246, 200, 199, 0.5);
         }
 
-        .pilates-card img {
+        .pilates-card-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: all 0.4s ease;
         }
 
-        .pilates-card.active img {
-            filter: brightness(0.4);
+        .pilates-card.active .pilates-card-image {
+            filter: brightness(0.35);
         }
 
         .pilates-card-overlay {
@@ -634,15 +636,16 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 30px;
+            padding: 40px;
             opacity: 0;
             transition: opacity 0.4s ease;
             pointer-events: none;
+            overflow-y: auto;
         }
 
         .pilates-card.active .pilates-card-overlay {
@@ -651,34 +654,68 @@
         }
 
         .pilates-card-title {
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 2.5rem;
+            font-weight: 700;
             color: #f6c8c7;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             text-align: center;
             font-family: 'Amita', serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .pilates-card-text {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: #ffffff;
-            line-height: 1.8;
+            line-height: 1.9;
             text-align: center;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
         }
 
-        /* Responsive adjustments */
+        /* Responsive adjustments for mobile - LARGE images */
         @media (max-width: 768px) {
+            .pilates-cards-container {
+                padding: 15px 10px;
+                gap: 20px;
+            }
+
             .pilates-card {
-                width: 300px;
-                height: 400px;
+                width: calc(100vw - 40px);
+                height: calc(100vh - 200px);
+                min-height: 500px;
             }
 
             .pilates-card-title {
-                font-size: 1.6rem;
+                font-size: 2rem;
             }
 
             .pilates-card-text {
-                font-size: 1rem;
+                font-size: 1.1rem;
+                line-height: 1.8;
+            }
+
+            .pilates-card-overlay {
+                padding: 30px 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pilates-card {
+                width: calc(100vw - 30px);
+                height: calc(100vh - 180px);
+                min-height: 480px;
+            }
+
+            .pilates-card-title {
+                font-size: 1.8rem;
+            }
+
+            .pilates-card-text {
+                font-size: 1.05rem;
+                line-height: 1.7;
+            }
+
+            .pilates-card-overlay {
+                padding: 25px 20px;
             }
         }
 
@@ -2697,7 +2734,7 @@
         <h2>Pilates Studio</h2>
         <div class="pilates-cards-container">
             <div class="pilates-card" onclick="togglePilatesCard(this)">
-                <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&h=400&fit=crop" alt="Pilates Studio">
+                <img class="pilates-card-image" src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&h=1000&fit=crop" alt="Pilates Studio">
                 <div class="pilates-card-overlay">
                     <h3 class="pilates-card-title">Pilates Studio</h3>
                     <p class="pilates-card-text">En Aura Studio, nuestra misión es promover el bienestar físico y mental a través del Pilates. Creemos que cada persona puede alcanzar su máximo potencial con las herramientas adecuadas.</p>
@@ -2705,7 +2742,7 @@
             </div>
 
             <div class="pilates-card" onclick="togglePilatesCard(this)">
-                <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&h=400&fit=crop" alt="Pilates Instructor">
+                <img class="pilates-card-image" src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=1000&fit=crop" alt="Pilates Instructor">
                 <div class="pilates-card-overlay">
                     <h3 class="pilates-card-title">Pilates Instructor</h3>
                     <p class="pilates-card-text">Ofrecemos un enfoque personalizado en cada clase de Pilates, adaptando los ejercicios a las necesidades individuales de nuestras alumnas. Nuestro equipo de instructoras certificadas está comprometida con tu progreso y salud.</p>
@@ -2713,7 +2750,7 @@
             </div>
 
             <div class="pilates-card" onclick="togglePilatesCard(this)">
-                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=400&fit=crop" alt="Pilates Practice">
+                <img class="pilates-card-image" src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1000&fit=crop" alt="Pilates Practice">
                 <div class="pilates-card-overlay">
                     <h3 class="pilates-card-title">Pilates Practice</h3>
                     <p class="pilates-card-text">Entrena con nosotras, mejora la flexibilidad, la fuerza y la postura. En Aura Studio, te enseñamos cómo estos beneficios pueden transformar tu vida diaria y ayudarte a lograr un equilibrio integral.</p>
