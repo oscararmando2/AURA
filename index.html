@@ -2565,20 +2565,17 @@
     <div id="user-login-modal" role="dialog" aria-labelledby="user-login-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
         <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
             <h2 id="user-login-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Iniciar Sesión</h2>
-            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Accede a tu cuenta para reservar clases</p>
+            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Ingresa tu número de teléfono para continuar</p>
             <div id="user-login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
             <form id="user-login-form">
-                <div style="margin-bottom: 15px;">
-                    <label for="user-login-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
-                    <input type="email" id="user-login-email" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                </div>
                 <div style="margin-bottom: 20px;">
-                    <label for="user-login-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
-                    <input type="password" id="user-login-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <label for="user-login-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Número de Teléfono</label>
+                    <input type="tel" id="user-login-email" required placeholder="7151596586" pattern="[0-9]+" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
-                        Iniciar Sesión
+                        Continuar
                     </button>
                     <button type="button" id="user-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
                         Cancelar
@@ -2902,9 +2899,9 @@
                         </div>
                     </div>
                     <div class="event-detail-row">
-                        <div class="event-detail-icon">📧</div>
+                        <div class="event-detail-icon">📱</div>
                         <div class="event-detail-info">
-                            <div class="event-detail-label">Email</div>
+                            <div class="event-detail-label">Teléfono</div>
                             <div class="event-detail-value" id="detail-client-email">-</div>
                         </div>
                     </div>
@@ -3322,9 +3319,10 @@
         let isAdmin = false;
 
         async function selectPlan(classes, price) {
-            // REQUISITO: Verificar autenticación antes de permitir reservas
-            if (!window.auth || !window.auth.currentUser) {
-                alert('⚠️ Debes iniciar sesión para hacer reservas.\n\nPor favor, usa el menú (☰) en la esquina superior derecha para:\n\n1. Registrarte (si es tu primera vez)\n2. O iniciar sesión (si ya tienes cuenta)\n\nDespués podrás seleccionar tu plan y hacer reservas.');
+            // SISTEMA SUPER SIMPLE: Verificar si hay teléfono en localStorage
+            const userTelefono = localStorage.getItem('userTelefono');
+            if (!userTelefono) {
+                alert('⚠️ Debes iniciar sesión para hacer reservas.\n\nPor favor, usa el menú (☰) en la esquina superior derecha para ingresar tu número de teléfono.');
                 return;
             }
             
@@ -3334,62 +3332,23 @@
             selectedPlan.bookedEvents = [];
             selectedPlan.userInfo = null;
 
-            // Obtener información del usuario autenticado
-            const currentUser = window.auth.currentUser;
-            const userEmail = currentUser.email;
+            // Obtener información del usuario
+            const userTelefonoTrimmed = userTelefono.trim();
             
-            // Intentar obtener el perfil del usuario desde Firestore
-            let nombre = null;
-            try {
-                const userProfile = await window.getUserProfile(userEmail);
-                if (userProfile && userProfile.nombre) {
-                    nombre = userProfile.nombre;
-                    console.log('✅ Perfil de usuario obtenido desde Firestore:', nombre);
-                } else {
-                    console.warn('⚠️ No se encontró perfil en Firestore para:', userEmail);
-                }
-            } catch (error) {
-                console.error('❌ Error al obtener el perfil del usuario:', error);
-            }
-            
-            // Si no se encontró el nombre en Firestore, solicitarlo UNA VEZ y guardarlo
+            // Preguntar por el nombre (siempre)
+            const nombre = prompt('Por favor, ingresa tu nombre completo:');
             if (!nombre) {
-                nombre = prompt('Por favor, ingresa tu nombre completo:');
-                if (!nombre) {
-                    alert('⚠️ El nombre es requerido para continuar con la reserva.');
-                    return;
-                }
-                
-                // Guardar el nombre en Firestore para uso futuro (verificar que no exista primero)
-                try {
-                    const emailLower = userEmail.toLowerCase().trim();
-                    const q = query(collection(db, 'usuarios'), where('email', '==', emailLower));
-                    const existingProfile = await getDocs(q);
-                    
-                    if (existingProfile.empty) {
-                        // Solo crear si no existe
-                        await addDoc(collection(db, 'usuarios'), {
-                            nombre: nombre.trim(),
-                            email: emailLower,
-                            timestamp: serverTimestamp()
-                        });
-                        console.log('✅ Perfil de usuario guardado en Firestore');
-                    } else {
-                        console.log('ℹ️ Perfil ya existe, no se crea duplicado');
-                    }
-                } catch (error) {
-                    console.error('❌ Error al guardar el perfil:', error);
-                    // Continuar con la reserva aunque no se haya podido guardar el perfil
-                }
+                alert('⚠️ El nombre es requerido para continuar con la reserva.');
+                return;
             }
 
             // Solo preguntar por notas (opcional)
             const notas = prompt('¿Alguna nota especial para tus clases? (opcional):') || '';
 
-            // Guardar información del cliente (usando email y nombre del usuario autenticado)
+            // Guardar información del cliente (usando teléfono y nombre)
             selectedPlan.userInfo = {
-                nombre: nombre,
-                email: userEmail.toLowerCase().trim(),
+                nombre: nombre.trim(),
+                telefono: userTelefonoTrimmed,
                 notas: notas
             };
 
@@ -3942,7 +3901,7 @@
                     return;
                 }
                 
-                const { nombre, email, notas } = selectedPlan.userInfo;
+                const { nombre, telefono, notas } = selectedPlan.userInfo;
                 
                 console.log(`📝 Guardando ${selectedPlan.bookedEvents.length} reservas para ${nombre}...`);
                 
@@ -3958,7 +3917,7 @@
                         // booking.fechaHora ya está en formato ISO (YYYY-MM-DDTHH:mm:ss)
                         const reservaId = await window.saveReservationToFirestore(
                             nombre, 
-                            email, 
+                            telefono, 
                             booking.fechaHora, // ISO format: YYYY-MM-DDTHH:mm:ss
                             notas
                         );
@@ -3976,7 +3935,7 @@
                 // Mostrar resultados
                 if (savedReservations.length === selectedPlan.bookedEvents.length) {
                     // Todo se guardó exitosamente
-                    alert(`✅ ¡Reservas Completadas y Guardadas!\n\n${savedReservations.length} clases reservadas para ${nombre}\n\nRecibirás una confirmación en ${email}`);
+                    alert(`✅ ¡Reservas Completadas y Guardadas!\n\n${savedReservations.length} clases reservadas para ${nombre}\n\nTe contactaremos al ${telefono}`);
                 } else if (savedReservations.length > 0) {
                     // Algunas reservas fallaron
                     alert(`⚠️ Reservas Parcialmente Guardadas\n\n${savedReservations.length} de ${selectedPlan.bookedEvents.length} clases guardadas para ${nombre}\n\n${failedReservations.length} reservas fallaron. Por favor, contacta con nosotros para completar tu reserva.`);
@@ -3996,8 +3955,9 @@
                 }
                 
                 // Recargar Mis Clases después de guardar
-                if (window.loadUserClasses && auth.currentUser) {
-                    window.loadUserClasses(auth.currentUser.email);
+                const savedTelefono = localStorage.getItem('userTelefono');
+                if (window.loadUserClasses && savedTelefono) {
+                    window.loadUserClasses(savedTelefono);
                 }
                 
                 // Resetear el plan seleccionado solo si se guardó al menos una reserva
@@ -4258,6 +4218,7 @@
 
         /**
          * Manejar el envío del formulario de login de usuario normal
+         * SISTEMA SUPER SIMPLE: Solo número de teléfono, guardado en localStorage
          */
         function setupUserLogin() {
             const loginForm = document.getElementById('user-login-form');
@@ -4266,41 +4227,33 @@
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
-                const email = document.getElementById('user-login-email').value;
-                const password = document.getElementById('user-login-password').value;
+                const telefono = document.getElementById('user-login-email').value.trim();
+                
+                // Validar que sea un número de teléfono válido (solo números)
+                if (!telefono || !/^\d+$/.test(telefono)) {
+                    loginError.textContent = 'Por favor, ingresa un número de teléfono válido (solo números)';
+                    loginError.style.display = 'block';
+                    return;
+                }
                 
                 // Ocultar error previo
                 loginError.style.display = 'none';
                 
-                try {
-                    // Autenticar con Firebase
-                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                    
-                    console.log('Login exitoso:', userCredential.user.email);
-                    
-                    // Cerrar modal después de login exitoso
-                    document.getElementById('user-login-modal').style.display = 'none';
-                    document.getElementById('user-login-form').reset();
-                    
-                } catch (error) {
-                    console.error('Error de autenticación:', error);
-                    
-                    // Mostrar mensaje de error
-                    let errorMessage = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
-                    
-                    if (error.code === 'auth/user-not-found') {
-                        errorMessage = 'Usuario no encontrado. Por favor, verifica tu email o regístrate.';
-                    } else if (error.code === 'auth/wrong-password') {
-                        errorMessage = 'Contraseña incorrecta. Por favor, inténtalo de nuevo.';
-                    } else if (error.code === 'auth/invalid-email') {
-                        errorMessage = 'Email inválido. Por favor, ingresa un email válido.';
-                    } else if (error.message) {
-                        errorMessage = error.message;
-                    }
-                    
-                    loginError.textContent = errorMessage;
-                    loginError.style.display = 'block';
-                }
+                // Guardar teléfono en localStorage
+                localStorage.setItem('userTelefono', telefono);
+                currentUser = { telefono: telefono };
+                
+                console.log('Login exitoso con teléfono:', telefono);
+                
+                // Cerrar modal
+                document.getElementById('user-login-modal').style.display = 'none';
+                document.getElementById('user-login-form').reset();
+                
+                // Cargar clases del usuario
+                await loadUserClasses(telefono);
+                
+                // Actualizar UI
+                updateUIForLoggedInUser();
             });
         }
 
@@ -4356,25 +4309,29 @@
 
         /**
          * Configurar el botón de cerrar sesión
+         * SISTEMA SUPER SIMPLE: Borrar teléfono de localStorage
          */
         function setupLogout() {
             // Botón de logout en el menú hamburguesa
             const menuLogoutBtn = document.getElementById('menu-logout');
             
-            menuLogoutBtn.addEventListener('click', async () => {
-                try {
-                    await signOut(auth);
-                    console.log('Sesión cerrada correctamente');
-                    
-                    // Cerrar el menú
-                    document.getElementById('menu-dropdown').style.display = 'none';
-                    document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
-                    document.getElementById('menu-dropdown').setAttribute('aria-hidden', 'true');
-                    
-                } catch (error) {
-                    console.error('Error al cerrar sesión:', error);
-                    alert('Error al cerrar sesión. Por favor, inténtalo de nuevo.');
-                }
+            menuLogoutBtn.addEventListener('click', () => {
+                // Borrar teléfono de localStorage
+                localStorage.removeItem('userTelefono');
+                currentUser = null;
+                
+                console.log('Sesión cerrada correctamente');
+                
+                // Ocultar sección "Mis Clases"
+                hideUserClasses();
+                
+                // Actualizar UI
+                updateUIForLoggedOutUser();
+                
+                // Cerrar el menú
+                document.getElementById('menu-dropdown').style.display = 'none';
+                document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
+                document.getElementById('menu-dropdown').setAttribute('aria-hidden', 'true');
             });
             
             // Botón de logout en el panel de admin (si existe)
@@ -4393,30 +4350,66 @@
         }
 
         /**
+         * Actualizar UI para usuario logueado
+         */
+        function updateUIForLoggedInUser() {
+            const menuLogout = document.getElementById('menu-logout');
+            const menuUserLogin = document.getElementById('menu-user-login');
+            const menuRegister = document.getElementById('menu-register');
+            
+            // Mostrar botón de logout
+            menuLogout.style.display = 'block';
+            
+            // Ocultar opciones de login y registro
+            menuUserLogin.style.display = 'none';
+            if (menuRegister) menuRegister.style.display = 'none';
+        }
+        
+        /**
+         * Actualizar UI para usuario no logueado
+         */
+        function updateUIForLoggedOutUser() {
+            const menuLogout = document.getElementById('menu-logout');
+            const menuUserLogin = document.getElementById('menu-user-login');
+            const menuRegister = document.getElementById('menu-register');
+            
+            // Ocultar botón de logout
+            menuLogout.style.display = 'none';
+            
+            // Mostrar solo login (ya no necesitamos registro)
+            menuUserLogin.style.display = 'block';
+            // Ocultar registro (ya no se usa)
+            if (menuRegister) menuRegister.style.display = 'none';
+        }
+        
+        /**
          * Observar cambios en el estado de autenticación
+         * SISTEMA SUPER SIMPLE: Verificar localStorage al cargar la página
          */
         function setupAuthObserver() {
+            // Verificar si hay un teléfono guardado en localStorage
+            const savedTelefono = localStorage.getItem('userTelefono');
+            if (savedTelefono) {
+                console.log('Usuario ya logueado con teléfono:', savedTelefono);
+                currentUser = { telefono: savedTelefono };
+                updateUIForLoggedInUser();
+                loadUserClasses(savedTelefono);
+            } else {
+                console.log('No hay usuario logueado');
+                currentUser = null;
+                updateUIForLoggedOutUser();
+                hideUserClasses();
+            }
+            
+            // Mantener la autenticación de Firebase para admin
             onAuthStateChanged(auth, async (user) => {
                 const adminLoginModal = document.getElementById('admin-login-modal');
                 const adminPanel = document.getElementById('admin-panel-section');
                 const loginForm = document.getElementById('admin-login-form');
                 const loginError = document.getElementById('login-error');
-                const menuLogout = document.getElementById('menu-logout');
-                const menuUserLogin = document.getElementById('menu-user-login');
-                const menuRegister = document.getElementById('menu-register');
                 const menuAdminLogin = document.getElementById('menu-admin-login');
                 
                 if (user) {
-                    currentUser = user;
-                    
-                    // Mostrar botón de logout en el menú
-                    menuLogout.style.display = 'block';
-                    
-                    // Ocultar opciones de registro y login cuando hay sesión
-                    menuUserLogin.style.display = 'none';
-                    menuRegister.style.display = 'none';
-                    menuAdminLogin.style.display = 'none';
-                    
                     // Si es admin, mostrar panel y cerrar modal
                     if (user.email === 'admin@aura.com') {
                         // Establecer flag de admin globalmente para el calendario
@@ -4446,45 +4439,20 @@
                         setTimeout(() => {
                             adminPanel.scrollIntoView({ behavior: 'smooth' });
                         }, 300);
-                    } else {
-                        // Usuario normal (no admin) - cerrar modal de login
-                        window.isAdmin = false;
-                        isAdmin = false;
                         
-                        adminLoginModal.style.display = 'none';
-                        adminPanel.style.display = 'none';
-                        
-                        // Load and show user's classes
-                        if (window.loadUserClasses && user.email) {
-                            await window.loadUserClasses(user.email);
-                        }
-                        
-                        // Recargar eventos del calendario como usuario público
-                        if (typeof calendar !== 'undefined' && calendar) {
-                            console.log('Recargando eventos del calendario como usuario público...');
-                            loadEventsFromFirestore();
-                        }
+                        // Ocultar login de admin del menú
+                        if (menuAdminLogin) menuAdminLogin.style.display = 'none';
                     }
-                    
                 } else {
-                    // No hay usuario autenticado
-                    currentUser = null;
+                    // No hay admin autenticado
                     window.isAdmin = false;
                     isAdmin = false;
-                    
-                    // Ocultar botón de logout
-                    menuLogout.style.display = 'none';
-                    
-                    // Mostrar opciones de registro y login
-                    menuUserLogin.style.display = 'block';
-                    menuRegister.style.display = 'block';
-                    menuAdminLogin.style.display = 'block';
                     
                     // Ocultar panel de admin
                     adminPanel.style.display = 'none';
                     
-                    // Hide My Classes section
-                    hideUserClasses();
+                    // Mostrar login de admin en el menú
+                    if (menuAdminLogin) menuAdminLogin.style.display = 'block';
                     
                     // Recargar eventos del calendario como usuario no autenticado
                     if (typeof calendar !== 'undefined' && calendar) {
@@ -4500,14 +4468,14 @@
         /**
          * Guardar reserva en Firestore
          * @param {string} nombre - Nombre del cliente
-         * @param {string} email - Email del cliente
+         * @param {string} telefono - Teléfono del cliente (nuevo sistema)
          * @param {string} fechaHora - Fecha y hora en formato ISO (YYYY-MM-DDTHH:mm:ss)
          * @param {string} notas - Notas adicionales (opcional)
          * @returns {Promise<string>} ID del documento creado
          */
-        async function saveReservation(nombre, email, fechaHora, notas = '') {
+        async function saveReservation(nombre, telefono, fechaHora, notas = '') {
             try {
-                console.log('💾 Intentando guardar reserva:', { nombre, email, fechaHora, notas });
+                console.log('💾 Intentando guardar reserva:', { nombre, telefono, fechaHora, notas });
                 
                 // Validar que Firebase esté inicializado
                 if (!db) {
@@ -4521,13 +4489,13 @@
                 }
                 
                 // Validar datos requeridos
-                if (!nombre || !email) {
-                    throw new Error('❌ Nombre y email son requeridos');
+                if (!nombre || !telefono) {
+                    throw new Error('❌ Nombre y teléfono son requeridos');
                 }
                 
                 const docRef = await addDoc(collection(db, 'reservas'), {
                     nombre: nombre,
-                    email: email.toLowerCase().trim(),
+                    telefono: telefono.trim(),
                     fechaHora: fechaHora, // Formato ISO: YYYY-MM-DDTHH:mm:ss
                     notas: notas || '',
                     timestamp: serverTimestamp()
@@ -4779,7 +4747,7 @@
                             start: startDate,
                             end: endDate,
                             fullName: data.nombre,
-                            email: data.email,
+                            telefono: data.telefono || data.email, // Soportar ambos por compatibilidad
                             notas: data.notas,
                             firebaseId: doc.id
                         });
@@ -4816,7 +4784,7 @@
                             textColor: '#333',
                             extendedProps: {
                                 fullName: firstReservation.fullName,
-                                email: firstReservation.email,
+                                telefono: firstReservation.telefono,
                                 notas: firstReservation.notas,
                                 firebaseId: firstReservation.firebaseId,
                                 isGrouped: false
@@ -4837,7 +4805,7 @@
                                 count: group.length,
                                 participants: group.map(r => ({
                                     fullName: r.fullName,
-                                    email: r.email,
+                                    telefono: r.telefono,
                                     notas: r.notas,
                                     firebaseId: r.firebaseId
                                 }))
@@ -4903,9 +4871,9 @@
                         upcomingCount += participantCount;
                     }
                     
-                    // Add unique emails
+                    // Add unique telefonos
                     event.extendedProps.participants.forEach(p => {
-                        if (p.email) uniqueEmails.add(p.email);
+                        if (p.telefono) uniqueEmails.add(p.telefono);
                     });
                 } else {
                     // Single reservation
@@ -4919,8 +4887,8 @@
                         upcomingCount += 1;
                     }
                     
-                    if (event.extendedProps.email) {
-                        uniqueEmails.add(event.extendedProps.email);
+                    if (event.extendedProps.telefono) {
+                        uniqueEmails.add(event.extendedProps.telefono);
                     }
                 }
             });
@@ -4991,14 +4959,14 @@
                         // Search in all participants
                         matchFound = event.extendedProps.participants.some(participant => {
                             const fullName = (participant.fullName || '').toLowerCase();
-                            const email = (participant.email || '').toLowerCase();
-                            return fullName.includes(searchText) || email.includes(searchText);
+                            const telefono = (participant.telefono || '').toLowerCase();
+                            return fullName.includes(searchText) || telefono.includes(searchText);
                         });
                     } else {
                         // Single event search
                         const fullName = (event.extendedProps.fullName || '').toLowerCase();
-                        const email = (event.extendedProps.email || '').toLowerCase();
-                        matchFound = fullName.includes(searchText) || email.includes(searchText);
+                        const telefono = (event.extendedProps.telefono || '').toLowerCase();
+                        matchFound = fullName.includes(searchText) || telefono.includes(searchText);
                     }
                     
                     if (!matchFound) {
@@ -5054,7 +5022,7 @@
             }
             
             // Create CSV content
-            let csv = 'Cliente,Email,Fecha,Hora,Notas\n';
+            let csv = 'Cliente,Teléfono,Fecha,Hora,Notas\n';
             
             allReservationsData.forEach(event => {
                 const date = event.start.toLocaleDateString('es-ES');
@@ -5065,16 +5033,16 @@
                     // Export each participant as a separate row
                     event.extendedProps.participants.forEach(participant => {
                         const fullName = participant.fullName || '';
-                        const email = participant.email || '';
+                        const telefono = participant.telefono || '';
                         const notes = (participant.notas || '').replace(/,/g, ';');
-                        csv += `"${fullName}","${email}","${date}","${time}","${notes}"\n`;
+                        csv += `"${fullName}","${telefono}","${date}","${time}","${notes}"\n`;
                     });
                 } else {
                     // Single reservation
                     const fullName = event.extendedProps.fullName || '';
-                    const email = event.extendedProps.email || '';
+                    const telefono = event.extendedProps.telefono || '';
                     const notes = (event.extendedProps.notas || '').replace(/,/g, ';');
-                    csv += `"${fullName}","${email}","${date}","${time}","${notes}"\n`;
+                    csv += `"${fullName}","${telefono}","${date}","${time}","${notes}"\n`;
                 }
             });
             
@@ -5128,7 +5096,7 @@
                                 <span style="color: #f6c8c7; margin-right: 5px;">👤</span>${participant.fullName || '-'}
                             </div>
                             <div style="font-size: 14px; color: #666; margin-bottom: 3px;">
-                                <span style="color: #f6c8c7; margin-right: 5px;">📧</span>${participant.email || '-'}
+                                <span style="color: #f6c8c7; margin-right: 5px;">📱</span>${participant.telefono || '-'}
                             </div>
                             ${participant.notas && participant.notas.trim() ? `
                                 <div style="font-size: 13px; color: #777; font-style: italic;">
@@ -5161,9 +5129,9 @@
                 const modalHeader = document.querySelector('.event-detail-header h3');
                 modalHeader.textContent = '👤 Detalle de Reserva';
                 
-                // Show client name and email normally
+                // Show client name and telefono normally
                 document.getElementById('detail-client-name').textContent = props.fullName || event.title;
-                document.getElementById('detail-client-email').textContent = props.email || '-';
+                document.getElementById('detail-client-email').textContent = props.telefono || '-';
                 document.getElementById('detail-client-email').style.display = 'block';
                 document.querySelector('.event-detail-row:has(#detail-client-email)').style.display = 'flex';
                 
@@ -5181,9 +5149,9 @@
                     notesRow.style.display = 'none';
                 }
                 
-                // Show contact button and store email
+                // Show contact button and store telefono
                 document.getElementById('detail-contact-btn').style.display = 'inline-block';
-                window.currentEventEmail = props.email;
+                window.currentEventTelefono = props.telefono;
             }
             
             // Show modal
@@ -5198,14 +5166,15 @@
         }
         
         /**
-         * Contact client via email
+         * Contact client via WhatsApp
          */
         function contactClient() {
-            const email = window.currentEventEmail;
-            if (email) {
-                window.location.href = `mailto:${email}?subject=Reserva AURA Studio&body=Hola,%0D%0A%0D%0ATe contactamos desde AURA Studio respecto a tu reserva.%0D%0A%0D%0ASaludos,%0D%0AAURA Studio`;
+            const telefono = window.currentEventTelefono;
+            if (telefono) {
+                const mensaje = encodeURIComponent('Hola! Te contactamos desde AURA Studio respecto a tu reserva. ¿En qué podemos ayudarte?');
+                window.open(`https://wa.me/52${telefono}?text=${mensaje}`, '_blank');
             } else {
-                alert('⚠️ No hay email disponible para este cliente');
+                alert('⚠️ No hay teléfono disponible para este cliente');
             }
         }
 
@@ -5214,8 +5183,9 @@
         /**
          * Load user's classes from Firestore
          * This function loads only the reservations for the currently logged-in user
+         * SISTEMA SUPER SIMPLE: Filtrar por teléfono en vez de email
          */
-        async function loadUserClasses(userEmail) {
+        async function loadUserClasses(userTelefono) {
             const myClassesSection = document.getElementById('my-classes-section');
             const loadingDiv = document.getElementById('my-classes-loading');
             const emptyDiv = document.getElementById('my-classes-empty');
@@ -5227,10 +5197,10 @@
             gridDiv.innerHTML = '';
 
             try {
-                console.log(`Cargando clases para: ${userEmail}`);
+                console.log(`Cargando clases para teléfono: ${userTelefono}`);
 
-                // Normalize email to lowercase and trim spaces
-                const userEmailLower = userEmail.toLowerCase().trim();
+                // Normalize telefono - trim spaces
+                const userTelefonoTrimmed = userTelefono.trim();
 
                 // Query Firestore without filtering to avoid permission issues
                 const q = query(collection(db, 'reservas'));
@@ -5240,7 +5210,7 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.email && data.email.toLowerCase().trim() === userEmailLower) {
+                    if (data.telefono && data.telefono.trim() === userTelefonoTrimmed) {
                         userReservations.push({ id: doc.id, ...data });
                     }
                 });
