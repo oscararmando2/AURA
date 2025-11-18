@@ -2538,16 +2538,13 @@
             <div id="register-success" style="display: none; background: linear-gradient(135deg, #c8f6c8 0%, #e3fbe3 100%); color: #2d5f2d; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
             <form id="register-form">
                 <div style="margin-bottom: 15px;">
-                    <label for="register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
-                    <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="register-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
-                    <input type="email" id="register-email" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <label for="register-phone" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Número de Teléfono</label>
+                    <input type="tel" id="register-phone" required placeholder="7151596586" pattern="[0-9]+" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <label for="register-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña (mínimo 6 caracteres)</label>
-                    <input type="password" id="register-password" required minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <label for="register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
+                    <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
@@ -2728,7 +2725,7 @@
 
     <!-- ========== 3.5. My Classes Section ========== -->
     <section id="my-classes-section" class="my-classes-section">
-        <h2>📚 Mis Clases</h2>
+        <h2 id="my-classes-greeting">📚 Mis Clases</h2>
         <div class="my-classes-container">
             <!-- Loading state -->
             <div id="my-classes-loading" class="my-classes-loading" style="display: none;">
@@ -3100,7 +3097,7 @@
                 hamburgerBtn.setAttribute('aria-expanded', 'false');
                 menuDropdown.setAttribute('aria-hidden', 'true');
                 registerModal.style.display = 'flex';
-                document.getElementById('register-email').focus();
+                document.getElementById('register-phone').focus();
             });
             
             // Show admin login modal
@@ -4136,6 +4133,7 @@
 
         /**
          * Manejar el envío del formulario de registro
+         * SISTEMA SUPER SIMPLE: Solo teléfono y nombre completo
          */
         function setupUserRegistration() {
             const registerForm = document.getElementById('register-form');
@@ -4145,41 +4143,51 @@
             registerForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
+                const telefono = document.getElementById('register-phone').value.trim();
                 const nombre = document.getElementById('register-name').value.trim();
-                const email = document.getElementById('register-email').value;
-                const password = document.getElementById('register-password').value;
+                
+                // Validar que sea un número de teléfono válido (solo números)
+                if (!telefono || !/^\d+$/.test(telefono)) {
+                    registerError.textContent = 'Por favor, ingresa un número de teléfono válido (solo números)';
+                    registerError.style.display = 'block';
+                    return;
+                }
+                
+                // Validar que el nombre no esté vacío
+                if (!nombre) {
+                    registerError.textContent = 'Por favor, ingresa tu nombre completo';
+                    registerError.style.display = 'block';
+                    return;
+                }
                 
                 // Ocultar mensajes previos
                 registerError.style.display = 'none';
                 registerSuccess.style.display = 'none';
                 
                 try {
-                    // Crear usuario en Firebase Authentication
-                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    // Verificar si ya existe un perfil para este teléfono
+                    const q = query(collection(db, 'usuarios'), where('telefono', '==', telefono));
+                    const existingProfile = await getDocs(q);
                     
-                    console.log('Usuario registrado exitosamente:', userCredential.user.email);
-                    
-                    // Guardar perfil del usuario en Firestore (verificar que no existe primero)
-                    try {
-                        const emailLower = email.toLowerCase().trim();
-                        // Verificar si ya existe un perfil para este email
-                        const q = query(collection(db, 'usuarios'), where('email', '==', emailLower));
-                        const existingProfile = await getDocs(q);
-                        
-                        if (existingProfile.empty) {
-                            // Solo crear si no existe
-                            await addDoc(collection(db, 'usuarios'), {
-                                nombre: nombre,
-                                email: emailLower,
-                                timestamp: serverTimestamp()
-                            });
-                            console.log('✅ Perfil de usuario guardado en Firestore');
-                        } else {
-                            console.log('ℹ️ Perfil de usuario ya existe, no se crea duplicado');
-                        }
-                    } catch (firestoreError) {
-                        console.warn('⚠️ No se pudo guardar el perfil, pero el usuario fue creado:', firestoreError);
+                    if (!existingProfile.empty) {
+                        registerError.textContent = 'Este número de teléfono ya está registrado. Por favor, inicia sesión.';
+                        registerError.style.display = 'block';
+                        return;
                     }
+                    
+                    // Guardar perfil del usuario en Firestore
+                    await addDoc(collection(db, 'usuarios'), {
+                        telefono: telefono,
+                        nombre: nombre,
+                        timestamp: serverTimestamp()
+                    });
+                    
+                    console.log('✅ Usuario registrado exitosamente:', telefono);
+                    
+                    // Guardar en localStorage y establecer como usuario actual
+                    localStorage.setItem('userTelefono', telefono);
+                    localStorage.setItem('userNombre', nombre);
+                    currentUser = { telefono: telefono, nombre: nombre };
                     
                     // Mostrar mensaje de éxito
                     registerSuccess.textContent = `¡Registro exitoso! Bienvenido/a ${nombre}`;
@@ -4188,10 +4196,16 @@
                     // Limpiar formulario
                     registerForm.reset();
                     
-                    // Cerrar modal después de 2 segundos
+                    // Cerrar modal después de 2 segundos y actualizar UI
                     setTimeout(() => {
                         document.getElementById('register-modal').style.display = 'none';
                         registerSuccess.style.display = 'none';
+                        
+                        // Actualizar UI para usuario logueado
+                        updateUIForLoggedInUser();
+                        
+                        // Cargar clases del usuario
+                        loadUserClasses(telefono);
                     }, 2000);
                     
                 } catch (error) {
@@ -4200,13 +4214,7 @@
                     // Mostrar mensaje de error
                     let errorMessage = 'Error al registrar. Por favor, inténtalo de nuevo.';
                     
-                    if (error.code === 'auth/email-already-in-use') {
-                        errorMessage = 'Este correo electrónico ya está registrado. Por favor, usa otro o inicia sesión.';
-                    } else if (error.code === 'auth/invalid-email') {
-                        errorMessage = 'Correo electrónico inválido. Por favor, verifica el formato.';
-                    } else if (error.code === 'auth/weak-password') {
-                        errorMessage = 'Contraseña débil. Debe tener al menos 6 caracteres.';
-                    } else if (error.message) {
+                    if (error.message) {
                         errorMessage = error.message;
                     }
                     
@@ -4239,21 +4247,40 @@
                 // Ocultar error previo
                 loginError.style.display = 'none';
                 
-                // Guardar teléfono en localStorage
-                localStorage.setItem('userTelefono', telefono);
-                currentUser = { telefono: telefono };
-                
-                console.log('Login exitoso con teléfono:', telefono);
-                
-                // Cerrar modal
-                document.getElementById('user-login-modal').style.display = 'none';
-                document.getElementById('user-login-form').reset();
-                
-                // Cargar clases del usuario
-                await loadUserClasses(telefono);
-                
-                // Actualizar UI
-                updateUIForLoggedInUser();
+                try {
+                    // Buscar el usuario en Firestore para obtener su nombre
+                    const q = query(collection(db, 'usuarios'), where('telefono', '==', telefono));
+                    const querySnapshot = await getDocs(q);
+                    
+                    let nombre = '';
+                    if (!querySnapshot.empty) {
+                        const userData = querySnapshot.docs[0].data();
+                        nombre = userData.nombre || '';
+                    }
+                    
+                    // Guardar teléfono y nombre en localStorage
+                    localStorage.setItem('userTelefono', telefono);
+                    if (nombre) {
+                        localStorage.setItem('userNombre', nombre);
+                    }
+                    currentUser = { telefono: telefono, nombre: nombre };
+                    
+                    console.log('Login exitoso con teléfono:', telefono, 'nombre:', nombre);
+                    
+                    // Cerrar modal
+                    document.getElementById('user-login-modal').style.display = 'none';
+                    document.getElementById('user-login-form').reset();
+                    
+                    // Cargar clases del usuario
+                    await loadUserClasses(telefono);
+                    
+                    // Actualizar UI
+                    updateUIForLoggedInUser();
+                } catch (error) {
+                    console.error('Error al iniciar sesión:', error);
+                    loginError.textContent = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.';
+                    loginError.style.display = 'block';
+                }
             });
         }
 
@@ -4309,15 +4336,16 @@
 
         /**
          * Configurar el botón de cerrar sesión
-         * SISTEMA SUPER SIMPLE: Borrar teléfono de localStorage
+         * SISTEMA SUPER SIMPLE: Borrar teléfono y nombre de localStorage
          */
         function setupLogout() {
             // Botón de logout en el menú hamburguesa
             const menuLogoutBtn = document.getElementById('menu-logout');
             
             menuLogoutBtn.addEventListener('click', () => {
-                // Borrar teléfono de localStorage
+                // Borrar teléfono y nombre de localStorage
                 localStorage.removeItem('userTelefono');
+                localStorage.removeItem('userNombre');
                 currentUser = null;
                 
                 console.log('Sesión cerrada correctamente');
@@ -4389,9 +4417,10 @@
         function setupAuthObserver() {
             // Verificar si hay un teléfono guardado en localStorage
             const savedTelefono = localStorage.getItem('userTelefono');
+            const savedNombre = localStorage.getItem('userNombre');
             if (savedTelefono) {
-                console.log('Usuario ya logueado con teléfono:', savedTelefono);
-                currentUser = { telefono: savedTelefono };
+                console.log('Usuario ya logueado con teléfono:', savedTelefono, 'nombre:', savedNombre);
+                currentUser = { telefono: savedTelefono, nombre: savedNombre || '' };
                 updateUIForLoggedInUser();
                 loadUserClasses(savedTelefono);
             } else {
@@ -5187,6 +5216,7 @@
          */
         async function loadUserClasses(userTelefono) {
             const myClassesSection = document.getElementById('my-classes-section');
+            const greetingEl = document.getElementById('my-classes-greeting');
             const loadingDiv = document.getElementById('my-classes-loading');
             const emptyDiv = document.getElementById('my-classes-empty');
             const gridDiv = document.getElementById('my-classes-grid');
@@ -5195,6 +5225,14 @@
             loadingDiv.style.display = 'block';
             emptyDiv.style.display = 'none';
             gridDiv.innerHTML = '';
+            
+            // Set greeting with user's name
+            const userName = currentUser?.nombre || localStorage.getItem('userNombre') || '';
+            if (userName) {
+                greetingEl.textContent = `Hola ${userName}`;
+            } else {
+                greetingEl.textContent = '📚 Mis Clases';
+            }
 
             try {
                 console.log(`Cargando clases para teléfono: ${userTelefono}`);
@@ -5324,7 +5362,10 @@
          */
         function hideUserClasses() {
             const myClassesSection = document.getElementById('my-classes-section');
+            const greetingEl = document.getElementById('my-classes-greeting');
             myClassesSection.style.display = 'none';
+            // Reset greeting to default
+            greetingEl.textContent = '📚 Mis Clases';
         }
 
 
