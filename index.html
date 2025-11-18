@@ -3996,10 +3996,10 @@
                 }
                 
                 // Recargar las clases del usuario (si no es admin) para mostrar en "Mis Clases"
-                if (!isAdmin && currentUser && currentUser.email) {
+                if (!isAdmin && window.auth.currentUser && window.auth.currentUser.email) {
                     console.log('🔄 Recargando clases del usuario...');
                     try {
-                        await loadUserClasses(currentUser.email);
+                        await loadUserClasses(window.auth.currentUser.email);
                         console.log('✅ Clases del usuario recargadas');
                     } catch (error) {
                         console.error('❌ Error al recargar clases del usuario:', error);
