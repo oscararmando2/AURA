@@ -3995,15 +3995,9 @@
                     loadEventsFromFirestore();
                 }
                 
-                // Recargar las clases del usuario (si no es admin) para mostrar en "Mis Clases"
-                if (!isAdmin && window.auth.currentUser && window.auth.currentUser.email) {
-                    console.log('🔄 Recargando clases del usuario...');
-                    try {
-                        await loadUserClasses(window.auth.currentUser.email);
-                        console.log('✅ Clases del usuario recargadas');
-                    } catch (error) {
-                        console.error('❌ Error al recargar clases del usuario:', error);
-                    }
+                // Recargar Mis Clases después de guardar
+                if (window.loadUserClasses && auth.currentUser) {
+                    window.loadUserClasses(auth.currentUser.email);
                 }
                 
                 // Resetear el plan seleccionado solo si se guardó al menos una reserva
@@ -4461,7 +4455,9 @@
                         adminPanel.style.display = 'none';
                         
                         // Load and show user's classes
-                        await loadUserClasses(user.email);
+                        if (window.loadUserClasses && user.email) {
+                            await window.loadUserClasses(user.email);
+                        }
                         
                         // Recargar eventos del calendario como usuario público
                         if (typeof calendar !== 'undefined' && calendar) {
@@ -5286,6 +5282,9 @@
                     </div>`;
             }
         }
+        
+        // Expose loadUserClasses to window object for accessibility
+        window.loadUserClasses = loadUserClasses;
         
         /**
          * Display user's classes in the grid
