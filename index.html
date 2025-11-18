@@ -4404,10 +4404,9 @@
             // Ocultar botón de logout
             menuLogout.style.display = 'none';
             
-            // Mostrar solo login (ya no necesitamos registro)
+            // Mostrar opciones de login y registro
             menuUserLogin.style.display = 'block';
-            // Ocultar registro (ya no se usa)
-            if (menuRegister) menuRegister.style.display = 'none';
+            if (menuRegister) menuRegister.style.display = 'block';
         }
         
         /**
