@@ -5,7 +5,7 @@ service cloud.firestore {
     // ====== RESERVAS ======
     match /reservas/{reservaId} {
       // Admin tiene acceso total
-      allow read, write: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+      allow read, write: if request.auth != null && request.auth.token.email == '7151596586';
 
       // Usuario normal puede crear reservas (solo necesita estar logueado)
       allow create: if request.auth != null;
@@ -19,7 +19,7 @@ service cloud.firestore {
     // ====== PERFIL DE USUARIOS ======
     match /usuarios/{userId} {
       // Admin tiene acceso total
-      allow read, write: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+      allow read, write: if request.auth != null && request.auth.token.email == '7151596586';
       
       // Usuario normal puede crear su perfil
       allow create: if request.auth != null;
