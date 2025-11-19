@@ -3860,9 +3860,49 @@
         }
 
         /**
+         * Contar cuántas reservas existen para una fecha y hora específica
+         * @param {string} dateStr - Fecha en formato YYYY-MM-DD
+         * @param {string} time - Hora en formato HH:mm
+         * @returns {Promise<number>} Número de reservas para ese horario
+         */
+        async function getReservationCountForTimeSlot(dateStr, time) {
+            try {
+                // Si Firestore no está disponible, asumir 0 reservas
+                if (!window.db) {
+                    console.warn('Firestore no disponible, asumiendo 0 reservas');
+                    return 0;
+                }
+                
+                const { getDocs, collection, query } = window.firestoreExports;
+                const q = query(collection(window.db, 'reservas'));
+                const querySnapshot = await getDocs(q);
+                
+                // Construir el fechaHora objetivo en formato ISO
+                const targetDateTime = `${dateStr}T${time}:00`;
+                
+                // Contar cuántas reservas coinciden con esta fecha y hora
+                let count = 0;
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    // Comparar fechaHora en formato ISO
+                    if (data.fechaHora === targetDateTime) {
+                        count++;
+                    }
+                });
+                
+                console.log(`🔍 Cupo para ${targetDateTime}: ${count}/5 personas`);
+                return count;
+            } catch (error) {
+                console.error('Error al contar reservas:', error);
+                // En caso de error, asumir 0 para no bloquear reservas
+                return 0;
+            }
+        }
+
+        /**
          * Mostrar modal de selección de horario
          */
-        function showTimeSelectionModal(dateStr) {
+        async function showTimeSelectionModal(dateStr) {
             const modal = document.getElementById('time-selection-modal');
             const dateDisplay = document.getElementById('time-modal-date');
             const slotsContainer = document.getElementById('time-slots-container');
@@ -3890,10 +3930,12 @@
             morningTitle.textContent = '🌅 Mañana';
             slotsContainer.appendChild(morningTitle);
             
-            morningSlots.forEach(time => {
-                const button = createTimeSlotButton(dateStr, time);
+            // Verificar capacidad para cada horario de mañana
+            for (const time of morningSlots) {
+                const count = await getReservationCountForTimeSlot(dateStr, time);
+                const button = createTimeSlotButton(dateStr, time, count);
                 slotsContainer.appendChild(button);
-            });
+            }
             
             // Agregar horarios de tarde
             const eveningTitle = document.createElement('div');
@@ -3901,10 +3943,12 @@
             eveningTitle.textContent = '🌆 Tarde';
             slotsContainer.appendChild(eveningTitle);
             
-            eveningSlots.forEach(time => {
-                const button = createTimeSlotButton(dateStr, time);
+            // Verificar capacidad para cada horario de tarde
+            for (const time of eveningSlots) {
+                const count = await getReservationCountForTimeSlot(dateStr, time);
+                const button = createTimeSlotButton(dateStr, time, count);
                 slotsContainer.appendChild(button);
-            });
+            }
             
             // Mostrar modal
             modal.style.display = 'flex';
@@ -3912,15 +3956,45 @@
 
         /**
          * Crear botón de horario
+         * @param {string} dateStr - Fecha en formato YYYY-MM-DD
+         * @param {string} time - Hora en formato HH:mm
+         * @param {number} currentCount - Número actual de reservas para este horario
          */
-        function createTimeSlotButton(dateStr, time) {
+        function createTimeSlotButton(dateStr, time, currentCount = 0) {
+            const MAX_CAPACITY = 5;
             const button = document.createElement('button');
-            button.textContent = time;
-            button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;';
+            const isFull = currentCount >= MAX_CAPACITY;
             
-            button.addEventListener('click', () => {
-                selectTimeSlot(dateStr, time);
-            });
+            // Mostrar hora y disponibilidad
+            if (isFull) {
+                button.textContent = `${time} (Lleno)`;
+                // Estilo gris cuando está lleno
+                button.style.cssText = 'padding: 15px; background: #cccccc; color: #666; border: 1px solid #999; font-size: 1rem; cursor: not-allowed; opacity: 0.6;';
+                button.disabled = true;
+                
+                // Mostrar mensaje al intentar hacer clic
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    alert(`⚠️ Lo sentimos, este horario (${time}) ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nDisponibilidad: ${MAX_CAPACITY}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario disponible.`);
+                });
+            } else {
+                const available = MAX_CAPACITY - currentCount;
+                button.textContent = `${time} (${available} disponibles)`;
+                // Estilo normal cuando hay disponibilidad
+                button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;';
+                
+                // Efecto hover
+                button.addEventListener('mouseenter', () => {
+                    button.style.background = '#e8cccc';
+                });
+                button.addEventListener('mouseleave', () => {
+                    button.style.background = '#f6c8c7';
+                });
+                
+                button.addEventListener('click', () => {
+                    selectTimeSlot(dateStr, time);
+                });
+            }
             
             return button;
         }
@@ -3930,6 +4004,15 @@
          * REQUISITO: fechaHora se guarda en formato ISO (YYYY-MM-DDTHH:mm:ss)
          */
         async function selectTimeSlot(dateStr, time) {
+            const MAX_CAPACITY = 5;
+            
+            // Verificar capacidad antes de continuar (doble verificación para prevenir condiciones de carrera)
+            const currentCount = await getReservationCountForTimeSlot(dateStr, time);
+            if (currentCount >= MAX_CAPACITY) {
+                alert(`⚠️ Lo sentimos, este horario ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nActualmente reservado: ${currentCount}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario.`);
+                return;
+            }
+            
             // Cerrar modal
             document.getElementById('time-selection-modal').style.display = 'none';
             
