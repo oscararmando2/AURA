@@ -3413,7 +3413,7 @@
          * - Calendario en español (locale: 'es')
          * - Carga dinámica de eventos desde Firestore colección 'reservas'
          * - Al hacer clic en una fecha: mostrar formulario de reservas
-         * - Filtrado admin vs público: admin@aura.com ve todo, otros ven clases públicas
+         * - Filtrado admin vs público: 7151596586 ve todo, otros ven clases públicas
          * - Guarda reservas en Firestore y actualiza calendario en tiempo real
          * - Responsive y centrado con máximo 900px de ancho
          * 
@@ -3584,7 +3584,7 @@
          * Cargar eventos desde Firebase Firestore
          * REQUISITO: Si admin, mostrar todos los eventos; si no, clases públicas fijas
          * 
-         * - Si el usuario es admin@aura.com: muestra todas las reservas desde Firestore
+         * - Si el usuario es 7151596586: muestra todas las reservas desde Firestore
          * - Si no es admin: muestra solo clases públicas fijas de pilates (recurrentes)
          * 
          * Las reservas se cargan con fechaHora en formato ISO (YYYY-MM-DDTHH:mm:ss)
@@ -4149,7 +4149,7 @@
          * 3. Crear usuario administrador:
          *    - En Authentication, ve a la pestaña "Users"
          *    - Haz clic en "Add user"
-         *    - Email: admin@aura.com
+         *    - Email: 7151596586
          *    - Contraseña: admin123
          *    - Haz clic en "Add user"
          * 
@@ -4168,7 +4168,7 @@
          *      match /databases/{database}/documents {
          *        // Colección de reservas: lectura solo para admin, escritura pública
          *        match /reservas/{document=**} {
-         *          allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+         *          allow read: if request.auth != null && request.auth.token.email == '7151596586';
          *          allow write: if true;
          *        }
          *      }
@@ -4504,7 +4504,7 @@
                     const userCredential = await signInWithEmailAndPassword(auth, email, password);
                     
                     // Verificar que sea el usuario admin
-                    if (userCredential.user.email !== 'admin@aura.com') {
+                    if (userCredential.user.email !== '7151596586') {
                         await signOut(auth);
                         throw new Error('Acceso denegado. Solo el administrador puede acceder.');
                     }
@@ -4638,7 +4638,7 @@
                 
                 if (user) {
                     // Si es admin, mostrar panel y cerrar modal
-                    if (user.email === 'admin@aura.com') {
+                    if (user.email === '7151596586') {
                         // Establecer flag de admin globalmente para el calendario
                         window.isAdmin = true;
                         isAdmin = true;
@@ -5574,7 +5574,7 @@
          * Estas reglas permiten:
          * - Lectura de la colección 'reservas' para el admin y para usuarios que lean sus propias reservas
          * - Escritura en 'reservas' SOLO para usuarios autenticados (request.auth != null)
-         * - Lectura de 'usuarios' SOLO para admin@aura.com
+         * - Lectura de 'usuarios' SOLO para 7151596586
          * - Escritura en 'usuarios' SOLO para usuarios autenticados
          * 
          * REGLAS DE FIRESTORE (copiar en Firebase Console):
@@ -5586,7 +5586,7 @@
          *     match /reservas/{reservaId} {
          *       // Lectura: admin puede leer todo, usuarios pueden leer sus propias reservas
          *       allow read: if request.auth != null && 
-         *                    (request.auth.token.email == 'admin@aura.com' || 
+         *                    (request.auth.token.email == '7151596586' || 
          *                     resource.data.email == request.auth.token.email);
          *       // Escritura solo para usuarios autenticados
          *       allow write: if request.auth != null;
@@ -5597,7 +5597,7 @@
          *       // Lectura: admin puede leer todo, usuarios pueden leer su propio perfil
          *       // IMPORTANTE: Los usuarios DEBEN poder leer su perfil para recuperar su nombre
          *       allow read: if request.auth != null && 
-         *                    (request.auth.token.email == 'admin@aura.com' || 
+         *                    (request.auth.token.email == '7151596586' || 
          *                     resource.data.email == request.auth.token.email);
          *       // Escritura solo para usuarios autenticados
          *       // IMPORTANTE: Los usuarios DEBEN poder escribir para guardar su perfil al registrarse
