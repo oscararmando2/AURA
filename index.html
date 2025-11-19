@@ -2928,7 +2928,7 @@
     <!-- ========== 6. Admin Panel Section ========== -->
     <section id="admin-panel-section" class="contact-section" style="display: none;">
         <h2>Panel de Administrador</h2>
-        <p style="margin-bottom: 10px;">Hola, <span id="admin-email-display">Michel</span>.</p>
+        <p style="margin-bottom: 10px;">Hola <span id="admin-email-display">Michel</span></p>
         <button id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px;">Cerrar Sesión</button>
         
         <!-- Contenedor principal: en móvil, el calendario se separa para ocupar todo el ancho -->
@@ -4646,8 +4646,8 @@
                         adminLoginModal.style.display = 'none';
                         adminPanel.style.display = 'block';
                         
-                        // Mostrar email del admin
-                        document.getElementById('admin-email-display').textContent = user.email;
+                        // Mostrar nombre del admin
+                        document.getElementById('admin-email-display').textContent = 'Michel';
                         
                         // Limpiar formulario de login
                         loginForm.reset();
