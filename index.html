@@ -624,6 +624,16 @@
             height: 100%;
             object-fit: cover;
             transition: all 0.4s ease;
+            animation: cardImageDarken 3.5s ease-in-out forwards;
+        }
+
+        @keyframes cardImageDarken {
+            0% {
+                filter: brightness(1);
+            }
+            100% {
+                filter: brightness(0.35);
+            }
         }
 
         .pilates-card.active .pilates-card-image {
@@ -646,6 +656,20 @@
             transition: opacity 0.4s ease;
             pointer-events: none;
             overflow-y: auto;
+            animation: overlayFadeIn 3.5s ease-in-out forwards;
+        }
+
+        @keyframes overlayFadeIn {
+            0% {
+                opacity: 0;
+            }
+            85.7% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+                pointer-events: auto;
+            }
         }
 
         .pilates-card.active .pilates-card-overlay {
