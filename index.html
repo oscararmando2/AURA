@@ -2651,6 +2651,9 @@
             <button id="menu-logout" role="menuitem" aria-label="Cerrar Sesión" style="display: none; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem;">
                 🚪 Cerrar Sesión
             </button>
+            <button id="menu-admin-logout" role="menuitem" aria-label="Cerrar Sesión Admin" style="display: none; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem;">
+                🚪 Cerrar Sesión Admin
+            </button>
         </div>
     </div>
 
@@ -4645,7 +4648,7 @@
          * SISTEMA SUPER SIMPLE: Borrar teléfono y nombre de localStorage
          */
         function setupLogout() {
-            // Botón de logout en el menú hamburguesa
+            // Botón de logout en el menú hamburguesa (usuarios regulares)
             const menuLogoutBtn = document.getElementById('menu-logout');
             
             menuLogoutBtn.addEventListener('click', () => {
@@ -4667,6 +4670,25 @@
                 document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
                 document.getElementById('menu-dropdown').setAttribute('aria-hidden', 'true');
             });
+            
+            // Botón de logout admin en el menú hamburguesa
+            const menuAdminLogoutBtn = document.getElementById('menu-admin-logout');
+            if (menuAdminLogoutBtn) {
+                menuAdminLogoutBtn.addEventListener('click', async () => {
+                    try {
+                        await signOut(auth);
+                        console.log('Sesión de admin cerrada correctamente');
+                        
+                        // Cerrar el menú
+                        document.getElementById('menu-dropdown').style.display = 'none';
+                        document.getElementById('hamburger-btn').setAttribute('aria-expanded', 'false');
+                        document.getElementById('menu-dropdown').setAttribute('aria-hidden', 'true');
+                    } catch (error) {
+                        console.error('Error al cerrar sesión:', error);
+                        alert('Error al cerrar sesión. Por favor, inténtalo de nuevo.');
+                    }
+                });
+            }
             
             // Botón de logout en el panel de admin (si existe)
             const adminLogoutBtn = document.getElementById('admin-logout-btn');
@@ -4742,6 +4764,7 @@
                 const loginForm = document.getElementById('admin-login-form');
                 const loginError = document.getElementById('login-error');
                 const menuAdminLogin = document.getElementById('menu-admin-login');
+                const menuAdminLogout = document.getElementById('menu-admin-logout');
                 
                 if (user) {
                     // Si es admin, mostrar panel y cerrar modal
@@ -4774,8 +4797,9 @@
                             adminPanel.scrollIntoView({ behavior: 'smooth' });
                         }, 300);
                         
-                        // Ocultar login de admin del menú
+                        // Ocultar login de admin y mostrar logout de admin en el menú
                         if (menuAdminLogin) menuAdminLogin.style.display = 'none';
+                        if (menuAdminLogout) menuAdminLogout.style.display = 'block';
                     }
                 } else {
                     // No hay admin autenticado
@@ -4785,8 +4809,9 @@
                     // Ocultar panel de admin
                     adminPanel.style.display = 'none';
                     
-                    // Mostrar login de admin en el menú
+                    // Mostrar login de admin y ocultar logout de admin en el menú
                     if (menuAdminLogin) menuAdminLogin.style.display = 'block';
+                    if (menuAdminLogout) menuAdminLogout.style.display = 'none';
                     
                     // Recargar eventos del calendario como usuario no autenticado
                     if (typeof calendar !== 'undefined' && calendar) {
