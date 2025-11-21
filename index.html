@@ -2689,7 +2689,7 @@
         <h2 style="color:#333; margin-bottom:15px;">¡Bienvenida a Aura!</h2>
         <p style="color:#666; margin-bottom:20px;">Ingresa tus datos para continuar al pago</p>
         <input type="text" id="quick-name" placeholder="Nombre completo" style="width:100%; padding:15px; margin-bottom:15px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
-        <input type="tel" id="quick-phone" placeholder="Teléfono (10 dígitos)" style="width:100%; padding:15px; margin-bottom:20px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
+        <input type="tel" id="quick-phone" placeholder="Teléfono (10 dígitos)" pattern="[0-9]{10}" maxlength="10" style="width:100%; padding:15px; margin-bottom:20px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
         <div style="display:flex; gap:15px;">
           <button onclick="guardarRegistroLocalYPagar()" style="flex:1; background:#f6c8c7; color:white; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Continuar al Pago</button>
           <button onclick="document.getElementById('register-modal').style.display='none'" style="flex:1; background:#eee; color:#666; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Cancelar</button>

@@ -1,7 +1,7 @@
 // script.js - Flujo de pago AURA Studio (registro único con localStorage)
 const BACKEND_URL = "https://aura-eta-five.vercel.app/api/create-preference"; // cambiarás por la tuya real
 
-// Variable global para almacenar el paquete seleccionado
+// Global variable to store the selected package
 let selectedPackage = { title: '', price: 0 };
 
 function showRegisterModal() {
@@ -29,10 +29,19 @@ function iniciarPago(button) {
 function guardarRegistroLocalYPagar() {
   const name = document.getElementById('quick-name').value.trim();
   const phone = document.getElementById('quick-phone').value.trim();
-  if (!name || !phone || phone.length < 10) {
-    alert('⚠️ Por favor completa nombre y teléfono válido');
+  
+  // Validate name
+  if (!name) {
+    alert('⚠️ Por favor ingresa tu nombre completo');
     return;
   }
+  
+  // Validate phone: only digits and exactly 10 characters
+  if (!phone || !/^\d{10}$/.test(phone)) {
+    alert('⚠️ Por favor ingresa un teléfono válido de 10 dígitos (solo números)');
+    return;
+  }
+  
   localStorage.setItem('userName', name);
   localStorage.setItem('userPhone', phone);
   localStorage.setItem('registered', 'true');
