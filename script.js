@@ -1,5 +1,7 @@
 // script.js - Flujo de pago AURA Studio (registro único con localStorage)
 const BACKEND_URL = "https://aura-eta-five.vercel.app/api/create-preference"; // cambiarás por la tuya real
+const REQUIRED_PHONE_DIGITS = 10;
+const PHONE_PATTERN = /^\d{10}$/;
 
 // Global variable to store the selected package
 let selectedPackage = { title: '', price: 0 };
@@ -36,9 +38,9 @@ function guardarRegistroLocalYPagar() {
     return;
   }
   
-  // Validate phone: only digits and exactly 10 characters
-  if (!phone || !/^\d{10}$/.test(phone)) {
-    alert('⚠️ Por favor ingresa un teléfono válido de 10 dígitos (solo números)');
+  // Validate phone: only digits and exactly the required length
+  if (!phone || !PHONE_PATTERN.test(phone)) {
+    alert(`⚠️ Por favor ingresa un teléfono válido de ${REQUIRED_PHONE_DIGITS} dígitos (solo números)`);
     return;
   }
   
