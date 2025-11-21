@@ -6,6 +6,8 @@
 // ========== CONFIGURATION ==========
 const BACKEND_URL = window.location.origin; // Easy to change for different environments
 // Alternative: const BACKEND_URL = 'http://localhost:3000'; or 'https://aura-studio.com'
+const CREATE_PREFERENCE_ENDPOINT = '/api/create-preference';
+const PHONE_REGEX = /^[0-9]{10}$/; // 10 digits, Mexican phone number format
 
 // ========== GLOBAL VARIABLES ==========
 let currentUser = null; // { telefono, nombre }
@@ -84,7 +86,7 @@ function guardarRegistroLocalYPagar() {
         return false;
     }
     
-    if (!/^[0-9]{10}$/.test(phone)) {
+    if (!PHONE_REGEX.test(phone)) {
         errorDiv.textContent = 'El teléfono debe tener exactamente 10 dígitos';
         errorDiv.style.display = 'block';
         return false;
@@ -119,7 +121,7 @@ async function proceedToPayment(userName, userPhone, packageTitle, packagePrice)
         console.log('💳 Creando preferencia de pago...', { userName, userPhone, packageTitle, packagePrice });
         
         // Call backend to create Mercado Pago preference
-        const response = await fetch(`${BACKEND_URL}/api/create-preference`, {
+        const response = await fetch(`${BACKEND_URL}${CREATE_PREFERENCE_ENDPOINT}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -133,8 +135,14 @@ async function proceedToPayment(userName, userPhone, packageTitle, packagePrice)
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al crear la preferencia de pago');
+            let errorMessage = 'Error al crear la preferencia de pago';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.error || errorMessage;
+            } catch (e) {
+                console.warn('Error parsing error response:', e);
+            }
+            throw new Error(errorMessage);
         }
 
         const data = await response.json();
