@@ -91,7 +91,7 @@ function guardarRegistroLocalYPagar() {
     
     // Validations
     if (!nombre || !telefono) {
-        errorDiv.textContent = 'Completa nombre y teléfono';
+        errorDiv.textContent = 'Por favor, completa nombre y teléfono';
         errorDiv.style.display = 'block';
         return false;
     }
