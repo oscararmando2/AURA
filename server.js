@@ -51,7 +51,8 @@ app.post('/api/create-preference', async (req, res) => {
                 name: userName,
                 email: tempEmail,
                 phone: {
-                    number: userPhone
+                    area_code: userPhone.substring(0, 2), // Extract area code (e.g., "55" from "5512345678")
+                    number: userPhone.substring(2) // Remaining digits
                 }
             },
             back_urls: {
@@ -95,8 +96,15 @@ app.post('/api/webhook', async (req, res) => {
         const payment = req.body;
         console.log('📩 Webhook received:', payment);
         
+        // IMPORTANT: In production, validate the webhook signature
+        // See: https://www.mercadopago.com.mx/developers/en/docs/checkout-pro/additional-content/security/notifications
+        // const xSignature = req.headers['x-signature'];
+        // const xRequestId = req.headers['x-request-id'];
+        // Validate signature here...
+        
         // Here you can process the payment notification
         // and update your database accordingly
+        // Example: Update order status in Firestore, send confirmation email, etc.
         
         res.status(200).send('OK');
     } catch (error) {

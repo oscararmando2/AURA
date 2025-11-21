@@ -3650,7 +3650,8 @@
                 console.log('Creando preferencia de pago...', { userName, userPhone, packageTitle, packagePrice });
                 
                 // Llamar al backend para crear la preferencia de Mercado Pago
-                const response = await fetch('http://localhost:3000/api/create-preference', {
+                // Use relative URL to work in any environment (localhost, production, etc.)
+                const response = await fetch('/api/create-preference', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
