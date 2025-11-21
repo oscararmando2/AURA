@@ -132,7 +132,7 @@ php -S localhost:8080
 - **Base de datos**: MySQL
 - **PDFs**: FPDF
 
-## Instalación
+## 🚀 Configuración Inicial
 
 1. Clonar el repositorio:
 ```bash
@@ -159,7 +159,7 @@ cp .env.example .env
 - [Guía Rápida: MERCADOPAGO_ACCESS_TOKEN_SETUP.md](MERCADOPAGO_ACCESS_TOKEN_SETUP.md)
 - [Documentación Completa: MERCADOPAGO_README.md](MERCADOPAGO_README.md)
 
-## 📦 Instalación
+## 📦 Instalación Detallada
 
 ### Sistema Python (Recomendado)
 
