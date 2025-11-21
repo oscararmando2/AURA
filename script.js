@@ -38,73 +38,83 @@ function handlePaymentClick(button) {
         console.log('✅ Usuario ya registrado, procediendo al pago...');
         proceedToPayment(userName, userPhone, title, price);
     } else {
-        // Not registered, show quick registration modal
+        // Not registered, show registration modal
         console.log('⚠️ Usuario no registrado, mostrando modal...');
-        showQuickRegisterModal();
+        showRegisterModal();
     }
 }
 
 /**
- * Show quick registration modal
+ * Show registration modal for payment flow
  */
-function showQuickRegisterModal() {
-    const modal = document.getElementById('quick-register-modal');
+function showRegisterModal() {
+    const modal = document.getElementById('register-modal');
     if (modal) {
         modal.style.display = 'flex';
         
         // Clear fields
-        document.getElementById('quick-register-name').value = '';
-        document.getElementById('quick-register-phone').value = '';
-        document.getElementById('quick-register-error').style.display = 'none';
+        document.getElementById('register-name').value = '';
+        document.getElementById('register-phone').value = '';
+        document.getElementById('register-error').style.display = 'none';
+        document.getElementById('register-success').style.display = 'none';
+        
+        // Focus on name field
+        document.getElementById('register-name').focus();
     }
 }
 
 /**
- * Hide quick registration modal
+ * Hide/close registration modal
  */
-function hideQuickRegisterModal() {
-    const modal = document.getElementById('quick-register-modal');
+function closeRegisterModal() {
+    const modal = document.getElementById('register-modal');
     if (modal) {
         modal.style.display = 'none';
+        
+        // Clear form
+        document.getElementById('register-form').reset();
+        document.getElementById('register-error').style.display = 'none';
+        document.getElementById('register-success').style.display = 'none';
     }
+    // Clear pending payment package
     pendingPaymentPackage = null;
 }
 
 /**
  * Save registration to localStorage and proceed to payment
- * This function is called when the modal form is submitted
+ * This function is called when the user wants to pay without full Firebase registration
  */
 function guardarRegistroLocalYPagar() {
-    const name = document.getElementById('quick-register-name').value.trim();
-    const phone = document.getElementById('quick-register-phone').value.trim();
-    const errorDiv = document.getElementById('quick-register-error');
+    const nombre = document.getElementById('register-name').value.trim();
+    const telefono = document.getElementById('register-phone').value.trim().replace(/\D/g, '');
+    const errorDiv = document.getElementById('register-error');
     
     // Validations
-    if (!name || !phone) {
-        errorDiv.textContent = 'Por favor, completa todos los campos';
+    if (!nombre || !telefono) {
+        errorDiv.textContent = 'Por favor, completa nombre y teléfono';
         errorDiv.style.display = 'block';
         return false;
     }
     
-    if (!PHONE_REGEX.test(phone)) {
+    if (!PHONE_REGEX.test(telefono)) {
         errorDiv.textContent = 'El teléfono debe tener exactamente 10 dígitos';
         errorDiv.style.display = 'block';
         return false;
     }
     
     // Save to localStorage
-    localStorage.setItem('userName', name);
-    localStorage.setItem('userPhone', phone);
+    localStorage.setItem('userName', nombre);
+    localStorage.setItem('userPhone', telefono);
     localStorage.setItem('registered', 'true');
     
-    console.log('✅ Usuario registrado en localStorage:', { name, phone });
+    console.log('✅ Usuario registrado en localStorage:', { nombre, telefono });
     
     // Hide modal
-    hideQuickRegisterModal();
+    closeRegisterModal();
     
     // Proceed to payment with pending package
     if (pendingPaymentPackage) {
-        proceedToPayment(name, phone, pendingPaymentPackage.title, pendingPaymentPackage.price);
+        proceedToPayment(nombre, telefono, pendingPaymentPackage.title, pendingPaymentPackage.price);
     } else {
         console.warn('⚠️ No hay paquete pendiente para pagar');
     }
@@ -164,26 +174,11 @@ async function proceedToPayment(userName, userPhone, packageTitle, packagePrice)
 // ========== EVENT LISTENERS ==========
 
 /**
- * Initialize quick registration form
+ * Initialize payment flow
  */
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Inicializando AURA Studio...');
     console.log('📍 Backend URL:', BACKEND_URL);
-    
-    // Setup quick registration form
-    const quickRegisterForm = document.getElementById('quick-register-form');
-    const quickRegisterCancel = document.getElementById('quick-register-cancel');
-    
-    if (quickRegisterForm) {
-        quickRegisterForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            guardarRegistroLocalYPagar();
-        });
-    }
-    
-    if (quickRegisterCancel) {
-        quickRegisterCancel.addEventListener('click', hideQuickRegisterModal);
-    }
     
     // Check if user is already registered
     const isRegistered = localStorage.getItem('registered');
@@ -203,8 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // ========== EXPOSE GLOBAL FUNCTIONS ==========
 // Make functions available globally for onclick handlers
 window.handlePaymentClick = handlePaymentClick;
-window.showQuickRegisterModal = showQuickRegisterModal;
-window.hideQuickRegisterModal = hideQuickRegisterModal;
+window.showRegisterModal = showRegisterModal;
+window.closeRegisterModal = closeRegisterModal;
 window.guardarRegistroLocalYPagar = guardarRegistroLocalYPagar;
 window.proceedToPayment = proceedToPayment;
 
