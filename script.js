@@ -1,5 +1,10 @@
 // script.js - Flujo de pago AURA Studio (registro único con localStorage)
 const BACKEND_URL = "https://aura-eta-five.vercel.app/api/create-preference"; // cambiarás por la tuya real
+const REQUIRED_PHONE_DIGITS = 10;
+const PHONE_PATTERN = /^\d{10}$/;
+
+// Global variable to store the selected package
+let selectedPackage = { title: '', price: 0 };
 
 function showRegisterModal() {
   document.getElementById("register-modal").style.display = "flex";
@@ -12,6 +17,9 @@ function closeRegisterModal() {
 function iniciarPago(button) {
   const title = button.dataset.title;
   const price = Number(button.dataset.price);
+  
+  // Guardar el paquete seleccionado
+  selectedPackage = { title, price };
 
   if (localStorage.getItem("registered") === "true") {
     crearPreferenciaYpagar(title, price);
@@ -21,25 +29,26 @@ function iniciarPago(button) {
 }
 
 function guardarRegistroLocalYPagar() {
-  const nombre = document.getElementById("register-name").value.trim();
-  const telefono = document.getElementById("register-phone").value.trim().replace(/\D/g, "");
-
-  if (!nombre || !telefono) {
-    alert("Completa nombre y teléfono");
+  const name = document.getElementById('quick-name').value.trim();
+  const phone = document.getElementById('quick-phone').value.trim();
+  
+  // Validate name
+  if (!name) {
+    alert('⚠️ Por favor ingresa tu nombre completo');
     return;
   }
-
-  localStorage.setItem("userName", nombre);
-  localStorage.setItem("userPhone", telefono);
-  localStorage.setItem("registered", "true");
-
-  // Cerrar tu modal
-  document.getElementById("register-modal").style.display = "none";
-
-  const title = document.querySelector(".plan-btn[onclick*='iniciarPago']").dataset.title;
-  const price = Number(document.querySelector(".plan-btn[onclick*='iniciarPago']").dataset.price);
-
-  crearPreferenciaYpagar(title, price);
+  
+  // Validate phone: only digits and exactly the required length
+  if (!phone || !PHONE_PATTERN.test(phone)) {
+    alert(`⚠️ Por favor ingresa un teléfono válido de ${REQUIRED_PHONE_DIGITS} dígitos (solo números)`);
+    return;
+  }
+  
+  localStorage.setItem('userName', name);
+  localStorage.setItem('userPhone', phone);
+  localStorage.setItem('registered', 'true');
+  document.getElementById('register-modal').style.display = 'none';
+  crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
 }
 
 async function crearPreferenciaYpagar(title, price) {

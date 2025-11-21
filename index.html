@@ -2667,9 +2667,6 @@
         
         <!-- Menú desplegable -->
         <div id="menu-dropdown" role="menu" aria-hidden="true" style="display: none; position: absolute; top: 60px; right: 0; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); border: 2px solid rgba(246, 200, 199, 0.3); min-width: 200px; overflow: hidden;">
-            <button id="menu-user-login" role="menuitem" aria-label="Iniciar Sesión" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
-                🔓 Iniciar Sesión
-            </button>
             <button id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 📝 Registrarse
             </button>
@@ -2687,72 +2684,20 @@
 
     <!-- Modal para Registro de Usuario -->
     <!-- Modal de Registro - Usado para ambos: crear cuenta completa Y registro rápido para pago -->
-    <div id="register-modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
-        <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
-            <h2 id="register-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Registrarse</h2>
-            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Crea tu cuenta para reservar clases</p>
-            <div id="register-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
-            <div id="register-success" style="display: none; background: linear-gradient(135deg, #c8f6c8 0%, #e3fbe3 100%); color: #2d5f2d; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
-            <form id="register-form">
-                <div style="margin-bottom: 15px;">
-                    <label for="register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
-                    <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="register-phone" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Número de Teléfono</label>
-                    <input type="tel" id="register-phone" required placeholder="7151596586" pattern="[0-9]+" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
-                </div>
-                <div id="register-password-section" style="margin-bottom: 20px;">
-                    <label for="register-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña (opcional para pago rápido)</label>
-                    <input type="password" id="register-password" minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo necesaria para crear cuenta completa</small>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <!-- Botón para continuar al pago (solo localStorage) -->
-                    <button type="button" id="register-continue-payment" onclick="guardarRegistroLocalYPagar()" style="width: 100%; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; border-radius: 8px;">
-                        Continuar al Pago
-                    </button>
-                    <!-- Botón para registro completo con Firebase -->
-                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%); color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; border-radius: 8px;">
-                        Crear Cuenta Completa
-                    </button>
-                    <!-- Botón cancelar -->
-                    <button type="button" id="register-cancel" style="width: 100%; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; border-radius: 8px;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
+    <div id="register-modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:#fff; padding:40px; border-radius:20px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(246,200,199,0.4); border:3px solid #f6c8c7;">
+        <h2 id="register-modal-title" style="color:#333; margin-bottom:15px;">¡Bienvenida a Aura!</h2>
+        <p style="color:#666; margin-bottom:20px;">Ingresa tus datos para continuar al pago</p>
+        <input type="text" id="quick-name" placeholder="Nombre completo" aria-label="Nombre completo" required style="width:100%; padding:15px; margin-bottom:15px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
+        <input type="tel" id="quick-phone" placeholder="Teléfono (10 dígitos)" pattern="[0-9]{10}" maxlength="10" aria-label="Teléfono de 10 dígitos" required style="width:100%; padding:15px; margin-bottom:20px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
+        <div style="display:flex; gap:15px;">
+          <button onclick="guardarRegistroLocalYPagar()" style="flex:1; background:#f6c8c7; color:white; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Continuar al Pago</button>
+          <button onclick="document.getElementById('register-modal').style.display='none'" style="flex:1; background:#eee; color:#666; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Cancelar</button>
         </div>
+      </div>
     </div>
 
-    <!-- Modal para Login de Usuario Normal -->
-    <div id="user-login-modal" role="dialog" aria-labelledby="user-login-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
-        <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
-            <h2 id="user-login-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Iniciar Sesión</h2>
-            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Ingresa tu número de teléfono para continuar</p>
-            <div id="user-login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
-            <form id="user-login-form">
-                <div style="margin-bottom: 15px;">
-                    <label for="user-login-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Número de Teléfono</label>
-                    <input type="tel" id="user-login-email" required placeholder="7151596586" pattern="[0-9]+" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
-                </div>
-                <div style="margin-bottom: 20px;">
-                    <label for="user-login-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
-                    <input type="password" id="user-login-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
-                        Iniciar Sesión
-                    </button>
-                    <button type="button" id="user-login-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <!-- Modal para Selección de Horario -->
     <div id="time-selection-modal" role="dialog" aria-labelledby="time-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
@@ -3216,15 +3161,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             const hamburgerBtn = document.getElementById('hamburger-btn');
             const menuDropdown = document.getElementById('menu-dropdown');
-            const menuUserLogin = document.getElementById('menu-user-login');
             const menuRegister = document.getElementById('menu-register');
             const menuAdminLogin = document.getElementById('menu-admin-login');
             const menuLogout = document.getElementById('menu-logout');
             
             const registerModal = document.getElementById('register-modal');
-            const registerCancel = document.getElementById('register-cancel');
-            const userLoginModal = document.getElementById('user-login-modal');
-            const userLoginCancel = document.getElementById('user-login-cancel');
             const adminLoginModal = document.getElementById('admin-login-modal');
             const adminLoginCancel = document.getElementById('admin-login-cancel');
             
@@ -3246,7 +3187,7 @@
             });
             
             // Hover effects for menu items
-            const menuItems = [menuUserLogin, menuRegister, menuAdminLogin, menuLogout];
+            const menuItems = [menuRegister, menuAdminLogin, menuLogout];
             menuItems.forEach(item => {
                 item.addEventListener('mouseenter', () => {
                     item.style.background = 'linear-gradient(135deg, #fef5f5 0%, #fbe3e3 100%)';
@@ -3256,22 +3197,13 @@
                 });
             });
             
-            // Show user login modal
-            menuUserLogin.addEventListener('click', () => {
-                menuDropdown.style.display = 'none';
-                hamburgerBtn.setAttribute('aria-expanded', 'false');
-                menuDropdown.setAttribute('aria-hidden', 'true');
-                userLoginModal.style.display = 'flex';
-                document.getElementById('user-login-email').focus();
-            });
-            
             // Show register modal
             menuRegister.addEventListener('click', () => {
                 menuDropdown.style.display = 'none';
                 hamburgerBtn.setAttribute('aria-expanded', 'false');
                 menuDropdown.setAttribute('aria-hidden', 'true');
                 registerModal.style.display = 'flex';
-                document.getElementById('register-phone').focus();
+                document.getElementById('quick-name').focus();
             });
             
             // Show admin login modal
@@ -3281,18 +3213,6 @@
                 menuDropdown.setAttribute('aria-hidden', 'true');
                 adminLoginModal.style.display = 'flex';
                 document.getElementById('admin-email').focus();
-            });
-            
-            // Close user login modal
-            userLoginCancel.addEventListener('click', () => {
-                userLoginModal.style.display = 'none';
-                document.getElementById('user-login-form').reset();
-                document.getElementById('user-login-error').style.display = 'none';
-            });
-            
-            // Close register modal
-            registerCancel.addEventListener('click', () => {
-                closeRegisterModal();
             });
             
             // Close admin login modal
@@ -3347,7 +3267,6 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     registerModal.style.display = 'none';
-                    userLoginModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
                     timeModal.style.display = 'none';
                     menuDropdown.style.display = 'none';
@@ -3360,17 +3279,9 @@
             registerModal.addEventListener('click', (e) => {
                 if (e.target === registerModal) {
                     registerModal.style.display = 'none';
-                    document.getElementById('register-form').reset();
-                    document.getElementById('register-error').style.display = 'none';
-                    document.getElementById('register-success').style.display = 'none';
-                }
-            });
-            
-            userLoginModal.addEventListener('click', (e) => {
-                if (e.target === userLoginModal) {
-                    userLoginModal.style.display = 'none';
-                    document.getElementById('user-login-form').reset();
-                    document.getElementById('user-login-error').style.display = 'none';
+                    // Clear input fields
+                    document.getElementById('quick-name').value = '';
+                    document.getElementById('quick-phone').value = '';
                 }
             });
             
@@ -4405,232 +4316,6 @@
         // ========== VARIABLES GLOBALES ==========
         let currentUser = null;
 
-        // ========== UTILIDADES DE CONTRASEÑA ==========
-
-        /**
-         * Hash password using SHA-256
-         * @param {string} password - Plain text password
-         * @returns {Promise<string>} - Hashed password in hex format
-         */
-        async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hashHex;
-        }
-
-        /**
-         * Verify password against stored hash
-         * @param {string} password - Plain text password to verify
-         * @param {string} storedHash - Stored password hash
-         * @returns {Promise<boolean>} - True if password matches
-         */
-        async function verifyPassword(password, storedHash) {
-            const passwordHash = await hashPassword(password);
-            return passwordHash === storedHash;
-        }
-
-        // ========== FUNCIONES DE AUTENTICACIÓN ==========
-
-        /**
-         * Manejar el envío del formulario de registro
-         * Ahora incluye contraseña para autenticación segura
-         */
-        function setupUserRegistration() {
-            const registerForm = document.getElementById('register-form');
-            const registerError = document.getElementById('register-error');
-            const registerSuccess = document.getElementById('register-success');
-
-            registerForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const telefono = document.getElementById('register-phone').value.trim();
-                const nombre = document.getElementById('register-name').value.trim();
-                const password = document.getElementById('register-password').value;
-                
-                // Validar que sea un número de teléfono válido (solo números)
-                if (!telefono || !/^\d+$/.test(telefono)) {
-                    registerError.textContent = 'Por favor, ingresa un número de teléfono válido (solo números)';
-                    registerError.style.display = 'block';
-                    return;
-                }
-                
-                // Validar que el nombre no esté vacío
-                if (!nombre) {
-                    registerError.textContent = 'Por favor, ingresa tu nombre completo';
-                    registerError.style.display = 'block';
-                    return;
-                }
-                
-                // Validar contraseña
-                if (!password || password.length < 6) {
-                    registerError.textContent = 'La contraseña debe tener al menos 6 caracteres';
-                    registerError.style.display = 'block';
-                    return;
-                }
-                
-                // Ocultar mensajes previos
-                registerError.style.display = 'none';
-                registerSuccess.style.display = 'none';
-                
-                try {
-                    // Verificar si ya existe un perfil para este teléfono
-                    const q = query(collection(db, 'usuarios'), where('telefono', '==', telefono));
-                    const existingProfile = await getDocs(q);
-                    
-                    if (!existingProfile.empty) {
-                        registerError.textContent = 'Este número de teléfono ya está registrado. Por favor, inicia sesión.';
-                        registerError.style.display = 'block';
-                        return;
-                    }
-                    
-                    // Hash de la contraseña
-                    const passwordHash = await hashPassword(password);
-                    
-                    // Guardar perfil del usuario en Firestore
-                    await addDoc(collection(db, 'usuarios'), {
-                        telefono: telefono,
-                        nombre: nombre,
-                        passwordHash: passwordHash,
-                        timestamp: serverTimestamp()
-                    });
-                    
-                    console.log('✅ Usuario registrado exitosamente:', telefono);
-                    
-                    // Guardar en localStorage y establecer como usuario actual
-                    localStorage.setItem('userTelefono', telefono);
-                    localStorage.setItem('userNombre', nombre);
-                    currentUser = { telefono: telefono, nombre: nombre };
-                    
-                    // Mostrar mensaje de éxito
-                    registerSuccess.textContent = `¡Registro exitoso! Bienvenido/a ${nombre}`;
-                    registerSuccess.style.display = 'block';
-                    
-                    // Limpiar formulario
-                    registerForm.reset();
-                    
-                    // Cerrar modal después de 2 segundos y actualizar UI
-                    setTimeout(() => {
-                        document.getElementById('register-modal').style.display = 'none';
-                        registerSuccess.style.display = 'none';
-                        
-                        // Actualizar UI para usuario logueado
-                        updateUIForLoggedInUser();
-                        
-                        // Cargar clases del usuario
-                        loadUserClasses(telefono);
-                    }, 2000);
-                    
-                } catch (error) {
-                    console.error('Error de registro:', error);
-                    
-                    // Mostrar mensaje de error
-                    let errorMessage = 'Error al registrar. Por favor, inténtalo de nuevo.';
-                    
-                    if (error.message) {
-                        errorMessage = error.message;
-                    }
-                    
-                    registerError.textContent = errorMessage;
-                    registerError.style.display = 'block';
-                }
-            });
-        }
-
-        /**
-         * Manejar el envío del formulario de login de usuario normal
-         * Ahora verifica tanto el teléfono como la contraseña
-         */
-        function setupUserLogin() {
-            const loginForm = document.getElementById('user-login-form');
-            const loginError = document.getElementById('user-login-error');
-
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const telefono = document.getElementById('user-login-email').value.trim();
-                const password = document.getElementById('user-login-password').value;
-                
-                // Validar que sea un número de teléfono válido (solo números)
-                if (!telefono || !/^\d+$/.test(telefono)) {
-                    loginError.textContent = 'Por favor, ingresa un número de teléfono válido (solo números)';
-                    loginError.style.display = 'block';
-                    return;
-                }
-                
-                // Validar contraseña
-                if (!password) {
-                    loginError.textContent = 'Por favor, ingresa tu contraseña';
-                    loginError.style.display = 'block';
-                    return;
-                }
-                
-                // Ocultar error previo
-                loginError.style.display = 'none';
-                
-                try {
-                    // Buscar el usuario en Firestore
-                    const q = query(collection(db, 'usuarios'), where('telefono', '==', telefono));
-                    const querySnapshot = await getDocs(q);
-                    
-                    if (querySnapshot.empty) {
-                        loginError.textContent = 'Número de teléfono no registrado. Por favor, regístrate primero.';
-                        loginError.style.display = 'block';
-                        return;
-                    }
-                    
-                    const userDoc = querySnapshot.docs[0];
-                    const userData = userDoc.data();
-                    
-                    // Verificar si el usuario tiene contraseña guardada
-                    if (!userData.passwordHash) {
-                        // Usuario antiguo sin contraseña - permitir acceso y sugerir actualizar
-                        console.warn('⚠️ Usuario sin contraseña. Considera actualizar tu cuenta.');
-                        loginError.textContent = 'Tu cuenta necesita ser actualizada. Por favor, regístrate nuevamente para establecer una contraseña.';
-                        loginError.style.display = 'block';
-                        return;
-                    }
-                    
-                    // Verificar la contraseña
-                    const passwordValid = await verifyPassword(password, userData.passwordHash);
-                    
-                    if (!passwordValid) {
-                        loginError.textContent = 'Contraseña incorrecta. Por favor, inténtalo de nuevo.';
-                        loginError.style.display = 'block';
-                        return;
-                    }
-                    
-                    // Login exitoso
-                    const nombre = userData.nombre || '';
-                    
-                    // Guardar teléfono y nombre en localStorage
-                    localStorage.setItem('userTelefono', telefono);
-                    if (nombre) {
-                        localStorage.setItem('userNombre', nombre);
-                    }
-                    currentUser = { telefono: telefono, nombre: nombre };
-                    
-                    console.log('✅ Login exitoso con teléfono:', telefono, 'nombre:', nombre);
-                    
-                    // Cerrar modal
-                    document.getElementById('user-login-modal').style.display = 'none';
-                    document.getElementById('user-login-form').reset();
-                    
-                    // Cargar clases del usuario
-                    await loadUserClasses(telefono);
-                    
-                    // Actualizar UI
-                    updateUIForLoggedInUser();
-                } catch (error) {
-                    console.error('Error al iniciar sesión:', error);
-                    loginError.textContent = 'Error al iniciar sesión. Por favor, inténtalo de nuevo.';
-                    loginError.style.display = 'block';
-                }
-            });
-        }
-
         /**
          * Manejar el envío del formulario de login de administrador
          */
@@ -4748,14 +4433,12 @@
          */
         function updateUIForLoggedInUser() {
             const menuLogout = document.getElementById('menu-logout');
-            const menuUserLogin = document.getElementById('menu-user-login');
             const menuRegister = document.getElementById('menu-register');
             
             // Mostrar botón de logout
             menuLogout.style.display = 'block';
             
-            // Ocultar opciones de login y registro
-            menuUserLogin.style.display = 'none';
+            // Ocultar opciones de registro
             if (menuRegister) menuRegister.style.display = 'none';
         }
         
@@ -4764,14 +4447,12 @@
          */
         function updateUIForLoggedOutUser() {
             const menuLogout = document.getElementById('menu-logout');
-            const menuUserLogin = document.getElementById('menu-user-login');
             const menuRegister = document.getElementById('menu-register');
             
             // Ocultar botón de logout
             menuLogout.style.display = 'none';
             
-            // Mostrar opciones de login y registro
-            menuUserLogin.style.display = 'block';
+            // Mostrar opciones de registro
             if (menuRegister) menuRegister.style.display = 'block';
         }
         
@@ -5800,9 +5481,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('Inicializando sistema de autenticación y reservas...');
             
-            // Configurar registro, login y logout
-            setupUserRegistration();
-            setupUserLogin();
+            // Configurar admin login y logout
             setupAdminLogin();
             setupLogout();
             
