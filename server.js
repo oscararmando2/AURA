@@ -16,7 +16,26 @@ app.use(express.static('.', {
     index: ['index.html']
 }));
 
+// Validate that MERCADOPAGO_ACCESS_TOKEN is configured
+if (!process.env.MERCADOPAGO_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN === 'TEST-your-access-token-here' || process.env.MERCADOPAGO_ACCESS_TOKEN === 'your-access-token-here') {
+    console.error(`
+❌ ERROR: MERCADOPAGO_ACCESS_TOKEN not properly configured
+    
+Please follow these steps:
+1. Get your Access Token from: https://www.mercadopago.com.mx/developers/panel/credentials
+2. Update the .env file with your actual token:
+   MERCADOPAGO_ACCESS_TOKEN=TEST-1234567890-your-test-token-here (for testing)
+   or
+   MERCADOPAGO_ACCESS_TOKEN=APP-1234567890-your-prod-token-here (for production)
+3. Restart the server
+
+Note: The authorization header will be: 'Authorization: Bearer <your-token-here>'
+    `);
+    process.exit(1);
+}
+
 // Configure MercadoPago client (v2 API)
+// This will use the access token in the Authorization header as: Bearer <token>
 const client = new mercadopago.MercadoPagoConfig({
     accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN
 });
@@ -120,10 +139,26 @@ app.post('/api/webhook', async (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
+    const tokenType = process.env.MERCADOPAGO_ACCESS_TOKEN.startsWith('TEST-') ? 'TEST (Sandbox)' : 'PRODUCTION';
+    const tokenPreview = process.env.MERCADOPAGO_ACCESS_TOKEN.substring(0, 20) + '...';
+    
     console.log(`
 🚀 AURA MercadoPago Server Started
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📍 Port: ${PORT}
 🌐 URL: http://localhost:${PORT}
-💳 MercadoPago: ${process.env.MERCADOPAGO_ACCESS_TOKEN ? '✅ Configured' : '❌ Not configured'}
+💳 MercadoPago Access Token: ✅ Configured (${tokenType})
+   Token Preview: ${tokenPreview}
+   Authorization: Bearer <token> (handled by SDK)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+API Endpoints:
+  • GET  /api/health           - Health check
+  • POST /api/create-preference - Create payment preference
+  • POST /api/webhook          - MercadoPago notifications
+
+The MercadoPago SDK will automatically add the Authorization header:
+  Authorization: Bearer ${tokenPreview}
+to all requests to: https://api.mercadopago.com/v1/payments
     `);
 });

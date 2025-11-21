@@ -29,6 +29,9 @@ BASE_URL=http://localhost:3000
 
 **IMPORTANTE**: Nunca subas tu `.env` a Git. Ya está en `.gitignore`.
 
+📖 **Para una guía detallada de configuración del Access Token, consulta:**
+[MERCADOPAGO_ACCESS_TOKEN_SETUP.md](MERCADOPAGO_ACCESS_TOKEN_SETUP.md)
+
 ### 3. Instalar Dependencias
 
 ```bash
