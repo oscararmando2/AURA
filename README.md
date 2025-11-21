@@ -132,7 +132,7 @@ php -S localhost:8080
 - **Base de datos**: MySQL
 - **PDFs**: FPDF
 
-## Instalación
+## 🚀 Configuración Inicial
 
 1. Clonar el repositorio:
 ```bash
@@ -145,13 +145,21 @@ cd AURA
 npm install
 ```
 
-3. Configurar variables de entorno (opcional):
+3. Configurar variables de entorno (requerido para MercadoPago):
 ```bash
+# Opción 1: Usar el script de configuración automática
+./setup-env.sh
+
+# Opción 2: Configuración manual
 cp .env.example .env
-# Editar .env con tus valores
+# Editar .env con tus valores de MercadoPago Access Token
 ```
 
-## 📦 Instalación
+📖 **Para configurar MercadoPago Access Token:**
+- [Guía Rápida: MERCADOPAGO_ACCESS_TOKEN_SETUP.md](MERCADOPAGO_ACCESS_TOKEN_SETUP.md)
+- [Documentación Completa: MERCADOPAGO_README.md](MERCADOPAGO_README.md)
+
+## 📦 Instalación Detallada
 
 ### Sistema Python (Recomendado)
 
