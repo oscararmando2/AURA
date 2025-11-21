@@ -2686,7 +2686,7 @@
     </div>
 
     <!-- Modal para Registro de Usuario -->
-    <!-- NOTE: This modal uses Firebase/Firestore for full user accounts. For payment flow, see #quick-register-modal -->
+    <!-- Modal de Registro - Usado para ambos: crear cuenta completa Y registro rápido para pago -->
     <div id="register-modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
         <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
             <h2 id="register-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Registrarse</h2>
@@ -2695,24 +2695,30 @@
             <div id="register-success" style="display: none; background: linear-gradient(135deg, #c8f6c8 0%, #e3fbe3 100%); color: #2d5f2d; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
             <form id="register-form">
                 <div style="margin-bottom: 15px;">
+                    <label for="register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
+                    <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 15px;">
                     <label for="register-phone" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Número de Teléfono</label>
                     <input type="tel" id="register-phone" required placeholder="7151596586" pattern="[0-9]+" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                     <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
                 </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
-                    <input type="text" id="register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                </div>
-                <div style="margin-bottom: 20px;">
+                <div id="register-password-section" style="margin-bottom: 20px;">
                     <label for="register-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
-                    <input type="password" id="register-password" required minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <input type="password" id="register-password" minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                     <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Mínimo 6 caracteres</small>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
-                        Registrarse
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Botón para continuar al pago (solo localStorage) -->
+                    <button type="button" id="register-continue-payment" onclick="guardarRegistroLocalYPagar()" style="width: 100%; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; border-radius: 8px;">
+                        Continuar al Pago
                     </button>
-                    <button type="button" id="register-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
+                    <!-- Botón para registro completo con Firebase -->
+                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #e8cccc 0%, #f6c8c7 100%); color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; border-radius: 8px;">
+                        Crear Cuenta Completa
+                    </button>
+                    <!-- Botón cancelar -->
+                    <button type="button" id="register-cancel" style="width: 100%; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; border-radius: 8px;">
                         Cancelar
                     </button>
                 </div>
@@ -2767,33 +2773,7 @@
         </div>
     </div>
 
-    <!-- Modal para Registro Rápido de Pago (solo nombre + teléfono) -->
-    <div id="quick-register-modal" role="dialog" aria-labelledby="quick-register-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
-        <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
-            <h2 id="quick-register-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Registro Rápido</h2>
-            <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Completa estos datos para continuar con tu pago</p>
-            <div id="quick-register-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
-            <form id="quick-register-form">
-                <div style="margin-bottom: 15px;">
-                    <label for="quick-register-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre Completo</label>
-                    <input type="text" id="quick-register-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <label for="quick-register-phone" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Número de Teléfono (WhatsApp)</label>
-                    <input type="tel" id="quick-register-phone" required placeholder="5512345678" pattern="[0-9]{10}" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">10 dígitos, sin espacios ni guiones</small>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
-                        Continuar al Pago
-                    </button>
-                    <button type="button" id="quick-register-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
-                        Cancelar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+
 
     <!-- ========== 1. Welcome Section (Hero Section) ========== -->
     <section class="hero-section">
