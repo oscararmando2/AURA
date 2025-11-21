@@ -76,6 +76,8 @@ function closeRegisterModal() {
         document.getElementById('register-error').style.display = 'none';
         document.getElementById('register-success').style.display = 'none';
     }
+    // Clear pending payment package
+    pendingPaymentPackage = null;
 }
 
 /**

@@ -2704,9 +2704,9 @@
                     <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo números, sin espacios ni guiones</small>
                 </div>
                 <div id="register-password-section" style="margin-bottom: 20px;">
-                    <label for="register-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
+                    <label for="register-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña (opcional para pago rápido)</label>
                     <input type="password" id="register-password" minlength="6" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
-                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Mínimo 6 caracteres</small>
+                    <small style="color: #999; font-size: 0.85rem; display: block; margin-top: 5px;">Solo necesaria para crear cuenta completa</small>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <!-- Botón para continuar al pago (solo localStorage) -->
@@ -3292,10 +3292,7 @@
             
             // Close register modal
             registerCancel.addEventListener('click', () => {
-                registerModal.style.display = 'none';
-                document.getElementById('register-form').reset();
-                document.getElementById('register-error').style.display = 'none';
-                document.getElementById('register-success').style.display = 'none';
+                closeRegisterModal();
             });
             
             // Close admin login modal
