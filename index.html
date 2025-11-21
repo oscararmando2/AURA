@@ -3267,7 +3267,6 @@
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     registerModal.style.display = 'none';
-                    userLoginModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
                     timeModal.style.display = 'none';
                     menuDropdown.style.display = 'none';
@@ -3280,17 +3279,9 @@
             registerModal.addEventListener('click', (e) => {
                 if (e.target === registerModal) {
                     registerModal.style.display = 'none';
-                    document.getElementById('register-form').reset();
-                    document.getElementById('register-error').style.display = 'none';
-                    document.getElementById('register-success').style.display = 'none';
-                }
-            });
-            
-            userLoginModal.addEventListener('click', (e) => {
-                if (e.target === userLoginModal) {
-                    userLoginModal.style.display = 'none';
-                    document.getElementById('user-login-form').reset();
-                    document.getElementById('user-login-error').style.display = 'none';
+                    // Clear input fields
+                    document.getElementById('quick-name').value = '';
+                    document.getElementById('quick-phone').value = '';
                 }
             });
             
