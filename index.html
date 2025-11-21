@@ -2686,6 +2686,7 @@
     </div>
 
     <!-- Modal para Registro de Usuario -->
+    <!-- NOTE: This modal uses Firebase/Firestore for full user accounts. For payment flow, see #quick-register-modal -->
     <div id="register-modal" role="dialog" aria-labelledby="register-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
         <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 400px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
             <h2 id="register-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Registrarse</h2>
@@ -3595,138 +3596,7 @@
         }
 
         // ========== MERCADO PAGO PAYMENT FLOW ==========
-        
-        // Variable global para almacenar el paquete seleccionado temporalmente
-        let pendingPaymentPackage = null;
-
-        // Función principal para manejar el click en los botones de pago
-        function handlePaymentClick(button) {
-            const title = button.getAttribute('data-title');
-            const price = button.getAttribute('data-price');
-            
-            // Guardar los datos del paquete seleccionado
-            pendingPaymentPackage = { title, price };
-            
-            // Verificar si el usuario ya está registrado
-            const isRegistered = localStorage.getItem('registered');
-            const userName = localStorage.getItem('userName');
-            const userPhone = localStorage.getItem('userPhone');
-            
-            if (!isRegistered || !userName || !userPhone) {
-                // No está registrado, mostrar modal de registro rápido
-                showQuickRegisterModal();
-            } else {
-                // Ya está registrado, proceder directamente al pago
-                proceedToPayment(userName, userPhone, title, price);
-            }
-        }
-
-        // Mostrar el modal de registro rápido
-        function showQuickRegisterModal() {
-            const modal = document.getElementById('quick-register-modal');
-            modal.style.display = 'flex';
-            
-            // Limpiar campos
-            document.getElementById('quick-register-name').value = '';
-            document.getElementById('quick-register-phone').value = '';
-            document.getElementById('quick-register-error').style.display = 'none';
-        }
-
-        // Ocultar el modal de registro rápido
-        function hideQuickRegisterModal() {
-            const modal = document.getElementById('quick-register-modal');
-            modal.style.display = 'none';
-            pendingPaymentPackage = null;
-        }
-
-        // Proceder al pago con Mercado Pago
-        async function proceedToPayment(userName, userPhone, packageTitle, packagePrice) {
-            try {
-                console.log('Creando preferencia de pago...', { userName, userPhone, packageTitle, packagePrice });
-                
-                // Llamar al backend para crear la preferencia de Mercado Pago
-                // Use relative URL to work in any environment (localhost, production, etc.)
-                const response = await fetch('/api/create-preference', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        title: packageTitle,
-                        price: packagePrice,
-                        userName: userName,
-                        userPhone: userPhone
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Error al crear la preferencia de pago');
-                }
-
-                const data = await response.json();
-                
-                if (data.success && data.initPoint) {
-                    console.log('✅ Preferencia creada, redirigiendo a Mercado Pago...');
-                    // Redirigir al checkout de Mercado Pago
-                    window.location.href = data.initPoint;
-                } else {
-                    throw new Error('No se recibió el link de pago');
-                }
-                
-            } catch (error) {
-                console.error('❌ Error al procesar el pago:', error);
-                alert('Hubo un error al procesar tu pago. Por favor, intenta de nuevo.');
-            }
-        }
-
-        // Configurar el formulario de registro rápido
-        document.addEventListener('DOMContentLoaded', function() {
-            const quickRegisterForm = document.getElementById('quick-register-form');
-            const quickRegisterCancel = document.getElementById('quick-register-cancel');
-            
-            if (quickRegisterForm) {
-                quickRegisterForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const name = document.getElementById('quick-register-name').value.trim();
-                    const phone = document.getElementById('quick-register-phone').value.trim();
-                    const errorDiv = document.getElementById('quick-register-error');
-                    
-                    // Validaciones
-                    if (!name || !phone) {
-                        errorDiv.textContent = 'Por favor, completa todos los campos';
-                        errorDiv.style.display = 'block';
-                        return;
-                    }
-                    
-                    if (!/^[0-9]{10}$/.test(phone)) {
-                        errorDiv.textContent = 'El teléfono debe tener exactamente 10 dígitos';
-                        errorDiv.style.display = 'block';
-                        return;
-                    }
-                    
-                    // Guardar en localStorage
-                    localStorage.setItem('userName', name);
-                    localStorage.setItem('userPhone', phone);
-                    localStorage.setItem('registered', 'true');
-                    
-                    console.log('✅ Usuario registrado:', { name, phone });
-                    
-                    // Ocultar modal
-                    hideQuickRegisterModal();
-                    
-                    // Proceder al pago con el paquete pendiente
-                    if (pendingPaymentPackage) {
-                        proceedToPayment(name, phone, pendingPaymentPackage.title, pendingPaymentPackage.price);
-                    }
-                });
-            }
-            
-            if (quickRegisterCancel) {
-                quickRegisterCancel.addEventListener('click', hideQuickRegisterModal);
-            }
-        });
-
+        // MOVED TO script.js - All payment and quick registration logic is now in external script.js file
         // ========== FIN MERCADO PAGO PAYMENT FLOW ==========
 
         function initCalendar() {
@@ -6152,6 +6022,9 @@
             showCustomAlert(message, type, title);
         };
     </script>
+
+    <!-- ========== External Script for Payment Flow ========== -->
+    <script src="script.js"></script>
 
 </body>
 </html>
