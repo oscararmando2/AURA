@@ -11,9 +11,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('.')); // Serve static files from current directory
 
-// Configure MercadoPago
-mercadopago.configure({
-    access_token: process.env.MERCADOPAGO_ACCESS_TOKEN
+// Configure MercadoPago client (v2 API)
+const client = new mercadopago.MercadoPagoConfig({
+    accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN
 });
 
 // Health check endpoint
@@ -65,18 +65,19 @@ app.post('/api/create-preference', async (req, res) => {
             external_reference: `${userPhone}_${Date.now()}`
         };
 
-        // Create preference in MercadoPago
-        const response = await mercadopago.preferences.create(preference);
+        // Create preference in MercadoPago (v2 API)
+        const preferenceClient = new mercadopago.Preference(client);
+        const response = await preferenceClient.create({ body: preference });
 
         console.log('✅ Preference created successfully:', {
-            id: response.body.id,
-            init_point: response.body.init_point
+            id: response.id,
+            init_point: response.init_point
         });
 
         res.json({
             success: true,
-            preferenceId: response.body.id,
-            initPoint: response.body.init_point
+            preferenceId: response.id,
+            initPoint: response.init_point
         });
 
     } catch (error) {
