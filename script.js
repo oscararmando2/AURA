@@ -1,5 +1,5 @@
 // script.js - Flujo de pago AURA Studio (registro único con localStorage)
-const BACKEND_URL = "https://tu-proyecto.vercel.app/api/create-preference"; // cambiarás después del deploy
+const BACKEND_URL = "https://aura-pilates.vercel.app/api/create-preference"; // cambiarás por la tuya real
 
 function showRegisterModal() {
   document.getElementById("register-modal").style.display = "flex";
