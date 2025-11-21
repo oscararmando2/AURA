@@ -9,7 +9,12 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('.')); // Serve static files from current directory
+
+// Serve static files - exclude sensitive files
+app.use(express.static('.', {
+    dotfiles: 'deny', // Prevent serving .env and other dotfiles
+    index: ['index.html']
+}));
 
 // Configure MercadoPago client (v2 API)
 const client = new mercadopago.MercadoPagoConfig({

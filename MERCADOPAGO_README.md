@@ -184,9 +184,11 @@ localStorage.removeItem('registered');
 
 - ✅ El Access Token NUNCA se expone al frontend
 - ✅ Todas las llamadas a Mercado Pago se hacen desde el backend
-- ✅ El archivo `.env` está en `.gitignore`
+- ✅ El archivo `.env` está en `.gitignore` y protegido (dotfiles: 'deny')
 - ✅ Se validan los datos antes de crear la preferencia
 - ✅ Se usa HTTPS en producción (configurar BASE_URL)
+- ⚠️ **Producción**: Considera crear un directorio `public/` separado para archivos estáticos
+- ⚠️ **Producción**: Implementar validación de webhook signature (ver comentarios en server.js)
 
 ## 🚀 Despliegue a Producción
 
