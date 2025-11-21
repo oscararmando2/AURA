@@ -1,6 +1,9 @@
 // script.js - Flujo de pago AURA Studio (registro único con localStorage)
 const BACKEND_URL = "https://aura-eta-five.vercel.app/api/create-preference"; // cambiarás por la tuya real
 
+// Variable global para almacenar el paquete seleccionado
+let selectedPackage = { title: '', price: 0 };
+
 function showRegisterModal() {
   document.getElementById("register-modal").style.display = "flex";
 }
@@ -12,6 +15,9 @@ function closeRegisterModal() {
 function iniciarPago(button) {
   const title = button.dataset.title;
   const price = Number(button.dataset.price);
+  
+  // Guardar el paquete seleccionado
+  selectedPackage = { title, price };
 
   if (localStorage.getItem("registered") === "true") {
     crearPreferenciaYpagar(title, price);
@@ -21,25 +27,17 @@ function iniciarPago(button) {
 }
 
 function guardarRegistroLocalYPagar() {
-  const nombre = document.getElementById("register-name").value.trim();
-  const telefono = document.getElementById("register-phone").value.trim().replace(/\D/g, "");
-
-  if (!nombre || !telefono) {
-    alert("Completa nombre y teléfono");
+  const name = document.getElementById('quick-name').value.trim();
+  const phone = document.getElementById('quick-phone').value.trim();
+  if (!name || !phone || phone.length < 10) {
+    alert('⚠️ Por favor completa nombre y teléfono válido');
     return;
   }
-
-  localStorage.setItem("userName", nombre);
-  localStorage.setItem("userPhone", telefono);
-  localStorage.setItem("registered", "true");
-
-  // Cerrar tu modal
-  document.getElementById("register-modal").style.display = "none";
-
-  const title = document.querySelector(".plan-btn[onclick*='iniciarPago']").dataset.title;
-  const price = Number(document.querySelector(".plan-btn[onclick*='iniciarPago']").dataset.price);
-
-  crearPreferenciaYpagar(title, price);
+  localStorage.setItem('userName', name);
+  localStorage.setItem('userPhone', phone);
+  localStorage.setItem('registered', 'true');
+  document.getElementById('register-modal').style.display = 'none';
+  crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
 }
 
 async function crearPreferenciaYpagar(title, price) {
