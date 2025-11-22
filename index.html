@@ -5757,6 +5757,10 @@
                         return;
                     }
                     const clases = parseInt(match[0], 10);
+                    if (isNaN(clases) || clases <= 0) {
+                        console.error('Invalid number of classes (must be positive):', clases);
+                        return;
+                    }
                     
                     // Extract precio from data-price
                     const dataPrecio = button.getAttribute('data-price');
