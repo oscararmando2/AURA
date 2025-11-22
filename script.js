@@ -30,7 +30,7 @@ function iniciarPago(button) {
 
 function guardarRegistroLocalYPagar() {
   const name = document.getElementById('quick-name').value.trim();
-  const phone = document.getElementById('quick-phone').value.trim();
+  const phoneDigits = document.getElementById('quick-phone-digits').value.trim();
   
   // Validate name
   if (!name) {
@@ -38,14 +38,17 @@ function guardarRegistroLocalYPagar() {
     return;
   }
   
-  // Validate phone: only digits and exactly the required length
-  if (!phone || !PHONE_PATTERN.test(phone)) {
-    alert(`⚠️ Por favor ingresa un teléfono válido de ${REQUIRED_PHONE_DIGITS} dígitos (solo números)`);
+  // Validate phone: only digits and exactly 10 digits
+  if (!phoneDigits || !PHONE_PATTERN.test(phoneDigits)) {
+    alert('⚠️ Por favor ingresa tus 10 dígitos sin espacios ni guiones');
     return;
   }
   
+  // Construct full phone number with country code: 52 + 10 digits
+  const fullPhoneNumber = '52' + phoneDigits;
+  
   localStorage.setItem('userName', name);
-  localStorage.setItem('userPhone', phone);
+  localStorage.setItem('userTelefono', fullPhoneNumber);
   localStorage.setItem('registered', 'true');
   document.getElementById('register-modal').style.display = 'none';
   crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
@@ -53,7 +56,7 @@ function guardarRegistroLocalYPagar() {
 
 async function crearPreferenciaYpagar(title, price) {
   const nombre = localStorage.getItem("userName");
-  const telefono = localStorage.getItem("userPhone");
+  const telefono = localStorage.getItem("userTelefono");
 
   try {
     const res = await fetch(BACKEND_URL, {
