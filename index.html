@@ -5926,7 +5926,8 @@
                 const precio = boton.getAttribute('data-price');
                 
                 // Extraer número de clases del título (ej: "4 Clases" -> 4)
-                const clases = parseInt(titulo.match(/\d+/)[0]);
+                const match = titulo ? titulo.match(/\d+/) : null;
+                const clases = match ? parseInt(match[0]) : 1;
                 
                 // Remover onclick anterior si existe
                 boton.removeAttribute('onclick');
