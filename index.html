@@ -5769,8 +5769,8 @@
                         return;
                     }
                     const precio = parseInt(dataPrecio, 10);
-                    if (isNaN(precio)) {
-                        console.error('Invalid data-price format (expected number):', dataPrecio);
+                    if (isNaN(precio) || precio <= 0) {
+                        console.error('Invalid price (must be positive):', precio);
                         return;
                     }
                     
