@@ -5744,8 +5744,24 @@
             planButtons.forEach(button => {
                 button.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const clases = parseInt(button.getAttribute('data-title').match(/\d+/)[0]);
-                    const precio = parseInt(button.getAttribute('data-price'));
+                    
+                    // Extract clases from data-title (e.g., "1 Clases" -> 1)
+                    const dataTitle = button.getAttribute('data-title');
+                    const match = dataTitle ? dataTitle.match(/\d+/) : null;
+                    if (!match) {
+                        console.error('Invalid data-title attribute:', dataTitle);
+                        return;
+                    }
+                    const clases = parseInt(match[0], 10);
+                    
+                    // Extract precio from data-price
+                    const dataPrecio = button.getAttribute('data-price');
+                    const precio = parseInt(dataPrecio, 10);
+                    if (isNaN(precio)) {
+                        console.error('Invalid data-price attribute:', dataPrecio);
+                        return;
+                    }
+                    
                     console.log(`Plan button clicked: ${clases} clases, $${precio}`);
                     window.iniciarPagoAura(clases, precio);
                 });
