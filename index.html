@@ -5739,6 +5739,18 @@
 
         // Continuar al pago - Esperar a que DOM esté listo
         document.addEventListener('DOMContentLoaded', () => {
+            // Attach click handlers to all "Agendar Clase" buttons
+            const planButtons = document.querySelectorAll('.plan-btn');
+            planButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const clases = parseInt(button.getAttribute('data-title').match(/\d+/)[0]);
+                    const precio = parseInt(button.getAttribute('data-price'));
+                    console.log(`Plan button clicked: ${clases} clases, $${precio}`);
+                    window.iniciarPagoAura(clases, precio);
+                });
+            });
+            
             const continueButton = document.querySelector('button[onclick="guardarRegistroLocalYPagar()"]');
             if (continueButton) {
                 continueButton.onclick = async () => {
