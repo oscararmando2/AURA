@@ -5825,7 +5825,7 @@
                     pending: `${RETURN_URL}/?pago_pendiente=1`
                 },
                 auto_return: 'approved',
-                notification_url: `${RETURN_URL}/api/webhook`, // Webhook endpoint (opcional)
+                // notification_url: `${RETURN_URL}/api/webhook`, // Webhook endpoint (opcional - comentado hasta implementar endpoint)
                 statement_descriptor: 'AURA STUDIO',
                 external_reference: `${telefono}-${Date.now()}`
             };
@@ -5872,7 +5872,7 @@
         // ====================================================================
         // FUNCIÓN 4: Detectar retorno del pago y abrir calendario automáticamente
         // Se ejecuta automáticamente al cargar la página
-        // MEJORADA: Detecta múltiples parámetros, limpia URL, espera al calendario con setInterval
+        // MEJORADO: Detecta múltiples parámetros, limpia URL, espera al calendario con setInterval
         // ====================================================================
         function detectarRetornoDePago() {
             // Obtener parámetros de la URL
@@ -5946,7 +5946,7 @@
                                 } else if (intentos >= MAX_CALENDAR_WAIT_ATTEMPTS) {
                                     console.error('❌ Timeout esperando calendario después de 15 segundos');
                                     clearInterval(intervalo);
-                                    alert('⚠️ El calendario tardó demasiado en cargar. Por favor, recarga la página y vuelve a intentarlo.');
+                                    alert(`⚠️ Tu pago fue recibido exitosamente, pero el calendario tardó en cargar.\n\nTus ${clasesCompradas} clases están guardadas.\n\nPor favor, actualiza la página o contacta a soporte si el problema persiste.`);
                                 }
                             }, CALENDAR_POLLING_INTERVAL_MS);
                         }
