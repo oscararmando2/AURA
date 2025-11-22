@@ -5909,21 +5909,23 @@
                             console.log('⏳ Calendario no está listo - Esperando...');
                             // Si FullCalendar aún no está listo, usar setInterval (FIX #3)
                             let intentos = 0;
-                            const maxIntentos = 40; // 40 intentos x 300ms = 12 segundos máximo
+                            const MAX_CALENDAR_WAIT_ATTEMPTS = 40; // 40 intentos x 300ms = 12 segundos máximo
+                            const CALENDAR_POLLING_INTERVAL_MS = 300; // Verificar cada 300ms
+                            
                             const intervalo = setInterval(() => {
                                 intentos++;
-                                console.log(`🔄 Intento ${intentos}/${maxIntentos} - Verificando window.calendar...`);
+                                console.log(`🔄 Intento ${intentos}/${MAX_CALENDAR_WAIT_ATTEMPTS} - Verificando window.calendar...`);
                                 
                                 if (window.calendar) {
                                     console.log(`✅ ¡Calendario encontrado! Abriendo selectPlan...`);
                                     clearInterval(intervalo);
                                     window.selectPlan(clasesCompradas, precioComprado);
-                                } else if (intentos >= maxIntentos) {
+                                } else if (intentos >= MAX_CALENDAR_WAIT_ATTEMPTS) {
                                     console.error('❌ Timeout esperando calendario');
                                     clearInterval(intervalo);
                                     alert('⚠️ El calendario tardó demasiado en cargar. Por favor, recarga la página.');
                                 }
-                            }, 300); // Verificar cada 300ms (FIX #3)
+                            }, CALENDAR_POLLING_INTERVAL_MS);
                         }
                     } else {
                         console.warn('⚠️ Función selectPlan no disponible aún - Reintentando en 500ms');
