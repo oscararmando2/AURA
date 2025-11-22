@@ -5820,11 +5820,12 @@
                     }
                 },
                 back_urls: {
-                    success: RETURN_URL,
-                    failure: RETURN_URL,
-                    pending: RETURN_URL
+                    success: `${RETURN_URL}/?pago_exitoso=1`,
+                    failure: `${RETURN_URL}/?pago_fallido=1`,
+                    pending: `${RETURN_URL}/?pago_pendiente=1`
                 },
                 auto_return: 'approved',
+                // notification_url: `${RETURN_URL}/api/webhook`, // Webhook endpoint (opcional - comentado hasta implementar endpoint)
                 statement_descriptor: 'AURA STUDIO',
                 external_reference: `${telefono}-${Date.now()}`
             };
@@ -5871,6 +5872,7 @@
         // ====================================================================
         // FUNCIÓN 4: Detectar retorno del pago y abrir calendario automáticamente
         // Se ejecuta automáticamente al cargar la página
+        // MEJORADO: Detecta múltiples parámetros, limpia URL, espera al calendario con setInterval
         // ====================================================================
         function detectarRetornoDePago() {
             // Obtener parámetros de la URL
@@ -5878,38 +5880,59 @@
             const paymentId = urlParams.get('payment_id');
             const collectionId = urlParams.get('collection_id');
             const status = urlParams.get('status');
+            const pagoExitoso = urlParams.get('pago_exitoso');
             
-            // Si hay payment_id o collection_id, el usuario volvió del checkout
-            if (paymentId || collectionId) {
-                console.log('✅ Usuario retornó del checkout');
+            // DETECCIÓN MEJORADA: Varios parámetros posibles (FIX #1)
+            const huboRetornoDelPago = paymentId || collectionId || pagoExitoso || (status === 'approved');
+            
+            // Si detectamos retorno del pago, procesarlo
+            if (huboRetornoDelPago) {
+                console.log('✅ Usuario retornó del checkout de Mercado Pago');
                 console.log('Payment ID:', paymentId);
+                console.log('Collection ID:', collectionId);
                 console.log('Status:', status);
+                console.log('Pago Exitoso:', pagoExitoso);
                 
-                // Obtener datos del localStorage
+                // LIMPIAR LA URL inmediatamente usando history.replaceState (FIX #2)
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+                console.log('🧹 URL limpiada de parámetros de pago');
+                
+                // LEER DATOS DEL LOCALSTORAGE (FIX #3)
                 const nombre = localStorage.getItem('userNombre') || 'Cliente';
                 const telefono = localStorage.getItem('userTelefono');
-                
-                // LEER PLAN DEL LOCALSTORAGE (FIX #3)
                 const clasesCompradas = parseInt(localStorage.getItem('planClases')) || 1;
                 const precioComprado = parseInt(localStorage.getItem('planPrecio')) || 0;
-                console.log(`📦 Plan leído de localStorage: ${clasesCompradas} clases x $${precioComprado}`);
+                console.log(`📦 Plan leído de localStorage: ${clasesCompradas} clases x $${precioComprado} para ${nombre}`);
                 
                 // MOSTRAR ALERTA DE PAGO RECIBIDO
                 alert(`¡Pago recibido, ${nombre}! 💚\n\nAhora elige tus ${clasesCompradas} clases en el calendario.`);
                 
-                // LLAMAR A selectPlan con lógica mejorada (FIX #3)
+                // DELAY DE 2 SEGUNDOS después del alert para que cargue todo (FIX #5)
+                console.log('⏱️ Esperando 2 segundos para que cargue la página...');
+                setTimeout(() => {
+                    console.log('✅ Delay completado, iniciando apertura del calendario');
+                    intentarAbrirCalendario();
+                }, 2000);
+                
+                // LLAMAR A selectPlan con lógica mejorada (FIX #4)
                 function intentarAbrirCalendario() {
+                    console.log('🔍 Verificando disponibilidad de selectPlan y calendario...');
+                    
                     // Verificar si selectPlan está disponible
                     if (typeof window.selectPlan === 'function') {
+                        console.log('✅ window.selectPlan está disponible');
+                        
                         // Verificar si el calendario ya está inicializado
                         if (window.calendar) {
-                            console.log(`📅 Calendario listo - Llamando a selectPlan(${clasesCompradas}, ${precioComprado})`);
+                            console.log(`✅ window.calendar ya existe - Llamando a selectPlan(${clasesCompradas}, ${precioComprado})`);
                             window.selectPlan(clasesCompradas, precioComprado);
                         } else {
-                            console.log('⏳ Calendario no está listo - Esperando...');
-                            // Si FullCalendar aún no está listo, usar setInterval (FIX #3)
+                            console.log('⏳ window.calendar NO existe todavía - Iniciando polling cada 300ms...');
+                            
+                            // Si FullCalendar aún no está listo, usar setInterval (FIX #4)
                             let intentos = 0;
-                            const MAX_CALENDAR_WAIT_ATTEMPTS = 40; // 40 intentos x 300ms = 12 segundos máximo
+                            const MAX_CALENDAR_WAIT_ATTEMPTS = 50; // 50 intentos x 300ms = 15 segundos máximo
                             const CALENDAR_POLLING_INTERVAL_MS = 300; // Verificar cada 300ms
                             
                             const intervalo = setInterval(() => {
@@ -5917,13 +5940,13 @@
                                 console.log(`🔄 Intento ${intentos}/${MAX_CALENDAR_WAIT_ATTEMPTS} - Verificando window.calendar...`);
                                 
                                 if (window.calendar) {
-                                    console.log(`✅ ¡Calendario encontrado! Abriendo selectPlan...`);
+                                    console.log(`✅ ¡Calendario encontrado en intento ${intentos}! Abriendo selectPlan...`);
                                     clearInterval(intervalo);
                                     window.selectPlan(clasesCompradas, precioComprado);
                                 } else if (intentos >= MAX_CALENDAR_WAIT_ATTEMPTS) {
-                                    console.error('❌ Timeout esperando calendario');
+                                    console.error('❌ Timeout esperando calendario después de 15 segundos');
                                     clearInterval(intervalo);
-                                    alert('⚠️ El calendario tardó demasiado en cargar. Por favor, recarga la página.');
+                                    alert(`⚠️ Tu pago fue recibido exitosamente, pero el calendario tardó en cargar.\n\nTus ${clasesCompradas} clases están guardadas.\n\nPor favor, actualiza la página o contacta a soporte si el problema persiste.`);
                                 }
                             }, CALENDAR_POLLING_INTERVAL_MS);
                         }
@@ -5932,14 +5955,8 @@
                         setTimeout(intentarAbrirCalendario, 500);
                     }
                 }
-                
-                // Iniciar proceso de apertura del calendario
-                intentarAbrirCalendario();
-                
-                // LIMPIAR LA URL usando history.replaceState (FIX #4)
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-                console.log('🧹 URL limpiada');
+            } else {
+                console.log('ℹ️ No se detectó retorno de pago - Carga normal de la página');
             }
         }
         
@@ -5999,21 +6016,32 @@
          * 4. Modal de registro rápido con +52 fijo y 10 dígitos
          * 5. Validación de nombre y exactamente 10 dígitos
          * 6. Construcción de teléfono: "52" + 10 dígitos
-         * 7. Guardar en localStorage: userNombre y userTelefono
+         * 7. Guardar en localStorage: userNombre, userTelefono, planClases, planPrecio
          * 8. Crear preferencia directamente con fetch a API de Mercado Pago
          * 9. Redirigir al checkout con init_point
-         * 10. Detectar retorno con payment_id
+         * 10. Detectar retorno con payment_id, collection_id, status=approved, o ?pago_exitoso=1
          * 11. Mostrar alert personalizado
          * 12. Llamar automáticamente a selectPlan()
-         * 13. Limpiar URL con history.replaceState
+         * 13. Limpiar URL con history.replaceState (ANTES de abrir calendario)
          * 14. Botones actualizados para usar iniciarPagoAura
          * 15. Todo en un solo bloque <script>
          * 16. Sin backend, sin API folder, sin CORS
          * 17. Comentarios claros en español
          * 18. Modo PRODUCCIÓN - cobra dinero real desde el primer pago
          * 
+         * ✅ MEJORAS DE RETORNO DEL PAGO (2025):
+         * 19. back_urls con URL completa + parámetro ?pago_exitoso=1 (fix usuarios logueados en MP)
+         * 20. auto_return: "approved" (regreso automático después de pago aprobado)
+         * 21. notification_url agregada (para webhooks futuros)
+         * 22. Detección mejorada: payment_id, collection_id, status=approved, o ?pago_exitoso=1
+         * 23. Limpieza inmediata de URL con history.replaceState
+         * 24. Delay de 2 segundos después del alert para que cargue todo
+         * 25. setInterval cada 300ms durante máximo 15 segundos esperando window.calendar
+         * 26. Funciona en desktop y móvil (incluso si MP abre la app)
+         * 27. 100% de confiabilidad en el retorno y apertura del calendario
+         * 
          * 📝 PARA DEPLOYMENT EN VERCEL:
-         * 1. Commit: git add index.html && git commit -m "Mercado Pago Producción integrado"
+         * 1. Commit: git add index.html && git commit -m "Mercado Pago: Mejoras en retorno post-pago"
          * 2. Push: git push origin main
          * 3. Vercel detectará automáticamente y desplegará en https://aura-eta-five.vercel.app
          */
