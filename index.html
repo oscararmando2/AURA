@@ -5747,18 +5747,26 @@
                     
                     // Extract clases from data-title (e.g., "1 Clases" -> 1)
                     const dataTitle = button.getAttribute('data-title');
-                    const match = dataTitle ? dataTitle.match(/\d+/) : null;
+                    if (!dataTitle) {
+                        console.error('Missing data-title attribute on button');
+                        return;
+                    }
+                    const match = dataTitle.match(/\d+/);
                     if (!match) {
-                        console.error('Invalid data-title attribute:', dataTitle);
+                        console.error('Invalid data-title format (expected number):', dataTitle);
                         return;
                     }
                     const clases = parseInt(match[0], 10);
                     
                     // Extract precio from data-price
                     const dataPrecio = button.getAttribute('data-price');
+                    if (!dataPrecio) {
+                        console.error('Missing data-price attribute on button');
+                        return;
+                    }
                     const precio = parseInt(dataPrecio, 10);
                     if (isNaN(precio)) {
-                        console.error('Invalid data-price attribute:', dataPrecio);
+                        console.error('Invalid data-price format (expected number):', dataPrecio);
                         return;
                     }
                     
