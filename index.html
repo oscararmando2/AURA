@@ -2783,8 +2783,8 @@
                     <div class="bg"></div>
                     <div class="blob"></div>
                     <h3>1 Clase</h3>
-                    <div class="price">$150</div>
-                    <button class="plan-btn" data-title="1 Clases" data-price="150">Agendar Clase</button>
+                    <div class="price">$5</div>
+                    <button class="plan-btn" data-title="1 Clases" data-price="5">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -3420,7 +3420,10 @@
         // Variable global para saber si el usuario es admin
         let isAdmin = false;
 
-        async function selectPlan(classes, price) {
+        // FIX #1: Hacer selectPlan global (window.selectPlan)
+        window.selectPlan = async function(classes, price) {
+            console.log(`📅 selectPlan llamado: ${classes} clases x $${price}`);
+            
             // SISTEMA SUPER SIMPLE: Verificar si hay teléfono en localStorage
             const userTelefono = localStorage.getItem('userTelefono');
             if (!userTelefono) {
@@ -3437,11 +3440,14 @@
             // Obtener información del usuario
             const userTelefonoTrimmed = userTelefono.trim();
             
-            // Preguntar por el nombre (siempre)
-            const nombre = prompt('Por favor, ingresa tu nombre completo:');
+            // Obtener nombre del localStorage (si ya pagó) o preguntar
+            let nombre = localStorage.getItem('userNombre');
             if (!nombre) {
-                alert('⚠️ El nombre es requerido para continuar con la reserva.');
-                return;
+                nombre = prompt('Por favor, ingresa tu nombre completo:');
+                if (!nombre) {
+                    alert('⚠️ El nombre es requerido para continuar con la reserva.');
+                    return;
+                }
             }
 
             // Solo preguntar por notas (opcional)
@@ -3459,8 +3465,10 @@
             
             // Initialize or update calendar
             if (!calendar) {
+                console.log('📅 Inicializando calendario...');
                 initCalendar();
             } else {
+                console.log('📅 Calendario ya existe, limpiando eventos temporales...');
                 // Limpiar eventos temporales
                 selectedPlan.bookedEvents.forEach(eventId => {
                     const event = calendar.getEventById(eventId);
@@ -3476,8 +3484,12 @@
             alert(`Plan seleccionado: ${classes} clases por $${price}.\n\nHola ${nombre}, ahora haz clic en las fechas del calendario para seleccionar tus ${classes} clases.\n\nPara cada fecha, se abrirá un selector de horario.`);
             
             // Scroll to calendar
+            console.log('📜 Scrolling al calendario...');
             document.getElementById('calendar-container').scrollIntoView({ behavior: 'smooth' });
-        }
+        };
+        
+        // Mantener referencia local para compatibilidad
+        const selectPlan = window.selectPlan;
 
         // Función para actualizar el mensaje informativo del calendario
         function updateCalendarInfo() {
@@ -5708,8 +5720,13 @@
         function iniciarPagoAura(clases, precio) {
             console.log(`💳 Iniciando pago para ${clases} clases por $${precio}`);
             
-            // Guardar el plan seleccionado
+            // Guardar el plan seleccionado en variable local Y en localStorage
             planSeleccionado = { clases: clases, precio: precio };
+            
+            // GUARDAR PLAN EN LOCALSTORAGE (FIX #2)
+            localStorage.setItem('planClases', clases);
+            localStorage.setItem('planPrecio', precio);
+            console.log(`📦 Plan guardado en localStorage: ${clases} clases x $${precio}`);
             
             // Abrir modal de registro rápido
             const modal = document.getElementById('register-modal');
@@ -5852,7 +5869,7 @@
         }
         
         // ====================================================================
-        // FUNCIÓN 4: Detectar retorno del pago y mostrar alerta
+        // FUNCIÓN 4: Detectar retorno del pago y abrir calendario automáticamente
         // Se ejecuta automáticamente al cargar la página
         // ====================================================================
         function detectarRetornoDePago() {
@@ -5872,28 +5889,54 @@
                 const nombre = localStorage.getItem('userNombre') || 'Cliente';
                 const telefono = localStorage.getItem('userTelefono');
                 
-                // Determinar cuántas clases compró (del localStorage si lo guardamos, o predeterminado)
-                const clasesCompradas = planSeleccionado.clases || 1;
-                const precioComprado = planSeleccionado.precio || 0;
+                // LEER PLAN DEL LOCALSTORAGE (FIX #3)
+                const clasesCompradas = parseInt(localStorage.getItem('planClases')) || 1;
+                const precioComprado = parseInt(localStorage.getItem('planPrecio')) || 0;
+                console.log(`📦 Plan leído de localStorage: ${clasesCompradas} clases x $${precioComprado}`);
                 
                 // MOSTRAR ALERTA DE PAGO RECIBIDO
                 alert(`¡Pago recibido, ${nombre}! 💚\n\nAhora elige tus ${clasesCompradas} clases en el calendario.`);
                 
-                // LLAMAR AUTOMÁTICAMENTE A selectPlan()
-                if (typeof window.selectPlan === 'function') {
-                    console.log(`📅 Llamando a selectPlan(${clasesCompradas}, ${precioComprado})`);
-                    window.selectPlan(clasesCompradas, precioComprado);
-                } else {
-                    console.warn('⚠️ Función selectPlan no disponible aún');
-                    // Esperar un momento y reintentar
-                    setTimeout(() => {
-                        if (typeof window.selectPlan === 'function') {
+                // LLAMAR A selectPlan con lógica mejorada (FIX #3)
+                function intentarAbrirCalendario() {
+                    // Verificar si selectPlan está disponible
+                    if (typeof window.selectPlan === 'function') {
+                        // Verificar si el calendario ya está inicializado
+                        if (window.calendar) {
+                            console.log(`📅 Calendario listo - Llamando a selectPlan(${clasesCompradas}, ${precioComprado})`);
                             window.selectPlan(clasesCompradas, precioComprado);
+                        } else {
+                            console.log('⏳ Calendario no está listo - Esperando...');
+                            // Si FullCalendar aún no está listo, usar setInterval (FIX #3)
+                            let intentos = 0;
+                            const MAX_CALENDAR_WAIT_ATTEMPTS = 40; // 40 intentos x 300ms = 12 segundos máximo
+                            const CALENDAR_POLLING_INTERVAL_MS = 300; // Verificar cada 300ms
+                            
+                            const intervalo = setInterval(() => {
+                                intentos++;
+                                console.log(`🔄 Intento ${intentos}/${MAX_CALENDAR_WAIT_ATTEMPTS} - Verificando window.calendar...`);
+                                
+                                if (window.calendar) {
+                                    console.log(`✅ ¡Calendario encontrado! Abriendo selectPlan...`);
+                                    clearInterval(intervalo);
+                                    window.selectPlan(clasesCompradas, precioComprado);
+                                } else if (intentos >= MAX_CALENDAR_WAIT_ATTEMPTS) {
+                                    console.error('❌ Timeout esperando calendario');
+                                    clearInterval(intervalo);
+                                    alert('⚠️ El calendario tardó demasiado en cargar. Por favor, recarga la página.');
+                                }
+                            }, CALENDAR_POLLING_INTERVAL_MS);
                         }
-                    }, 1000);
+                    } else {
+                        console.warn('⚠️ Función selectPlan no disponible aún - Reintentando en 500ms');
+                        setTimeout(intentarAbrirCalendario, 500);
+                    }
                 }
                 
-                // LIMPIAR LA URL usando history.replaceState
+                // Iniciar proceso de apertura del calendario
+                intentarAbrirCalendario();
+                
+                // LIMPIAR LA URL usando history.replaceState (FIX #4)
                 const cleanUrl = window.location.origin + window.location.pathname;
                 window.history.replaceState({}, document.title, cleanUrl);
                 console.log('🧹 URL limpiada');
