@@ -3421,8 +3421,12 @@
         let isAdmin = false;
 
         // FIX #1: Hacer selectPlan global (window.selectPlan)
-        window.selectPlan = async function(classes, price) {
+        window.selectPlan = async function(classes, price, options = {}) {
             console.log(`📅 selectPlan llamado: ${classes} clases x $${price}`);
+            
+            // Options: { skipAlert: false, skipPrompts: false }
+            const skipAlert = options.skipAlert || false;
+            const skipPrompts = options.skipPrompts || false;
             
             // SISTEMA SUPER SIMPLE: Verificar si hay teléfono en localStorage
             const userTelefono = localStorage.getItem('userTelefono');
@@ -3442,16 +3446,18 @@
             
             // Obtener nombre del localStorage (si ya pagó) o preguntar
             let nombre = localStorage.getItem('userNombre');
-            if (!nombre) {
+            if (!nombre && !skipPrompts) {
                 nombre = prompt('Por favor, ingresa tu nombre completo:');
                 if (!nombre) {
                     alert('⚠️ El nombre es requerido para continuar con la reserva.');
                     return;
                 }
+            } else if (!nombre) {
+                nombre = 'Usuario'; // Fallback si skipPrompts está activado
             }
 
-            // Solo preguntar por notas (opcional)
-            const notas = prompt('¿Alguna nota especial para tus clases? (opcional):') || '';
+            // Solo preguntar por notas (opcional) si no se está saltando los prompts
+            const notas = skipPrompts ? '' : (prompt('¿Alguna nota especial para tus clases? (opcional):') || '');
 
             // Guardar información del cliente (usando teléfono y nombre)
             selectedPlan.userInfo = {
@@ -3460,8 +3466,12 @@
                 notas: notas
             };
 
-            // Show calendar
-            document.getElementById('calendar-container').style.display = 'block';
+            // Show calendar immediately
+            const calendarContainer = document.getElementById('calendar-container');
+            if (calendarContainer) {
+                calendarContainer.style.display = 'block';
+                console.log('📅 Calendario container mostrado');
+            }
             
             // Initialize or update calendar
             if (!calendar) {
@@ -3481,11 +3491,18 @@
             // Actualizar el mensaje informativo
             updateCalendarInfo();
 
-            alert(`Plan seleccionado: ${classes} clases por $${price}.\n\nHola ${nombre}, ahora haz clic en las fechas del calendario para seleccionar tus ${classes} clases.\n\nPara cada fecha, se abrirá un selector de horario.`);
+            // Mostrar alert solo si no se pide omitirlo (útil para callback de pago)
+            if (!skipAlert) {
+                alert(`Plan seleccionado: ${classes} clases por $${price}.\n\nHola ${nombre}, ahora haz clic en las fechas del calendario para seleccionar tus ${classes} clases.\n\nPara cada fecha, se abrirá un selector de horario.`);
+            }
             
             // Scroll to calendar
             console.log('📜 Scrolling al calendario...');
-            document.getElementById('calendar-container').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => {
+                if (calendarContainer) {
+                    calendarContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 100);
         };
         
         // Mantener referencia local para compatibilidad
@@ -3563,7 +3580,10 @@
                 });
                 
                 calendar.render();
-                console.log('✅ FullCalendar v6.1.15 inicializado correctamente');
+                
+                // Hacer el calendario globalmente accesible
+                window.calendar = calendar;
+                console.log('✅ FullCalendar v6.1.15 inicializado correctamente y disponible globalmente');
                 
                 // Cargar eventos desde Firestore
                 loadEventsFromFirestore();
@@ -5706,24 +5726,9 @@
         // Variable global para el plan
         let planSeleccionado = { clases: 0, precio: 0 };
 
-        // FUNCIÓN GLOBAL selectPlan (FUERA del módulo Firebase)
-        window.selectPlan = function(clases, precio) {
-            console.log(`selectPlan(${clases}, ${precio}) llamado`);
-            planSeleccionado = { clases, precio };
-
-            // Mostrar calendario
-            const container = document.getElementById('calendar-container');
-            if (container) {
-                container.style.display = 'block';
-                container.scrollIntoView({ behavior: 'smooth' });
-            }
-
-            // Actualizar mensaje
-            const info = document.querySelector('.calendar-info h3');
-            if (info) info.innerHTML = `Selecciona tus ${clases} clases`;
-
-            alert(`¡Pago recibido! Ahora elige tus ${clases} clases`);
-        };
+        // NOTA: window.selectPlan ya está definido arriba en el código (línea ~3424)
+        // No redefinimos aquí para evitar duplicados
+        // La función selectPlan original maneja todo el flujo de reservas
 
         // Botones de planes
         window.iniciarPagoAura = function(clases, precio) {
@@ -5833,30 +5838,74 @@
             }
         }
 
-        // DETECTOR DE RETORNO MEJORADO (funciona en todos los casos)
+        // DETECTOR DE RETORNO MEJORADO - Maneja callback de Mercado Pago
         function detectarRetorno() {
             const params = new URLSearchParams(location.search);
             const success = params.has('success') || params.has('payment_id') || params.has('collection_id') || params.get('status') === 'approved';
             
             if (success) {
-                // Limpiar URL
-                history.replaceState({}, '', location.pathname);
+                console.log('💳 Retorno de Mercado Pago detectado - Pago exitoso');
                 
+                // 1. Limpiar URL inmediatamente (quitar parámetros de pago)
+                history.replaceState({}, document.title, location.pathname);
+                console.log('🧹 URL limpiada');
+                
+                // 2. Obtener datos del plan desde localStorage
                 const clases = parseInt(localStorage.getItem('planClases') || '1');
                 const precio = parseInt(localStorage.getItem('planPrecio') || '150');
                 const nombre = localStorage.getItem('userNombre') || 'clienta';
                 
-                alert(`¡Pago recibido, ${nombre}! Ahora elige tus ${clases} clases`);
+                console.log(`📋 Plan recuperado: ${clases} clases, $${precio}, cliente: ${nombre}`);
                 
-                // Esperar a que FullCalendar cargue
+                // 3. Mostrar alert con nombre del usuario
+                alert(`¡Pago recibido, ${nombre}! Ahora elige tus ${clases} clase${clases > 1 ? 's' : ''}`);
+                console.log('✅ Alert mostrado al usuario');
+                
+                // 4. Mostrar calendario inmediatamente (antes de esperar FullCalendar)
+                const container = document.getElementById('calendar-container');
+                if (container) {
+                    container.style.display = 'block';
+                    console.log('📅 Calendario container mostrado inmediatamente');
+                }
+                
+                // 5. Actualizar mensaje del calendario inmediatamente
+                const info = document.querySelector('.calendar-info h3');
+                if (info) {
+                    info.innerHTML = `Selecciona tus ${clases} clase${clases > 1 ? 's' : ''}`;
+                    console.log('📝 Mensaje del calendario actualizado');
+                }
+                
+                // 6. Esperar a que FullCalendar cargue (polling cada 250ms, máximo 10 segundos)
+                console.log('⏳ Esperando a que FullCalendar cargue...');
+                let intentos = 0;
+                const maxIntentos = 40; // 40 intentos × 250ms = 10 segundos
+                
                 const waitForCalendar = setInterval(() => {
+                    intentos++;
+                    
+                    // Verificar si FullCalendar y selectPlan están disponibles
                     if (window.calendar && typeof window.selectPlan === 'function') {
                         clearInterval(waitForCalendar);
-                        window.selectPlan(clases, precio);
+                        console.log(`✅ FullCalendar cargado (intento ${intentos}/${maxIntentos})`);
+                        
+                        // Ejecutar selectPlan para configurar el plan y hacer scroll
+                        // skipAlert: true - No mostrar el alert de "Plan seleccionado" porque ya mostramos "Pago recibido"
+                        // skipPrompts: true - No preguntar por notas porque ya tenemos el nombre del pago
+                        window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
+                    } else if (intentos >= maxIntentos) {
+                        // Timeout alcanzado (10 segundos)
+                        clearInterval(waitForCalendar);
+                        console.warn('⚠️ Timeout: FullCalendar no cargó en 10 segundos');
+                        console.warn('⚠️ El calendario ya está visible pero puede que no funcione correctamente');
+                        
+                        // Intentar llamar selectPlan de todas formas (por si acaso)
+                        if (typeof window.selectPlan === 'function') {
+                            window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
+                        }
+                    } else {
+                        console.log(`⏳ Esperando FullCalendar... (${intentos}/${maxIntentos})`);
                     }
-                }, 300);
-                
-                setTimeout(() => clearInterval(waitForCalendar), 15000); // max 15s
+                }, 250); // Polling cada 250ms como se requiere
             }
         }
 
