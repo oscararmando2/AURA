@@ -7,6 +7,9 @@ export default async function handler(req, res) {
 
   const { title, price, payer_name, payer_phone } = req.body;
 
+  // Use environment variable for base URL, fallback to Vercel deployment
+  const baseUrl = process.env.BASE_URL || "https://aura-eta-five.vercel.app";
+
 const preference = {
   items: [{ title, unit_price: Number(price), quantity: 1, currency_id: "MXN" }],
   payer: { 
@@ -18,9 +21,9 @@ const preference = {
     email: `${payer_phone}@temp.aura.com`
   },
   back_urls: {
-    success: "https://oscararmando2.github.io/AURA/",
-    failure: "https://oscararmando2.github.io/AURA/",
-    pending: "https://oscararmando2.github.io/AURA/",
+    success: `${baseUrl}/?success=1`,
+    failure: `${baseUrl}/?error=1`,
+    pending: `${baseUrl}/?pending=1`,
   },
   auto_return: "approved",
   notification_url: `https://${req.headers.host}/api/webhook`,
