@@ -5739,6 +5739,46 @@
 
         // Continuar al pago - Esperar a que DOM esté listo
         document.addEventListener('DOMContentLoaded', () => {
+            // Attach click handlers to all "Agendar Clase" buttons
+            const planButtons = document.querySelectorAll('.plan-btn');
+            planButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Extract clases from data-title (e.g., "1 Clases" -> 1)
+                    const dataTitle = button.getAttribute('data-title');
+                    if (!dataTitle) {
+                        console.error('Missing data-title attribute on button');
+                        return;
+                    }
+                    const match = dataTitle.match(/\d+/);
+                    if (!match) {
+                        console.error('Invalid data-title format (expected number):', dataTitle);
+                        return;
+                    }
+                    const clases = parseInt(match[0], 10);
+                    if (isNaN(clases) || clases <= 0) {
+                        console.error('Invalid number of classes (must be positive):', clases);
+                        return;
+                    }
+                    
+                    // Extract precio from data-price
+                    const dataPrecio = button.getAttribute('data-price');
+                    if (!dataPrecio) {
+                        console.error('Missing data-price attribute on button');
+                        return;
+                    }
+                    const precio = parseInt(dataPrecio, 10);
+                    if (isNaN(precio) || precio <= 0) {
+                        console.error('Invalid price (must be positive):', precio);
+                        return;
+                    }
+                    
+                    console.log(`Plan button clicked: ${clases} clases, $${precio}`);
+                    window.iniciarPagoAura(clases, precio);
+                });
+            });
+            
             const continueButton = document.querySelector('button[onclick="guardarRegistroLocalYPagar()"]');
             if (continueButton) {
                 continueButton.onclick = async () => {
