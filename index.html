@@ -4057,6 +4057,10 @@
             showReservationModal(dateStr, time, dateFormatted, timeFormatted, dateTimeStr);
         }
 
+        // Constants for phone number handling
+        const MEXICO_COUNTRY_CODE = '52';
+        const PHONE_DIGITS_LENGTH = 10;
+        
         /**
          * Mostrar modal de confirmación de reserva con datos del cliente
          * NUEVO FLUJO: Pedir nombre y teléfono por cada horario
@@ -4083,8 +4087,12 @@
             const savedName = localStorage.getItem('userNombre') || '';
             const savedPhone = localStorage.getItem('userTelefono') || '';
             nameInput.value = savedName;
-            // Remove +52 prefix if present
-            phoneInput.value = savedPhone.startsWith('52') ? savedPhone.substring(2) : savedPhone;
+            // Remove country code prefix if present (supports any length country code)
+            if (savedPhone.startsWith(MEXICO_COUNTRY_CODE) && savedPhone.length > MEXICO_COUNTRY_CODE.length) {
+                phoneInput.value = savedPhone.substring(MEXICO_COUNTRY_CODE.length);
+            } else {
+                phoneInput.value = savedPhone;
+            }
             
             // Event handlers
             confirmBtn.onclick = () => {
@@ -4120,13 +4128,13 @@
                 return;
             }
             
-            if (phoneDigits.length !== 10) {
-                alert('⚠️ Por favor ingresa 10 dígitos de teléfono (sin espacios ni guiones)');
+            if (phoneDigits.length !== PHONE_DIGITS_LENGTH) {
+                alert(`⚠️ Por favor ingresa ${PHONE_DIGITS_LENGTH} dígitos de teléfono (sin espacios ni guiones)`);
                 phoneInput.focus();
                 return;
             }
             
-            const telefono = '52' + phoneDigits; // Agregar código de país
+            const telefono = MEXICO_COUNTRY_CODE + phoneDigits; // Agregar código de país
             
             // Guardar datos del cliente (se usarán para todas las reservas)
             localStorage.setItem('userNombre', nombre);
@@ -5963,6 +5971,10 @@
             }
         }
 
+        // Constants for Firebase initialization
+        const MAX_FIREBASE_INIT_ATTEMPTS = 20;
+        const FIREBASE_POLLING_INTERVAL_MS = 500;
+        
         // DETECTOR DE RETORNO MEJORADO - Maneja callback de Mercado Pago
         // NUEVO FLUJO: Guardar todas las reservas en Firestore al regresar del pago
         async function detectarRetorno() {
@@ -6005,15 +6017,14 @@
                 // 4. Esperar a que Firebase esté listo
                 const waitForFirebase = async () => {
                     let attempts = 0;
-                    const maxAttempts = 20;
                     
-                    while (attempts < maxAttempts) {
+                    while (attempts < MAX_FIREBASE_INIT_ATTEMPTS) {
                         if (window.firebaseReady && window.db && typeof window.saveReservationToFirestore === 'function') {
                             return true;
                         }
-                        await new Promise(resolve => setTimeout(resolve, 500));
+                        await new Promise(resolve => setTimeout(resolve, FIREBASE_POLLING_INTERVAL_MS));
                         attempts++;
-                        console.log(`⏳ Esperando Firebase... (${attempts}/${maxAttempts})`);
+                        console.log(`⏳ Esperando Firebase... (${attempts}/${MAX_FIREBASE_INIT_ATTEMPTS})`);
                     }
                     return false;
                 };
