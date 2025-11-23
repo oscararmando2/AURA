@@ -3424,6 +3424,9 @@
         window.selectPlan = async function(classes, price, options = {}) {
             console.log(`📅 selectPlan llamado: ${classes} clases x $${price}`);
             
+            // Configuración
+            const FALLBACK_USER_NAME = 'Usuario'; // Nombre por defecto si no se puede obtener
+            
             // Options: { skipAlert: false, skipPrompts: false }
             const skipAlert = options.skipAlert || false;
             const skipPrompts = options.skipPrompts || false;
@@ -3453,7 +3456,7 @@
                     return;
                 }
             } else if (!nombre) {
-                nombre = 'Usuario'; // Fallback si skipPrompts está activado
+                nombre = FALLBACK_USER_NAME; // Fallback si skipPrompts está activado
             }
 
             // Solo preguntar por notas (opcional) si no se está saltando los prompts
@@ -5840,6 +5843,14 @@
 
         // DETECTOR DE RETORNO MEJORADO - Maneja callback de Mercado Pago
         function detectarRetorno() {
+            // Configuración de polling para esperar FullCalendar
+            const POLLING_INTERVAL_MS = 250; // Intervalo entre intentos (250ms)
+            const MAX_POLLING_ATTEMPTS = 40; // Máximo de intentos (40 × 250ms = 10 segundos)
+            const FALLBACK_USER_NAME = 'clienta'; // Nombre por defecto si no hay en localStorage
+            
+            // Helper function para pluralización de "clase/clases"
+            const pluralizeClases = (count) => count > 1 ? 'clases' : 'clase';
+            
             const params = new URLSearchParams(location.search);
             const success = params.has('success') || params.has('payment_id') || params.has('collection_id') || params.get('status') === 'approved';
             
@@ -5853,12 +5864,12 @@
                 // 2. Obtener datos del plan desde localStorage
                 const clases = parseInt(localStorage.getItem('planClases') || '1');
                 const precio = parseInt(localStorage.getItem('planPrecio') || '150');
-                const nombre = localStorage.getItem('userNombre') || 'clienta';
+                const nombre = localStorage.getItem('userNombre') || FALLBACK_USER_NAME;
                 
                 console.log(`📋 Plan recuperado: ${clases} clases, $${precio}, cliente: ${nombre}`);
                 
                 // 3. Mostrar alert con nombre del usuario
-                alert(`¡Pago recibido, ${nombre}! Ahora elige tus ${clases} clase${clases > 1 ? 's' : ''}`);
+                alert(`¡Pago recibido, ${nombre}! Ahora elige tus ${clases} ${pluralizeClases(clases)}`);
                 console.log('✅ Alert mostrado al usuario');
                 
                 // 4. Mostrar calendario inmediatamente (antes de esperar FullCalendar)
@@ -5871,14 +5882,13 @@
                 // 5. Actualizar mensaje del calendario inmediatamente
                 const info = document.querySelector('.calendar-info h3');
                 if (info) {
-                    info.innerHTML = `Selecciona tus ${clases} clase${clases > 1 ? 's' : ''}`;
+                    info.innerHTML = `Selecciona tus ${clases} ${pluralizeClases(clases)}`;
                     console.log('📝 Mensaje del calendario actualizado');
                 }
                 
-                // 6. Esperar a que FullCalendar cargue (polling cada 250ms, máximo 10 segundos)
-                console.log('⏳ Esperando a que FullCalendar cargue...');
+                // 6. Esperar a que FullCalendar cargue (polling)
+                console.log(`⏳ Esperando a que FullCalendar cargue (máx ${MAX_POLLING_ATTEMPTS * POLLING_INTERVAL_MS / 1000}s)...`);
                 let intentos = 0;
-                const maxIntentos = 40; // 40 intentos × 250ms = 10 segundos
                 
                 const waitForCalendar = setInterval(() => {
                     intentos++;
@@ -5886,16 +5896,16 @@
                     // Verificar si FullCalendar y selectPlan están disponibles
                     if (window.calendar && typeof window.selectPlan === 'function') {
                         clearInterval(waitForCalendar);
-                        console.log(`✅ FullCalendar cargado (intento ${intentos}/${maxIntentos})`);
+                        console.log(`✅ FullCalendar cargado (intento ${intentos}/${MAX_POLLING_ATTEMPTS})`);
                         
                         // Ejecutar selectPlan para configurar el plan y hacer scroll
                         // skipAlert: true - No mostrar el alert de "Plan seleccionado" porque ya mostramos "Pago recibido"
                         // skipPrompts: true - No preguntar por notas porque ya tenemos el nombre del pago
                         window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
-                    } else if (intentos >= maxIntentos) {
-                        // Timeout alcanzado (10 segundos)
+                    } else if (intentos >= MAX_POLLING_ATTEMPTS) {
+                        // Timeout alcanzado
                         clearInterval(waitForCalendar);
-                        console.warn('⚠️ Timeout: FullCalendar no cargó en 10 segundos');
+                        console.warn(`⚠️ Timeout: FullCalendar no cargó en ${MAX_POLLING_ATTEMPTS * POLLING_INTERVAL_MS / 1000} segundos`);
                         console.warn('⚠️ El calendario ya está visible pero puede que no funcione correctamente');
                         
                         // Intentar llamar selectPlan de todas formas (por si acaso)
@@ -5903,9 +5913,9 @@
                             window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
                         }
                     } else {
-                        console.log(`⏳ Esperando FullCalendar... (${intentos}/${maxIntentos})`);
+                        console.log(`⏳ Esperando FullCalendar... (${intentos}/${MAX_POLLING_ATTEMPTS})`);
                     }
-                }, 250); // Polling cada 250ms como se requiere
+                }, POLLING_INTERVAL_MS);
             }
         }
 
