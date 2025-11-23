@@ -5865,25 +5865,6 @@
         const MP_ACCESS_TOKEN = 'APP_USR-4503161965031070-112117-be731e41124a02f1a5fceed4c7127c9b-501317704';
         const RETURN_URL = 'https://aura-eta-five.vercel.app';
 
-        // Variable global para el plan
-        let planSeleccionado = { clases: 0, precio: 0 };
-
-        // NOTA: window.selectPlan ya está definido arriba en el código (línea ~3424)
-        // No redefinimos aquí para evitar duplicados
-        // La función selectPlan original maneja todo el flujo de reservas
-
-        // Botones de planes
-        window.iniciarPagoAura = function(clases, precio) {
-            planSeleccionado = { clases, precio };
-            
-            // GUARDAR EN LOCALSTORAGE (sobrevive el redirect)
-            localStorage.setItem('planClases', clases);
-            localStorage.setItem('planPrecio', precio);
-            
-            document.getElementById('register-modal').style.display = 'flex';
-            document.getElementById('quick-name').focus();
-        };
-
         // NUEVO FLUJO: Attach click handlers to all "Agendar Clase" buttons
         document.addEventListener('DOMContentLoaded', () => {
             // Attach click handlers to all "Agendar Clase" buttons
@@ -5937,11 +5918,15 @@
         });
 
         async function crearPreferenciaYRedirigir(nombre, telefono) {
+            // Usar selectedPlan para obtener clases y precio
+            const classes = selectedPlan.classes || parseInt(localStorage.getItem('tempPlanClasses') || '1');
+            const price = selectedPlan.price || parseInt(localStorage.getItem('tempPlanPrice') || '150');
+            
             const preference = {
                 items: [{
-                    title: `${planSeleccionado.clases} clase${planSeleccionado.clases > 1 ? 's' : ''} en Aura Studio`,
+                    title: `${classes} clase${classes > 1 ? 's' : ''} en Aura Studio`,
                     quantity: 1,
-                    unit_price: planSeleccionado.precio,
+                    unit_price: price,
                     currency_id: 'MXN'
                 }],
                 back_urls: {
@@ -5964,9 +5949,17 @@
                 });
                 
                 const data = await res.json();
+                if (!data.init_point) {
+                    console.error('❌ Error en respuesta de MercadoPago:', data);
+                    alert('Error al crear preferencia de pago. Por favor, intenta nuevamente.');
+                    return;
+                }
+                
+                console.log('✅ Preferencia creada, redirigiendo a:', data.init_point);
                 location.href = data.init_point;
             } catch (e) {
-                alert('Error al procesar pago');
+                console.error('❌ Error al procesar pago:', e);
+                alert('Error al procesar pago. Por favor, intenta nuevamente.');
             }
         }
 
