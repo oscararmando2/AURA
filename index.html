@@ -5879,12 +5879,19 @@
                     console.log('📅 Calendario container mostrado inmediatamente');
                 }
                 
-                // 5. Actualizar mensaje del calendario inmediatamente
+                // 5. Actualizar mensaje del calendario inmediatamente (mensaje simple inicial)
                 const info = document.querySelector('.calendar-info h3');
                 if (info) {
                     info.innerHTML = `Selecciona tus ${clases} ${pluralizeClases(clases)}`;
-                    console.log('📝 Mensaje del calendario actualizado');
+                    console.log('📝 Mensaje del calendario actualizado (mensaje inicial)');
                 }
+                
+                // Helper function para ejecutar selectPlan con las opciones correctas
+                const executeSelectPlan = () => {
+                    // skipAlert: true - No mostrar el alert de "Plan seleccionado" porque ya mostramos "Pago recibido"
+                    // skipPrompts: true - No preguntar por notas porque ya tenemos el nombre del pago
+                    window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
+                };
                 
                 // 6. Esperar a que FullCalendar cargue (polling)
                 console.log(`⏳ Esperando a que FullCalendar cargue (máx ${MAX_POLLING_ATTEMPTS * POLLING_INTERVAL_MS / 1000}s)...`);
@@ -5898,10 +5905,8 @@
                         clearInterval(waitForCalendar);
                         console.log(`✅ FullCalendar cargado (intento ${intentos}/${MAX_POLLING_ATTEMPTS})`);
                         
-                        // Ejecutar selectPlan para configurar el plan y hacer scroll
-                        // skipAlert: true - No mostrar el alert de "Plan seleccionado" porque ya mostramos "Pago recibido"
-                        // skipPrompts: true - No preguntar por notas porque ya tenemos el nombre del pago
-                        window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
+                        // Ejecutar selectPlan - esto también actualizará el mensaje con el formato de progreso
+                        executeSelectPlan();
                     } else if (intentos >= MAX_POLLING_ATTEMPTS) {
                         // Timeout alcanzado
                         clearInterval(waitForCalendar);
@@ -5910,7 +5915,7 @@
                         
                         // Intentar llamar selectPlan de todas formas (por si acaso)
                         if (typeof window.selectPlan === 'function') {
-                            window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
+                            executeSelectPlan();
                         }
                     } else {
                         console.log(`⏳ Esperando FullCalendar... (${intentos}/${MAX_POLLING_ATTEMPTS})`);
