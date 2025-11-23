@@ -2723,6 +2723,56 @@
         </div>
     </div>
 
+    <!-- Modal para Confirmación de Reserva (Nombre + Teléfono + Pagar) -->
+    <div id="reservation-modal" role="dialog" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2100; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 500px; width: 90%; border: 2px solid rgba(246, 200, 199, 0.3);">
+            <h2 style="color: #333; margin-bottom: 20px; font-size: 1.8rem; font-weight: 600; text-align: center;">Confirma tu Reserva</h2>
+            
+            <!-- Información del horario seleccionado -->
+            <div style="background: rgba(246, 200, 199, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(246, 200, 199, 0.3);">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="font-size: 1.5rem;">📅</span>
+                    <span id="reservation-date-display" style="color: #333; font-weight: 600; font-size: 1.1rem;"></span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">🕐</span>
+                    <span id="reservation-time-display" style="color: #666; font-weight: 500; font-size: 1.05rem;"></span>
+                </div>
+            </div>
+            
+            <!-- Formulario de datos del cliente -->
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Nombre Completo</label>
+                <input type="text" id="reservation-name" placeholder="Ej: María García" style="width: 100%; padding: 14px; border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#f6c8c7'" onblur="this.style.borderColor='rgba(246, 200, 199, 0.3)'" />
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Teléfono (10 dígitos)</label>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="padding: 14px; background: rgba(246, 200, 199, 0.1); border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-weight: 600; color: #333;">+52</span>
+                    <input type="tel" id="reservation-phone" placeholder="1234567890" maxlength="10" pattern="[0-9]{10}" style="flex: 1; padding: 14px; border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#f6c8c7'" onblur="this.style.borderColor='rgba(246, 200, 199, 0.3)'" />
+                </div>
+                <p style="color: #999; font-size: 0.85rem; margin-top: 6px;">Solo números, sin espacios ni guiones</p>
+            </div>
+            
+            <!-- Contador de clases seleccionadas -->
+            <div style="background: rgba(246, 200, 199, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 25px; text-align: center;">
+                <p style="color: #666; font-size: 0.95rem; margin-bottom: 5px;">Progreso de reservas</p>
+                <p id="reservation-progress" style="color: #333; font-weight: 700; font-size: 1.3rem;"></p>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div style="display: flex; gap: 12px;">
+                <button type="button" id="reservation-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 16px; border: 1px solid #ccc; border-radius: 10px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#d0d0d0'" onmouseout="this.style.background='#e0e0e0'">
+                    Cancelar
+                </button>
+                <button type="button" id="reservation-confirm" style="flex: 2; background: linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%); color: #fff; padding: 16px; border: 2px solid #e8cccc; border-radius: 10px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(246, 200, 199, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(246, 200, 199, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(246, 200, 199, 0.4)'">
+                    Reservar y pagar ahora
+                </button>
+            </div>
+        </div>
+    </div>
+
 
 
     <!-- ========== 1. Welcome Section (Hero Section) ========== -->
@@ -3421,22 +3471,18 @@
         let isAdmin = false;
 
         // FIX #1: Hacer selectPlan global (window.selectPlan)
+        // NUEVO FLUJO: Mostrar calendario inmediatamente, pedir datos por reserva
         window.selectPlan = async function(classes, price, options = {}) {
             console.log(`📅 selectPlan llamado: ${classes} clases x $${price}`);
             
-            // Configuración
-            const FALLBACK_USER_NAME = 'Usuario'; // Nombre por defecto si no se puede obtener
+            // Limpiar cualquier estado previo de reservas temporales
+            localStorage.removeItem('tempReservations');
+            localStorage.removeItem('tempPlanClasses');
+            localStorage.removeItem('tempPlanPrice');
             
-            // Options: { skipAlert: false, skipPrompts: false }
-            const skipAlert = options.skipAlert || false;
-            const skipPrompts = options.skipPrompts || false;
-            
-            // SISTEMA SUPER SIMPLE: Verificar si hay teléfono en localStorage
-            const userTelefono = localStorage.getItem('userTelefono');
-            if (!userTelefono) {
-                alert('⚠️ Debes iniciar sesión para hacer reservas.\n\nPor favor, usa el menú (☰) en la esquina superior derecha para ingresar tu número de teléfono.');
-                return;
-            }
+            // Guardar plan seleccionado en localStorage (sobrevive al reload)
+            localStorage.setItem('tempPlanClasses', classes);
+            localStorage.setItem('tempPlanPrice', price);
             
             selectedPlan.classes = classes;
             selectedPlan.price = price;
@@ -3444,32 +3490,7 @@
             selectedPlan.bookedEvents = [];
             selectedPlan.userInfo = null;
 
-            // Obtener información del usuario
-            const userTelefonoTrimmed = userTelefono.trim();
-            
-            // Obtener nombre del localStorage (si ya pagó) o preguntar
-            let nombre = localStorage.getItem('userNombre');
-            if (!nombre && !skipPrompts) {
-                nombre = prompt('Por favor, ingresa tu nombre completo:');
-                if (!nombre) {
-                    alert('⚠️ El nombre es requerido para continuar con la reserva.');
-                    return;
-                }
-            } else if (!nombre) {
-                nombre = FALLBACK_USER_NAME; // Fallback si skipPrompts está activado
-            }
-
-            // Solo preguntar por notas (opcional) si no se está saltando los prompts
-            const notas = skipPrompts ? '' : (prompt('¿Alguna nota especial para tus clases? (opcional):') || '');
-
-            // Guardar información del cliente (usando teléfono y nombre)
-            selectedPlan.userInfo = {
-                nombre: nombre.trim(),
-                telefono: userTelefonoTrimmed,
-                notas: notas
-            };
-
-            // Show calendar immediately
+            // Show calendar immediately WITHOUT requiring login
             const calendarContainer = document.getElementById('calendar-container');
             if (calendarContainer) {
                 calendarContainer.style.display = 'block';
@@ -3483,8 +3504,8 @@
             } else {
                 console.log('📅 Calendario ya existe, limpiando eventos temporales...');
                 // Limpiar eventos temporales
-                selectedPlan.bookedEvents.forEach(eventId => {
-                    const event = calendar.getEventById(eventId);
+                selectedPlan.bookedEvents.forEach(eventObj => {
+                    const event = calendar.getEventById(eventObj.eventId);
                     if (event) event.remove();
                 });
                 selectedPlan.bookedEvents = [];
@@ -3494,11 +3515,6 @@
             // Actualizar el mensaje informativo
             updateCalendarInfo();
 
-            // Mostrar alert solo si no se pide omitirlo (útil para callback de pago)
-            if (!skipAlert) {
-                alert(`Plan seleccionado: ${classes} clases por $${price}.\n\nHola ${nombre}, ahora haz clic en las fechas del calendario para seleccionar tus ${classes} clases.\n\nPara cada fecha, se abrirá un selector de horario.`);
-            }
-            
             // Scroll to calendar
             console.log('📜 Scrolling al calendario...');
             setTimeout(() => {
@@ -3791,7 +3807,7 @@
 
         /**
          * Manejar click en una fecha del calendario
-         * REQUISITO: Solo usuarios autenticados pueden agendar (currentUser no nulo)
+         * NUEVO FLUJO: No requiere autenticación previa
          */
         function handleDateClick(info) {
             console.log('Fecha clickeada:', info.dateStr);
@@ -3812,15 +3828,9 @@
                 alert('❌ No puedes seleccionar fechas pasadas');
                 return;
             }
-            
-            // REQUISITO: Verificar que el usuario esté autenticado
-            if (!window.auth || !window.auth.currentUser) {
-                alert('⚠️ Debes iniciar sesión para hacer reservas.\n\nPor favor, usa el menú (☰) en la esquina superior derecha para registrarte o iniciar sesión.');
-                return;
-            }
 
             // Check if plan is selected
-            if (selectedPlan.classes === 0 || !selectedPlan.userInfo) {
+            if (selectedPlan.classes === 0) {
                 alert('⚠️ Por favor, selecciona un plan primero');
                 return;
             }
@@ -4017,71 +4027,208 @@
         }
 
         /**
-         * Seleccionar horario y agregar al calendario
-         * REQUISITO: fechaHora se guarda en formato ISO (YYYY-MM-DDTHH:mm:ss)
+         * Seleccionar horario y mostrar modal de datos + pago
+         * NUEVO FLUJO: Pedir nombre y teléfono por cada reserva
          */
         async function selectTimeSlot(dateStr, time) {
             const MAX_CAPACITY = 5;
             
-            // Verificar capacidad antes de continuar (doble verificación para prevenir condiciones de carrera)
+            // Verificar capacidad antes de continuar
             const currentCount = await getReservationCountForTimeSlot(dateStr, time);
             if (currentCount >= MAX_CAPACITY) {
                 alert(`⚠️ Lo sentimos, este horario ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nActualmente reservado: ${currentCount}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario.`);
                 return;
             }
             
-            // Cerrar modal
+            // Cerrar modal de selección de horario
             document.getElementById('time-selection-modal').style.display = 'none';
             
-            // REQUISITO: Crear fecha y hora completa en formato ISO (YYYY-MM-DDTHH:mm:ss)
+            // Crear fecha y hora en formato ISO
             const dateTimeStr = `${dateStr}T${time}:00`;
             const dateTime = new Date(dateTimeStr);
-            const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
             
-            // Format date and time for display only (human-readable)
+            // Format date and time for display in modal
             const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const timeOptions = { hour: '2-digit', minute: '2-digit' };
             const dateFormatted = dateTime.toLocaleDateString('es-ES', dateOptions);
             const timeFormatted = dateTime.toLocaleTimeString('es-ES', timeOptions);
             
-            // REQUISITO: Store fechaHora in ISO format (YYYY-MM-DDTHH:mm:ss) as specified
-            const fechaHoraISO = dateTimeStr; // ISO format: YYYY-MM-DDTHH:mm:ss
+            // Mostrar modal de confirmación con datos del cliente
+            showReservationModal(dateStr, time, dateFormatted, timeFormatted, dateTimeStr);
+        }
+
+        // Constants for phone number handling
+        const MEXICO_COUNTRY_CODE = '52';
+        const PHONE_DIGITS_LENGTH = 10;
+        
+        /**
+         * Mostrar modal de confirmación de reserva con datos del cliente
+         * NUEVO FLUJO: Pedir nombre y teléfono por cada horario
+         */
+        function showReservationModal(dateStr, time, dateFormatted, timeFormatted, dateTimeStr) {
+            const modal = document.getElementById('reservation-modal');
+            const dateDisplay = document.getElementById('reservation-date-display');
+            const timeDisplay = document.getElementById('reservation-time-display');
+            const nameInput = document.getElementById('reservation-name');
+            const phoneInput = document.getElementById('reservation-phone');
+            const progressDisplay = document.getElementById('reservation-progress');
+            const confirmBtn = document.getElementById('reservation-confirm');
+            const cancelBtn = document.getElementById('reservation-cancel');
+            
+            // Mostrar fecha y hora seleccionada
+            dateDisplay.textContent = dateFormatted;
+            timeDisplay.textContent = timeFormatted;
+            
+            // Mostrar progreso
+            const currentCount = selectedPlan.bookedClasses + 1;
+            progressDisplay.textContent = `${currentCount} de ${selectedPlan.classes} clases seleccionadas`;
+            
+            // Pre-llenar con datos si ya están en localStorage (de pago previo)
+            const savedName = localStorage.getItem('userNombre') || '';
+            const savedPhone = localStorage.getItem('userTelefono') || '';
+            nameInput.value = savedName;
+            // Remove country code prefix if present (supports any length country code)
+            if (savedPhone.startsWith(MEXICO_COUNTRY_CODE) && savedPhone.length > MEXICO_COUNTRY_CODE.length) {
+                phoneInput.value = savedPhone.substring(MEXICO_COUNTRY_CODE.length);
+            } else {
+                phoneInput.value = savedPhone;
+            }
+            
+            // Event handlers
+            confirmBtn.onclick = () => {
+                confirmReservation(dateStr, time, dateTimeStr);
+            };
+            
+            cancelBtn.onclick = () => {
+                modal.style.display = 'none';
+                // Volver a mostrar el modal de selección de horario
+                document.getElementById('time-selection-modal').style.display = 'flex';
+            };
+            
+            // Show modal
+            modal.style.display = 'flex';
+            nameInput.focus();
+        }
+
+        /**
+         * Confirmar reserva y agregar temporalmente al calendario
+         * NUEVO FLUJO: Guardar en localStorage y continuar o proceder al pago
+         */
+        function confirmReservation(dateStr, time, dateTimeStr) {
+            const nameInput = document.getElementById('reservation-name');
+            const phoneInput = document.getElementById('reservation-phone');
+            
+            const nombre = nameInput.value.trim();
+            const phoneDigits = phoneInput.value.trim().replace(/\D/g, '');
+            
+            // Validar campos
+            if (!nombre) {
+                alert('⚠️ Por favor ingresa tu nombre completo');
+                nameInput.focus();
+                return;
+            }
+            
+            if (phoneDigits.length !== PHONE_DIGITS_LENGTH) {
+                alert(`⚠️ Por favor ingresa ${PHONE_DIGITS_LENGTH} dígitos de teléfono (sin espacios ni guiones)`);
+                phoneInput.focus();
+                return;
+            }
+            
+            const telefono = MEXICO_COUNTRY_CODE + phoneDigits; // Agregar código de país
+            
+            // Guardar datos del cliente (se usarán para todas las reservas)
+            localStorage.setItem('userNombre', nombre);
+            localStorage.setItem('userTelefono', telefono);
+            
+            // Store in selectedPlan if not already set
+            if (!selectedPlan.userInfo) {
+                selectedPlan.userInfo = {
+                    nombre: nombre,
+                    telefono: telefono,
+                    notas: ''
+                };
+            }
+            
+            // Cerrar modal
+            document.getElementById('reservation-modal').style.display = 'none';
+            
+            // Crear fecha y hora en formato ISO
+            const dateTime = new Date(dateTimeStr);
+            const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
             
             // Agregar evento al calendario temporalmente
             const eventId = `temp-${Date.now()}`;
             calendar.addEvent({
                 id: eventId,
-                title: `✓ ${selectedPlan.userInfo.nombre}`,
+                title: `✓ ${nombre}`,
                 start: dateTime,
                 end: endDateTime,
                 backgroundColor: '#fbe3e3',
                 borderColor: '#e8cccc',
                 textColor: '#333',
                 extendedProps: {
-                    fechaHora: fechaHoraISO,
-                    temporal: true
+                    fechaHora: dateTimeStr, // ISO format
+                    temporal: true,
+                    nombre: nombre,
+                    telefono: telefono
                 }
             });
             
+            // Agregar a la lista de reservas seleccionadas
             selectedPlan.bookedClasses++;
             selectedPlan.bookedEvents.push({
                 eventId: eventId,
-                fechaHora: fechaHoraISO, // Store in ISO format
-                date: dateTimeStr
+                fechaHora: dateTimeStr, // ISO format: YYYY-MM-DDTHH:mm:ss
+                nombre: nombre,
+                telefono: telefono
             });
+            
+            // Guardar en localStorage (temporal, hasta pago exitoso)
+            saveTempReservations();
             
             // Actualizar contador
             updateCalendarInfo();
             
             const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
             
+            // Verificar si completó todas las reservas
             if (selectedPlan.bookedClasses >= selectedPlan.classes) {
-                // Todas las clases seleccionadas, guardar en Firestore
-                alert(`✅ ¡Has seleccionado todas tus ${selectedPlan.classes} clases!\n\nAhora se guardarán todas tus reservas...`);
-                await saveAllReservations();
+                // Todas las clases seleccionadas -> proceder al pago
+                alert(`✅ ¡Has seleccionado todas tus ${selectedPlan.classes} clases!\n\nAhora serás redirigido al pago...`);
+                setTimeout(() => {
+                    proceedToPayment();
+                }, 1000);
             } else {
-                alert(`✅ Clase agregada!\n\n📅 ${dateFormatted}\n🕐 ${timeFormatted}\n\nClases seleccionadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}\n\nContinúa seleccionando tus clases en el calendario.`);
+                // Continuar seleccionando
+                alert(`✅ Clase agregada!\n\n📅 ${dateTime.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n🕐 ${dateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}\n\nClases seleccionadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}\n\nContinúa seleccionando tus clases en el calendario.`);
             }
+        }
+
+        /**
+         * Guardar reservas temporales en localStorage
+         */
+        function saveTempReservations() {
+            const tempData = {
+                reservations: selectedPlan.bookedEvents,
+                userInfo: selectedPlan.userInfo
+            };
+            localStorage.setItem('tempReservations', JSON.stringify(tempData));
+            console.log('💾 Reservas temporales guardadas en localStorage');
+        }
+
+        /**
+         * Proceder al pago con MercadoPago
+         */
+        async function proceedToPayment() {
+            const nombre = selectedPlan.userInfo.nombre;
+            const telefono = selectedPlan.userInfo.telefono;
+            const classes = selectedPlan.classes;
+            const precio = selectedPlan.price;
+            
+            console.log(`💳 Procesando pago: ${classes} clases x $${precio} para ${nombre}`);
+            
+            // Crear preferencia de MercadoPago y redirigir
+            await crearPreferenciaYRedirigir(nombre, telefono);
         }
 
         /**
@@ -5726,26 +5873,7 @@
         const MP_ACCESS_TOKEN = 'APP_USR-4503161965031070-112117-be731e41124a02f1a5fceed4c7127c9b-501317704';
         const RETURN_URL = 'https://aura-eta-five.vercel.app';
 
-        // Variable global para el plan
-        let planSeleccionado = { clases: 0, precio: 0 };
-
-        // NOTA: window.selectPlan ya está definido arriba en el código (línea ~3424)
-        // No redefinimos aquí para evitar duplicados
-        // La función selectPlan original maneja todo el flujo de reservas
-
-        // Botones de planes
-        window.iniciarPagoAura = function(clases, precio) {
-            planSeleccionado = { clases, precio };
-            
-            // GUARDAR EN LOCALSTORAGE (sobrevive el redirect)
-            localStorage.setItem('planClases', clases);
-            localStorage.setItem('planPrecio', precio);
-            
-            document.getElementById('register-modal').style.display = 'flex';
-            document.getElementById('quick-name').focus();
-        };
-
-        // Continuar al pago - Esperar a que DOM esté listo
+        // NUEVO FLUJO: Attach click handlers to all "Agendar Clase" buttons
         document.addEventListener('DOMContentLoaded', () => {
             // Attach click handlers to all "Agendar Clase" buttons
             const planButtons = document.querySelectorAll('.plan-btn');
@@ -5783,36 +5911,30 @@
                     }
                     
                     console.log(`Plan button clicked: ${clases} clases, $${precio}`);
-                    window.iniciarPagoAura(clases, precio);
+                    // NUEVO FLUJO: Llamar directamente a selectPlan (muestra calendario inmediatamente)
+                    window.selectPlan(clases, precio);
                 });
             });
             
-            const continueButton = document.querySelector('button[onclick="guardarRegistroLocalYPagar()"]');
-            if (continueButton) {
-                continueButton.onclick = async () => {
-                    const nombre = document.getElementById('quick-name').value.trim();
-                    const digitos = document.getElementById('quick-phone-digits').value.replace(/\D/g, '');
-                    
-                    if (!nombre || digitos.length !== 10) {
-                        alert('Completa nombre y 10 dígitos');
-                        return;
-                    }
-                    
-                    localStorage.setItem('userNombre', nombre);
-                    localStorage.setItem('userTelefono', '52' + digitos);
-                    
-                    document.getElementById('register-modal').style.display = 'none';
-                    await crearPreferenciaYRedirigir(nombre, '52' + digitos);
-                };
+            // Setup time selection modal cancel button
+            const timeCancelBtn = document.getElementById('time-cancel');
+            if (timeCancelBtn) {
+                timeCancelBtn.addEventListener('click', () => {
+                    document.getElementById('time-selection-modal').style.display = 'none';
+                });
             }
         });
 
         async function crearPreferenciaYRedirigir(nombre, telefono) {
+            // Usar selectedPlan para obtener clases y precio
+            const classes = selectedPlan.classes || parseInt(localStorage.getItem('tempPlanClasses') || '1');
+            const price = selectedPlan.price || parseInt(localStorage.getItem('tempPlanPrice') || '150');
+            
             const preference = {
                 items: [{
-                    title: `${planSeleccionado.clases} clase${planSeleccionado.clases > 1 ? 's' : ''} en Aura Studio`,
+                    title: `${classes} clase${classes > 1 ? 's' : ''} en Aura Studio`,
                     quantity: 1,
-                    unit_price: planSeleccionado.precio,
+                    unit_price: price,
                     currency_id: 'MXN'
                 }],
                 back_urls: {
@@ -5835,22 +5957,27 @@
                 });
                 
                 const data = await res.json();
+                if (!data.init_point) {
+                    console.error('❌ Error en respuesta de MercadoPago:', data);
+                    alert('Error al crear preferencia de pago. Por favor, intenta nuevamente.');
+                    return;
+                }
+                
+                console.log('✅ Preferencia creada, redirigiendo a:', data.init_point);
                 location.href = data.init_point;
             } catch (e) {
-                alert('Error al procesar pago');
+                console.error('❌ Error al procesar pago:', e);
+                alert('Error al procesar pago. Por favor, intenta nuevamente.');
             }
         }
 
+        // Constants for Firebase initialization
+        const MAX_FIREBASE_INIT_ATTEMPTS = 20;
+        const FIREBASE_POLLING_INTERVAL_MS = 500;
+        
         // DETECTOR DE RETORNO MEJORADO - Maneja callback de Mercado Pago
-        function detectarRetorno() {
-            // Configuración de polling para esperar FullCalendar
-            const POLLING_INTERVAL_MS = 250; // Intervalo entre intentos (250ms)
-            const MAX_POLLING_ATTEMPTS = 40; // Máximo de intentos (40 × 250ms = 10 segundos)
-            const FALLBACK_USER_NAME = 'clienta'; // Nombre por defecto si no hay en localStorage
-            
-            // Helper function para pluralización de "clase/clases"
-            const pluralizeClases = (count) => count > 1 ? 'clases' : 'clase';
-            
+        // NUEVO FLUJO: Guardar todas las reservas en Firestore al regresar del pago
+        async function detectarRetorno() {
             const params = new URLSearchParams(location.search);
             const success = params.has('success') || params.has('payment_id') || params.has('collection_id') || params.get('status') === 'approved';
             
@@ -5861,66 +5988,119 @@
                 history.replaceState({}, document.title, location.pathname);
                 console.log('🧹 URL limpiada');
                 
-                // 2. Obtener datos del plan desde localStorage
-                const clases = parseInt(localStorage.getItem('planClases') || '1');
-                const precio = parseInt(localStorage.getItem('planPrecio') || '150');
-                const nombre = localStorage.getItem('userNombre') || FALLBACK_USER_NAME;
-                
-                console.log(`📋 Plan recuperado: ${clases} clases, $${precio}, cliente: ${nombre}`);
-                
-                // 3. Mostrar alert con nombre del usuario
-                alert(`¡Pago recibido, ${nombre}! Ahora elige tus ${clases} ${pluralizeClases(clases)}`);
-                console.log('✅ Alert mostrado al usuario');
-                
-                // 4. Mostrar calendario inmediatamente (antes de esperar FullCalendar)
-                const container = document.getElementById('calendar-container');
-                if (container) {
-                    container.style.display = 'block';
-                    console.log('📅 Calendario container mostrado inmediatamente');
+                // 2. Recuperar reservas temporales de localStorage
+                const tempReservationsStr = localStorage.getItem('tempReservations');
+                if (!tempReservationsStr) {
+                    console.error('❌ No hay reservas temporales en localStorage');
+                    alert('⚠️ No se encontraron reservas pendientes.\n\nPor favor, selecciona un plan nuevamente.');
+                    return;
                 }
                 
-                // 5. Actualizar mensaje del calendario inmediatamente (mensaje simple inicial)
-                const info = document.querySelector('.calendar-info h3');
-                if (info) {
-                    info.innerHTML = `Selecciona tus ${clases} ${pluralizeClases(clases)}`;
-                    console.log('📝 Mensaje del calendario actualizado (mensaje inicial)');
+                let tempData;
+                try {
+                    tempData = JSON.parse(tempReservationsStr);
+                } catch (e) {
+                    console.error('❌ Error al parsear reservas temporales:', e);
+                    alert('❌ Error al recuperar reservas. Por favor, contacta con soporte.');
+                    return;
                 }
                 
-                // Helper function para ejecutar selectPlan con las opciones correctas
-                const executeSelectPlan = () => {
-                    // skipAlert: true - No mostrar el alert de "Plan seleccionado" porque ya mostramos "Pago recibido"
-                    // skipPrompts: true - No preguntar por notas porque ya tenemos el nombre del pago
-                    window.selectPlan(clases, precio, { skipAlert: true, skipPrompts: true });
+                const { reservations, userInfo } = tempData;
+                const nombre = userInfo?.nombre || localStorage.getItem('userNombre') || 'Cliente';
+                const telefono = userInfo?.telefono || localStorage.getItem('userTelefono') || '';
+                
+                console.log(`📋 Reservas recuperadas: ${reservations.length} clases para ${nombre}`);
+                
+                // 3. Mostrar mensaje de éxito
+                alert(`¡Pago recibido, ${nombre}!\n\nGuardando tus ${reservations.length} clases...`);
+                
+                // 4. Esperar a que Firebase esté listo
+                const waitForFirebase = async () => {
+                    let attempts = 0;
+                    
+                    while (attempts < MAX_FIREBASE_INIT_ATTEMPTS) {
+                        if (window.firebaseReady && window.db && typeof window.saveReservationToFirestore === 'function') {
+                            return true;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, FIREBASE_POLLING_INTERVAL_MS));
+                        attempts++;
+                        console.log(`⏳ Esperando Firebase... (${attempts}/${MAX_FIREBASE_INIT_ATTEMPTS})`);
+                    }
+                    return false;
                 };
                 
-                // 6. Esperar a que FullCalendar cargue (polling)
-                console.log(`⏳ Esperando a que FullCalendar cargue (máx ${MAX_POLLING_ATTEMPTS * POLLING_INTERVAL_MS / 1000}s)...`);
-                let intentos = 0;
+                const firebaseReady = await waitForFirebase();
+                if (!firebaseReady) {
+                    console.error('❌ Firebase no está listo');
+                    alert('❌ Error: Sistema de reservas no disponible.\n\nTus reservas están guardadas temporalmente.\nPor favor, contacta con soporte mostrando este mensaje.');
+                    return;
+                }
                 
-                const waitForCalendar = setInterval(() => {
-                    intentos++;
-                    
-                    // Verificar si FullCalendar y selectPlan están disponibles
-                    if (window.calendar && typeof window.selectPlan === 'function') {
-                        clearInterval(waitForCalendar);
-                        console.log(`✅ FullCalendar cargado (intento ${intentos}/${MAX_POLLING_ATTEMPTS})`);
+                console.log('✅ Firebase listo, guardando reservas...');
+                
+                // 5. Guardar todas las reservas en Firestore
+                const savedReservations = [];
+                const failedReservations = [];
+                
+                for (let i = 0; i < reservations.length; i++) {
+                    const reservation = reservations[i];
+                    try {
+                        console.log(`💾 Guardando reserva ${i + 1}/${reservations.length}...`);
                         
-                        // Ejecutar selectPlan - esto también actualizará el mensaje con el formato de progreso
-                        executeSelectPlan();
-                    } else if (intentos >= MAX_POLLING_ATTEMPTS) {
-                        // Timeout alcanzado
-                        clearInterval(waitForCalendar);
-                        console.warn(`⚠️ Timeout: FullCalendar no cargó en ${MAX_POLLING_ATTEMPTS * POLLING_INTERVAL_MS / 1000} segundos`);
-                        console.warn('⚠️ El calendario ya está visible pero puede que no funcione correctamente');
+                        const reservaId = await window.saveReservationToFirestore(
+                            reservation.nombre,
+                            reservation.telefono,
+                            reservation.fechaHora, // ISO format: YYYY-MM-DDTHH:mm:ss
+                            '' // notas vacías por ahora
+                        );
                         
-                        // Intentar llamar selectPlan de todas formas (por si acaso)
-                        if (typeof window.selectPlan === 'function') {
-                            executeSelectPlan();
-                        }
-                    } else {
-                        console.log(`⏳ Esperando FullCalendar... (${intentos}/${MAX_POLLING_ATTEMPTS})`);
+                        savedReservations.push(reservaId);
+                        console.log(`✅ Reserva ${i + 1} guardada con ID:`, reservaId);
+                    } catch (error) {
+                        console.error(`❌ Error al guardar reserva ${i + 1}:`, error);
+                        failedReservations.push(reservation);
                     }
-                }, POLLING_INTERVAL_MS);
+                }
+                
+                // 6. Limpiar datos temporales
+                localStorage.removeItem('tempReservations');
+                localStorage.removeItem('tempPlanClasses');
+                localStorage.removeItem('tempPlanPrice');
+                localStorage.removeItem('planClases');
+                localStorage.removeItem('planPrecio');
+                console.log('🧹 Datos temporales limpiados');
+                
+                // 7. Mostrar resultado
+                if (savedReservations.length === reservations.length) {
+                    // Todas guardadas exitosamente
+                    alert(`✅ ¡Pago recibido! Tus ${savedReservations.length} clases están confirmadas.\n\nGracias ${nombre}, nos vemos pronto!`);
+                    
+                    // 8. Recargar "Mis Clases" si el usuario está logueado
+                    if (telefono && typeof window.loadUserClasses === 'function') {
+                        console.log('📚 Recargando "Mis Clases"...');
+                        await window.loadUserClasses(telefono);
+                    }
+                    
+                    // 9. Recargar panel admin si está disponible
+                    if (window.isAdmin && typeof window.loadReservationsFromFirestore === 'function') {
+                        console.log('👨‍💼 Recargando panel admin...');
+                        await window.loadReservationsFromFirestore();
+                    }
+                    
+                    // 10. Scroll a "Mis Clases" si está visible
+                    const myClassesSection = document.getElementById('my-classes-section');
+                    if (myClassesSection && myClassesSection.style.display !== 'none') {
+                        setTimeout(() => {
+                            myClassesSection.scrollIntoView({ behavior: 'smooth' });
+                        }, 1000);
+                    }
+                } else if (savedReservations.length > 0) {
+                    // Algunas guardadas
+                    alert(`⚠️ Pago recibido\n\n${savedReservations.length} de ${reservations.length} clases guardadas correctamente.\n\n${failedReservations.length} clases fallaron.\n\nPor favor, contacta con soporte.`);
+                } else {
+                    // Ninguna guardada
+                    alert('❌ Error al guardar las reservas.\n\nTu pago fue recibido pero hubo un error técnico.\n\nPor favor, contacta con soporte inmediatamente.');
+                }
             }
         }
 
