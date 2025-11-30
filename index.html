@@ -2661,7 +2661,7 @@
     <!-- Menú hamburguesa en la esquina superior derecha -->
     <div id="hamburger-container" style="position: fixed; top: 0; right: 20px; z-index: 1000; height: 70px; display: flex; align-items: center;">
         <!-- Botón hamburguesa (tres líneas) -->
-        <button id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: transparent; border: none; padding: 10px; cursor: pointer; display: flex; flex-direction: column; justify-content: center;">
+        <button type="button" id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: transparent; border: none; padding: 10px; cursor: pointer; display: flex; flex-direction: column; justify-content: center;">
             <div style="width: 30px; height: 3px; background-color: #f6c8c7; margin: 6px 0; border-radius: 2px;"></div>
             <div style="width: 30px; height: 3px; background-color: #f6c8c7; margin: 6px 0; border-radius: 2px;"></div>
             <div style="width: 30px; height: 3px; background-color: #f6c8c7; margin: 6px 0; border-radius: 2px;"></div>
@@ -2669,16 +2669,16 @@
         
         <!-- Menú desplegable -->
         <div id="menu-dropdown" role="menu" aria-hidden="true" style="display: none; position: absolute; top: 60px; right: 0; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); border: 2px solid rgba(246, 200, 199, 0.3); min-width: 200px; overflow: hidden;">
-            <button id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
+            <button type="button" id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 📝 Registrarse
             </button>
-            <button id="menu-admin-login" role="menuitem" aria-label="Login Admin" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
+            <button type="button" id="menu-admin-login" role="menuitem" aria-label="Login Admin" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 🔐 Login Admin
             </button>
-            <button id="menu-logout" role="menuitem" aria-label="Cerrar Sesión" style="display: none; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem;">
+            <button type="button" id="menu-logout" role="menuitem" aria-label="Cerrar Sesión" style="display: none; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem;">
                 🚪 Cerrar Sesión
             </button>
-            <button id="menu-admin-logout" role="menuitem" aria-label="Cerrar Sesión Admin" style="display: none; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem;">
+            <button type="button" id="menu-admin-logout" role="menuitem" aria-label="Cerrar Sesión Admin" style="display: none; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem;">
                 🚪 Cerrar Sesión Admin
             </button>
         </div>
@@ -2690,14 +2690,14 @@
       <div style="background:#fff; padding:40px; border-radius:20px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(246,200,199,0.4); border:3px solid #f6c8c7;">
         <h2 id="register-modal-title" style="color:#333; margin-bottom:15px;">¡Bienvenida a Aura!</h2>
         <p style="color:#666; margin-bottom:20px;">Ingresa tus datos para continuar</p>
-        <input type="text" id="quick-name" placeholder="Nombre completo" aria-label="Nombre completo" required style="width:100%; padding:15px; margin-bottom:15px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
+        <input type="text" id="quick-name" placeholder="Nombre completo" aria-label="Nombre completo" autocomplete="name" required style="width:100%; padding:15px; margin-bottom:15px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
           <span style="font-size: 1.3rem; font-weight: 600; color: #999; background: #f8f8f8; padding: 15px 12px; border-radius: 12px 0 0 12px; border: 1px solid #f6c8c7; border-right: none;">+52</span>
-          <input type="tel" id="quick-phone-digits" placeholder="715 159 6586" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" style="flex: 1; padding: 15px; border: 1px solid #f6c8c7; border-radius: 0 12px 12px 0; font-size: 1.1rem;" required>
+          <input type="tel" id="quick-phone-digits" placeholder="715 159 6586" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" autocomplete="tel" style="flex: 1; padding: 15px; border: 1px solid #f6c8c7; border-radius: 0 12px 12px 0; font-size: 1.1rem;" required>
         </div>
         <div style="display:flex; gap:15px;">
-          <button onclick="guardarRegistroLocalYPagar()" style="flex:1; background:#f6c8c7; color:white; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Continuar al Pago</button>
-          <button onclick="document.getElementById('register-modal').style.display='none'" style="flex:1; background:#eee; color:#666; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Cancelar</button>
+          <button type="button" onclick="guardarRegistroLocalYPagar()" style="flex:1; background:#f6c8c7; color:white; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Continuar al Pago</button>
+          <button type="button" onclick="document.getElementById('register-modal').style.display='none'" style="flex:1; background:#eee; color:#666; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Cancelar</button>
         </div>
       </div>
     </div>
@@ -2742,15 +2742,15 @@
             
             <!-- Formulario de datos del cliente -->
             <div style="margin-bottom: 25px;">
-                <label style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Nombre Completo</label>
-                <input type="text" id="reservation-name" placeholder="Ej: María García" style="width: 100%; padding: 14px; border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#f6c8c7'" onblur="this.style.borderColor='rgba(246, 200, 199, 0.3)'" />
+                <label for="reservation-name" style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Nombre Completo</label>
+                <input type="text" id="reservation-name" placeholder="Ej: María García" autocomplete="name" style="width: 100%; padding: 14px; border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#f6c8c7'" onblur="this.style.borderColor='rgba(246, 200, 199, 0.3)'" />
             </div>
             
             <div style="margin-bottom: 25px;">
-                <label style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Teléfono (10 dígitos)</label>
+                <label for="reservation-phone" style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Teléfono (10 dígitos)</label>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <span style="padding: 14px; background: rgba(246, 200, 199, 0.1); border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-weight: 600; color: #333;">+52</span>
-                    <input type="tel" id="reservation-phone" placeholder="1234567890" maxlength="10" pattern="[0-9]{10}" style="flex: 1; padding: 14px; border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#f6c8c7'" onblur="this.style.borderColor='rgba(246, 200, 199, 0.3)'" />
+                    <input type="tel" id="reservation-phone" placeholder="1234567890" maxlength="10" pattern="[0-9]{10}" autocomplete="tel" style="flex: 1; padding: 14px; border: 2px solid rgba(246, 200, 199, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#f6c8c7'" onblur="this.style.borderColor='rgba(246, 200, 199, 0.3)'" />
                 </div>
                 <p style="color: #999; font-size: 0.85rem; margin-top: 6px;">Solo números, sin espacios ni guiones</p>
             </div>
@@ -2834,7 +2834,7 @@
                     <div class="blob"></div>
                     <h3>1 Clase</h3>
                     <div class="price">$1</div>
-                    <button class="plan-btn" data-title="1 Clases" data-price="1">Agendar Clase</button>
+                    <button type="button" class="plan-btn" data-title="1 Clases" data-price="1">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -2843,7 +2843,7 @@
                     <h3>4 Clases</h3>
                     <div class="price">$450</div>
                     <div class="savings">Ahorras $150</div>
-                    <button class="plan-btn" data-title="4 Clases" data-price="450">Agendar Clase</button>
+                    <button type="button" class="plan-btn" data-title="4 Clases" data-price="450">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -2852,7 +2852,7 @@
                     <h3>8 Clases</h3>
                     <div class="price">$800</div>
                     <div class="savings">Ahorras $400</div>
-                    <button class="plan-btn" data-title="8 Clases" data-price="800">Agendar Clase</button>
+                    <button type="button" class="plan-btn" data-title="8 Clases" data-price="800">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -2861,7 +2861,7 @@
                     <h3>12 Clases</h3>
                     <div class="price">$1100</div>
                     <div class="savings">Ahorras $700</div>
-                    <button class="plan-btn" data-title="12 Clases" data-price="1100">Agendar Clase</button>
+                    <button type="button" class="plan-btn" data-title="12 Clases" data-price="1100">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -2870,7 +2870,7 @@
                     <h3>15 Clases</h3>
                     <div class="price">$1350</div>
                     <div class="savings">Ahorras $900</div>
-                    <button class="plan-btn" data-title="15 Clases" data-price="1350">Agendar Clase</button>
+                    <button type="button" class="plan-btn" data-title="15 Clases" data-price="1350">Agendar Clase</button>
                 </div>
             </div>
 
@@ -2971,11 +2971,11 @@
             <form id="admin-login-form">
                 <div style="margin-bottom: 15px;">
                     <label for="admin-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
-                    <input type="email" id="admin-email" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <input type="email" id="admin-email" required autocomplete="username" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
                 <div style="margin-bottom: 20px;">
                     <label for="admin-password" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Contraseña</label>
-                    <input type="password" id="admin-password" required style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    <input type="password" id="admin-password" required autocomplete="current-password" style="width: 100%; padding: 12px; border: 1px solid rgba(246, 200, 199, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" style="flex: 1; background: #f6c8c7; color: #fff; padding: 12px 20px; border: 1px solid #ccc; font-size: 1rem; cursor: pointer;">
@@ -2993,7 +2993,7 @@
     <section id="admin-panel-section" class="contact-section" style="display: none;">
         <h2>Panel de Administrador</h2>
         <p style="margin-bottom: 10px;">Hola <span id="admin-email-display">Michel</span></p>
-        <button id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px;">Cerrar Sesión</button>
+        <button type="button" id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px;">Cerrar Sesión</button>
         
         <!-- Contenedor principal: en móvil, el calendario se separa para ocupar todo el ancho -->
         <div id="admin-panel-container" style="max-width: 1400px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #fef5f5 100%); padding: 50px; border-radius: 25px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); border: 2px solid rgba(246, 200, 199, 0.3);">
@@ -3037,10 +3037,10 @@
                     <input type="text" id="search-client" placeholder="🔍 Buscar por cliente..." style="flex: 1; min-width: 200px;">
                     <input type="date" id="filter-date-start" placeholder="Desde">
                     <input type="date" id="filter-date-end" placeholder="Hasta">
-                    <button id="btn-filter-apply">🔍 Filtrar</button>
-                    <button id="btn-filter-clear">✖️ Limpiar</button>
-                    <button id="btn-refresh-calendar">🔄 Actualizar</button>
-                    <button id="btn-export-calendar">📥 Exportar</button>
+                    <button type="button" id="btn-filter-apply">🔍 Filtrar</button>
+                    <button type="button" id="btn-filter-clear">✖️ Limpiar</button>
+                    <button type="button" id="btn-refresh-calendar">🔄 Actualizar</button>
+                    <button type="button" id="btn-export-calendar">📥 Exportar</button>
                 </div>
             </div>
             
@@ -3059,7 +3059,7 @@
             <div class="event-detail-content">
                 <div class="event-detail-header">
                     <h3>👤 Detalle de Reserva</h3>
-                    <button class="event-detail-close" id="event-detail-close">×</button>
+                    <button type="button" class="event-detail-close" id="event-detail-close">×</button>
                 </div>
                 <div class="event-detail-body">
                     <div class="event-detail-row">
@@ -3099,8 +3099,8 @@
                     </div>
                 </div>
                 <div class="event-detail-actions">
-                    <button class="btn-secondary" id="detail-close-btn">Cerrar</button>
-                    <button class="btn-primary" id="detail-contact-btn">📧 Contactar</button>
+                    <button type="button" class="btn-secondary" id="detail-close-btn">Cerrar</button>
+                    <button type="button" class="btn-primary" id="detail-contact-btn">📧 Contactar</button>
                 </div>
             </div>
         </div>
@@ -3193,7 +3193,7 @@
             
             <p style="text-align: center; margin-top: 30px; font-weight: 600;">Agradecemos su comprensión.<br>Aura Studio</p>
             
-            <button class="reglamento-close" id="reglamento-close">Cerrar</button>
+            <button type="button" class="reglamento-close" id="reglamento-close">Cerrar</button>
         </div>
     </div>
 
@@ -5777,7 +5777,7 @@
             <span id="custom-alert-icon" class="custom-alert-icon">✓</span>
             <h3 id="custom-alert-title" class="custom-alert-title">Título</h3>
             <p id="custom-alert-message" class="custom-alert-message">Mensaje</p>
-            <button id="custom-alert-button" class="custom-alert-button">Aceptar</button>
+            <button type="button" id="custom-alert-button" class="custom-alert-button">Aceptar</button>
         </div>
     </div>
 
