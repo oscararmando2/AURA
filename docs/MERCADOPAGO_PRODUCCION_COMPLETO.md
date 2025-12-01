@@ -14,11 +14,15 @@ Tu sitio https://aura-eta-five.vercel.app ahora está configurado para cobrar di
 <script src="https://sdk.mercadopago.com/js/v2"></script>
 ```
 
-### 2. Credenciales de Producción (hardcodeadas)
+### 2. Credenciales de Producción (configuradas en Vercel)
 ```javascript
-const MP_PUBLIC_KEY = 'APP_USR-bdeeb2ee-6396-4fe4-856c-f35d09a77378';
-const MP_ACCESS_TOKEN = 'APP_USR-4503161965031070-112117-be731e41124a02f1a5fceed4c7127c9b-501317704';
+// Las credenciales se configuran como variables de entorno en Vercel
+// Consulta docs/MERCADOPAGO_ACCESS_TOKEN_SETUP.md para instrucciones detalladas
+const MP_PUBLIC_KEY = process.env.MERCADO_PAGO_PUBLIC_KEY; // Tu Public Key de MercadoPago
+const MP_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN; // Tu Access Token de MercadoPago
 ```
+
+> **⚠️ IMPORTANTE**: Nunca expongas tus credenciales en el código fuente. Usa variables de entorno.
 
 ### 3. Flujo Completo de Pago
 
@@ -223,11 +227,13 @@ const RETURN_URL = 'https://tu-nuevo-dominio.com';
 ```
 
 ### Cambiar credenciales (si las renuevas):
-```javascript
-// Líneas 5695-5696 de index.html
-const MP_PUBLIC_KEY = 'TU_NUEVA_PUBLIC_KEY';
-const MP_ACCESS_TOKEN = 'TU_NUEVO_ACCESS_TOKEN';
-```
+Las credenciales deben configurarse como variables de entorno en Vercel:
+1. Ve a tu proyecto en Vercel Dashboard
+2. Settings → Environment Variables
+3. Actualiza `MERCADO_PAGO_PUBLIC_KEY` y `MERCADO_PAGO_ACCESS_TOKEN`
+4. Redespliega el proyecto
+
+> **Nota**: Consulta `docs/MERCADOPAGO_ACCESS_TOKEN_SETUP.md` para instrucciones detalladas.
 
 ---
 
