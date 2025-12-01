@@ -2,12 +2,21 @@
 /**
  * Endpoint para buscar productos por UPC
  * Devuelve JSON con información del producto
+ * 
+ * NOTA: Autenticación opcional - verificar AUTH_REQUIRED en .env
  */
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Incluir conexión a base de datos
+// Incluir autenticación si está habilitada
 require_once 'conexion.php';
+
+// Verificar si la autenticación está requerida
+$auth_required = getenv('AUTH_REQUIRED') === 'true';
+if ($auth_required) {
+    require_once 'auth.php';
+    requerirAutenticacion(true);
+}
 
 // Obtener el UPC de la petición
 $upc = isset($_GET['upc']) ? trim($_GET['upc']) : '';

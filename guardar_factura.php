@@ -2,12 +2,22 @@
 /**
  * Guarda la factura en la base de datos y genera el PDF
  * El Mexiquense Market - Sistema de Facturación
+ * 
+ * NOTA: Autenticación opcional - verificar AUTH_REQUIRED en .env
  */
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Incluir conexión a base de datos
+// Incluir conexión a base de datos y autenticación
 require_once 'conexion.php';
+
+// Verificar si la autenticación está requerida
+$auth_required = getenv('AUTH_REQUIRED') === 'true';
+if ($auth_required) {
+    require_once 'auth.php';
+    requerirAutenticacion(true);
+}
+
 require_once 'fpdf/fpdf.php';
 
 // Obtener datos del POST
