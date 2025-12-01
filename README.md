@@ -5,6 +5,8 @@ Este repositorio contiene **dos sistemas independientes**:
 1. **Sistema de Facturación** - Para El Mexiquense Market
 2. **AURA Studio** - Website de reservas de clases de Pilates
 
+📁 **Documentación adicional:** Toda la documentación detallada está en la carpeta [`/docs`](./docs/)
+
 ---
 
 ## 🧘 AURA Studio - Pilates Website
@@ -29,8 +31,8 @@ python download-video.py
 ```
 
 📖 **Guías completas:**
-- [⚡ QUICKSTART_VIDEO.md](QUICKSTART_VIDEO.md) - Solución en 30 segundos
-- [📖 DOWNLOAD_VIDEO_FIRST.md](DOWNLOAD_VIDEO_FIRST.md) - Instrucciones detalladas
+- [⚡ QUICKSTART_VIDEO.md](docs/QUICKSTART_VIDEO.md) - Solución en 30 segundos
+- [📖 DOWNLOAD_VIDEO_FIRST.md](docs/DOWNLOAD_VIDEO_FIRST.md) - Instrucciones detalladas
 - [🌐 video-missing.html](video-missing.html) - Guía visual interactiva
 
 **Características:**
@@ -42,16 +44,16 @@ python download-video.py
 - ✅ Diseño responsive y moderno
 - 🎬 Video de fondo en hero section (descarga requerida)
 
-**[Ver documentación completa de Pilates →](PILATES_README.md)**
+**[Ver documentación completa de Pilates →](docs/PILATES_README.md)**
 
 **Configuración de Firebase:**
-- 📖 **[FIREBASE_SETUP.md](FIREBASE_SETUP.md)** - Guía completa de configuración
-- ⚡ **[APPLY_FIRESTORE_RULES.md](APPLY_FIRESTORE_RULES.md)** - Aplicar reglas de seguridad (2-3 minutos)
-- 🔍 **[FIRESTORE_RULES_SOLUTION.md](FIRESTORE_RULES_SOLUTION.md)** - Explicación detallada de las reglas
+- 📖 **[FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md)** - Guía completa de configuración
+- ⚡ **[APPLY_FIRESTORE_RULES.md](docs/APPLY_FIRESTORE_RULES.md)** - Aplicar reglas de seguridad (2-3 minutos)
+- 🔍 **[FIRESTORE_RULES_SOLUTION.md](docs/FIRESTORE_RULES_SOLUTION.md)** - Explicación detallada de las reglas
 
 **Recientes actualizaciones:**
-- 🔧 **Reglas de Firestore para "Mis Clases" (2025-11-18)**: Solución para permitir que usuarios vean sus clases. Ver [FIRESTORE_RULES_SOLUTION.md](FIRESTORE_RULES_SOLUTION.md)
-- 🔧 **Corrección de reservas (2025-11-12)**: Solucionado el problema de guardado de reservas. Ver [RESERVATION_FIX_SUMMARY.md](RESERVATION_FIX_SUMMARY.md)
+- 🔧 **Reglas de Firestore para "Mis Clases" (2025-11-18)**: Solución para permitir que usuarios vean sus clases. Ver [FIRESTORE_RULES_SOLUTION.md](docs/FIRESTORE_RULES_SOLUTION.md)
+- 🔧 **Corrección de reservas (2025-11-12)**: Solucionado el problema de guardado de reservas. Ver [RESERVATION_FIX_SUMMARY.md](docs/RESERVATION_FIX_SUMMARY.md)
 
 ---
 
