@@ -4006,7 +4006,7 @@
             
             // Mostrar hora y disponibilidad en líneas separadas
             if (isFull) {
-                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem;">(Lleno)</span>`;
+                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem; white-space: nowrap;">(Lleno)</span>`;
                 // Estilo gris cuando está lleno
                 button.style.cssText = 'padding: 15px; background: #cccccc; color: #666; border: 1px solid #999; font-size: 1rem; cursor: not-allowed; opacity: 0.6; text-align: center;';
                 button.disabled = true;
@@ -4018,7 +4018,7 @@
                 });
             } else {
                 const available = MAX_CAPACITY - currentCount;
-                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem;">(${available} disponibles)</span>`;
+                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem; white-space: nowrap;">(${available} disponibles)</span>`;
                 // Estilo normal cuando hay disponibilidad
                 button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; text-align: center;';
                 
