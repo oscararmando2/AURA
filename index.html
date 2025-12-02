@@ -3283,6 +3283,7 @@
             
             timeCancel.addEventListener('click', () => {
                 timeModal.style.display = 'none';
+                document.body.style.overflow = ''; // Restore scrolling
             });
 
             // ========== Reglamento Modal Functionality ==========
@@ -3319,11 +3320,17 @@
             });
             
             // Close modals on ESC key
+            const reservationModal = document.getElementById('reservation-modal');
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
+                    // Check if time-selection-modal or reservation-modal is visible before closing
+                    if (timeModal.style.display === 'flex' || reservationModal.style.display === 'flex') {
+                        document.body.style.overflow = ''; // Restore scrolling
+                    }
                     registerModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
                     timeModal.style.display = 'none';
+                    reservationModal.style.display = 'none';
                     menuDropdown.style.display = 'none';
                     hamburgerBtn.setAttribute('aria-expanded', 'false');
                     menuDropdown.setAttribute('aria-hidden', 'true');
@@ -3351,6 +3358,15 @@
             timeModal.addEventListener('click', (e) => {
                 if (e.target === timeModal) {
                     timeModal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            });
+            
+            // Close reservation modal when clicking outside
+            reservationModal.addEventListener('click', (e) => {
+                if (e.target === reservationModal) {
+                    reservationModal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
                 }
             });
             
@@ -3997,6 +4013,7 @@
             
             // Mostrar modal
             modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
         }
 
         /**
@@ -4125,6 +4142,7 @@
             
             // Show modal
             modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
             nameInput.focus();
         }
 
@@ -4169,6 +4187,7 @@
             
             // Cerrar modal
             document.getElementById('reservation-modal').style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
             
             // Crear fecha y hora en formato ISO
             const dateTime = new Date(dateTimeStr);
@@ -5939,6 +5958,7 @@
             if (timeCancelBtn) {
                 timeCancelBtn.addEventListener('click', () => {
                     document.getElementById('time-selection-modal').style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
                 });
             }
         });
