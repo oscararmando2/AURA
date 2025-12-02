@@ -83,8 +83,10 @@
 ### 4.1. Configuración de credenciales
 **Líneas 5693-5696**
 ```javascript
-const MP_PUBLIC_KEY = 'APP_USR-bdeeb2ee-6396-4fe4-856c-f35d09a77378';
-const MP_ACCESS_TOKEN = 'APP_USR-4503161965031070-112117-be731e41124a02f1a5fceed4c7127c9b-501317704';
+// Las credenciales se configuran como variables de entorno en Vercel
+// ⚠️ NUNCA expongas tus credenciales en el código fuente
+const MP_PUBLIC_KEY = process.env.MERCADO_PAGO_PUBLIC_KEY; // Tu Public Key
+const MP_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN; // Tu Access Token
 const RETURN_URL = 'https://aura-eta-five.vercel.app';
 ```
 

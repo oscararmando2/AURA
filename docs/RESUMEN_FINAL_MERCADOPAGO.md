@@ -11,9 +11,10 @@ Todo el código está al final del `index.html`, justo antes de `</body>`:
 ```javascript
 <!-- ========== MERCADO PAGO - CHECKOUT PRO EN PRODUCCIÓN ========== -->
 <script>
-    // Credenciales de producción hardcodeadas
-    const MP_PUBLIC_KEY = 'APP_USR-bdeeb2ee-6396-4fe4-856c-f35d09a77378';
-    const MP_ACCESS_TOKEN = 'APP_USR-4503161965031070-112117-be731e41124a02f1a5fceed4c7127c9b-501317704';
+    // Credenciales se cargan desde variables de entorno de Vercel
+    // ⚠️ NUNCA expongas tus credenciales en el código fuente
+    const MP_PUBLIC_KEY = process.env.MERCADO_PAGO_PUBLIC_KEY;
+    const MP_ACCESS_TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN;
     
     // Función 1: Abrir modal de registro
     function iniciarPagoAura(clases, precio) { ... }
@@ -142,7 +143,7 @@ const response = await fetch('https://api.mercadopago.com/checkout/preferences',
     method: 'POST',
     headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer APP_USR-4503...'
+        'Authorization': 'Bearer ${MP_ACCESS_TOKEN}' // Token desde variable de entorno
     },
     body: JSON.stringify({
         items: [{ title: '4 Clases', quantity: 1, unit_price: 450 }],
@@ -228,9 +229,9 @@ console.log(typeof window.iniciarPagoAura); // Debe decir "function"
 iniciarPagoAura(1, 150);
 // Debe abrir el modal de registro
 
-// 3. Verificar credenciales (solo para debug)
-console.log('Public Key:', 'APP_USR-bdeeb2ee-6396-4fe4-856c-f35d09a77378');
-console.log('Access Token (primeros 20 chars):', 'APP_USR-450316196503...');
+// 3. Verificar credenciales (solo para debug, nunca en producción)
+// Las credenciales deben estar configuradas en Vercel como variables de entorno
+// No deben aparecer en el código fuente
 ```
 
 ---
