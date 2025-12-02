@@ -3559,12 +3559,20 @@
         // Incluye: iniciarPagoAura, guardarRegistroLocalYPagar, crearPreferenciaYRedirigir, detectarRetornoDePago
         // ========== FIN MERCADO PAGO PAYMENT FLOW ==========
 
+        let calendarInitRetries = 0;
+        const MAX_CALENDAR_INIT_RETRIES = 20;
+        
         function initCalendar() {
             console.log('Inicializando FullCalendar v6.1.15...');
             
             // Verificar que FullCalendar esté cargado
             if (typeof FullCalendar === 'undefined') {
-                console.warn('⚠️ FullCalendar no está cargado aún. Esperando...');
+                calendarInitRetries++;
+                if (calendarInitRetries >= MAX_CALENDAR_INIT_RETRIES) {
+                    console.error('❌ ERROR: FullCalendar no se pudo cargar después de varios intentos');
+                    return;
+                }
+                console.warn(`⚠️ FullCalendar no está cargado aún. Intento ${calendarInitRetries}/${MAX_CALENDAR_INIT_RETRIES}...`);
                 setTimeout(initCalendar, 500);
                 return;
             }
