@@ -1,6 +1,4 @@
-import mercadopago from "mercadopago";
-
-mercadopago.configure({ access_token: process.env.MERCADO_PAGO_ACCESS_TOKEN });
+import { MercadoPagoConfig, Preference } from "mercadopago";
 
 export default async function handler(req, res) {
   // Handle CORS preflight
@@ -13,6 +11,15 @@ export default async function handler(req, res) {
   
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  // Validar que el token de MercadoPago esté configurado
+  if (!process.env.MERCADO_PAGO_ACCESS_TOKEN) {
+    console.error("❌ MERCADO_PAGO_ACCESS_TOKEN no está configurado");
+    return res.status(500).json({ 
+      error: "Error de configuración del servidor",
+      details: "Token de MercadoPago no configurado"
+    });
   }
 
   const { title, price, payer_name, payer_phone } = req.body;
@@ -48,46 +55,55 @@ export default async function handler(req, res) {
   
   console.log(`📋 Creando preferencia: ${title} - $${numericPrice} para ${payer_name}`);
 
-  const preference = {
-    items: [{ 
-      title: String(title), 
-      unit_price: numericPrice, 
-      quantity: 1, 
-      currency_id: "MXN" 
-    }],
-    payer: { 
-      name: String(payer_name),
-      phone: { 
-        area_code: "52",
-        number: phoneNumber
+  // Inicializar cliente de MercadoPago con SDK v2
+  const client = new MercadoPagoConfig({ 
+    accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN 
+  });
+  
+  const preferenceClient = new Preference(client);
+
+  const preferenceData = {
+    body: {
+      items: [{ 
+        title: String(title), 
+        unit_price: numericPrice, 
+        quantity: 1, 
+        currency_id: "MXN" 
+      }],
+      payer: { 
+        name: String(payer_name),
+        phone: { 
+          area_code: "52",
+          number: phoneNumber
+        },
+        // Email temporal requerido por MercadoPago pero no validado
+        // Se usa el teléfono como identificador único del cliente
+        email: `${phoneNumber}@cliente.aura.mx`
       },
-      // Email temporal requerido por MercadoPago pero no validado
-      // Se usa el teléfono como identificador único del cliente
-      email: `${phoneNumber}@cliente.aura.mx`
-    },
-    back_urls: {
-      success: `${baseUrl}/?success=1&status=approved`,
-      failure: `${baseUrl}/?error=1&status=rejected`,
-      pending: `${baseUrl}/?pending=1&status=pending`,
-    },
-    auto_return: "approved",
-    notification_url: `https://${req.headers.host}/api/webhook`,
-    statement_descriptor: "AURA STUDIO",
-    external_reference: `aura-${Date.now()}-${phoneNumber}`,
+      back_urls: {
+        success: `${baseUrl}/?success=1&status=approved`,
+        failure: `${baseUrl}/?error=1&status=rejected`,
+        pending: `${baseUrl}/?pending=1&status=pending`,
+      },
+      auto_return: "approved",
+      notification_url: `https://${req.headers.host}/api/webhook`,
+      statement_descriptor: "AURA STUDIO",
+      external_reference: `aura-${Date.now()}-${phoneNumber}`,
+    }
   };
   
   try {
-    const response = await mercadopago.preferences.create(preference);
+    const response = await preferenceClient.create(preferenceData);
     
-    if (!response.body || !response.body.init_point) {
+    if (!response || !response.init_point) {
       console.error("❌ Respuesta inválida de MercadoPago:", response);
       return res.status(500).json({ error: "Respuesta inválida de MercadoPago" });
     }
     
-    console.log(`✅ Preferencia creada: ${response.body.id}`);
+    console.log(`✅ Preferencia creada: ${response.id}`);
     res.status(200).json({ 
-      init_point: response.body.init_point,
-      preference_id: response.body.id 
+      init_point: response.init_point,
+      preference_id: response.id 
     });
   } catch (error) {
     console.error("❌ Error al crear preferencia:", error.message);
