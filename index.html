@@ -3475,7 +3475,18 @@
         window.selectPlan = async function(classes, price, options = {}) {
             console.log(`📅 selectPlan llamado: ${classes} clases x $${price}`);
             
-            // Limpiar cualquier estado previo de reservas temporales
+            // IMPORTANTE: No limpiar tempReservations si hay un pago pendiente de procesar
+            // Esto evita perder las reservas cuando el usuario retorna de MercadoPago
+            const params = new URLSearchParams(location.search);
+            const isPaymentReturn = params.has('success') || params.has('payment_id') || 
+                                    params.has('collection_id') || params.has('status');
+            
+            if (isPaymentReturn) {
+                console.log('⚠️ Retorno de pago detectado, no limpiar tempReservations');
+                return; // Dejar que detectarRetorno maneje esto
+            }
+            
+            // Limpiar cualquier estado previo de reservas temporales (solo si no es retorno de pago)
             localStorage.removeItem('tempReservations');
             localStorage.removeItem('tempPlanClasses');
             localStorage.removeItem('tempPlanPrice');
@@ -5926,9 +5937,26 @@
         });
 
         async function crearPreferenciaYRedirigir(nombre, telefono) {
+            // Validar que tenemos los datos necesarios
+            if (!nombre || !telefono) {
+                console.error('❌ Faltan datos del cliente:', { nombre, telefono });
+                alert('❌ Error: Faltan datos del cliente. Por favor, completa el formulario.');
+                return;
+            }
+            
             // Usar selectedPlan para obtener clases y precio
             const classes = selectedPlan.classes || parseInt(localStorage.getItem('tempPlanClasses') || '1');
             const price = selectedPlan.price || parseInt(localStorage.getItem('tempPlanPrice') || '150');
+            
+            // Validar que hay clases y precio válidos
+            if (classes <= 0 || price <= 0) {
+                console.error('❌ Plan inválido:', { classes, price });
+                alert('❌ Error: Plan no válido. Por favor, selecciona un plan nuevamente.');
+                return;
+            }
+            
+            // Mostrar indicador de carga
+            console.log(`⏳ Procesando pago de ${classes} clase${classes > 1 ? 's' : ''} por $${price}...`);
 
             try {
                 // Llamar al backend seguro en lugar de exponer el token
@@ -5945,18 +5973,42 @@
                     })
                 });
                 
-                const data = await res.json();
-                if (!data.init_point) {
-                    console.error('❌ Error en respuesta del servidor:', data);
-                    alert('Error al crear preferencia de pago. Por favor, intenta nuevamente.');
+                // Verificar si la respuesta es exitosa
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    console.error('❌ Error del servidor:', res.status, errorData);
+                    
+                    if (res.status === 400) {
+                        alert(`❌ Datos inválidos: ${errorData.details || errorData.error || 'Verifica tus datos'}`);
+                    } else if (res.status === 500) {
+                        alert('❌ Error del servidor. Por favor, intenta nuevamente en unos minutos.');
+                    } else {
+                        alert(`❌ Error al procesar pago (${res.status}). Por favor, intenta nuevamente.`);
+                    }
                     return;
                 }
                 
-                console.log('✅ Preferencia creada, redirigiendo a:', data.init_point);
+                const data = await res.json();
+                if (!data.init_point) {
+                    console.error('❌ Error en respuesta del servidor:', data);
+                    alert('❌ Error al crear preferencia de pago. Por favor, intenta nuevamente.');
+                    return;
+                }
+                
+                console.log('✅ Preferencia creada:', data.preference_id || 'OK');
+                console.log('🔗 Redirigiendo a MercadoPago...');
+                
+                // Redirigir a MercadoPago
                 location.href = data.init_point;
             } catch (e) {
                 console.error('❌ Error al procesar pago:', e);
-                alert('Error al procesar pago. Por favor, intenta nuevamente.');
+                
+                // Verificar si es un error de red
+                if (e.name === 'TypeError' && e.message.includes('fetch')) {
+                    alert('❌ Error de conexión. Verifica tu internet e intenta nuevamente.');
+                } else {
+                    alert('❌ Error al procesar pago. Por favor, intenta nuevamente.');
+                }
             }
         }
 
@@ -5966,130 +6018,204 @@
         
         // DETECTOR DE RETORNO MEJORADO - Maneja callback de Mercado Pago
         // NUEVO FLUJO: Guardar todas las reservas en Firestore al regresar del pago
+        // Flag para evitar ejecución múltiple
+        let paymentReturnProcessed = false;
+        
         async function detectarRetorno() {
-            const params = new URLSearchParams(location.search);
-            const success = params.has('success') || params.has('payment_id') || params.has('collection_id') || params.get('status') === 'approved';
+            // Evitar doble procesamiento (DOMContentLoaded + load)
+            if (paymentReturnProcessed) {
+                console.log('⏭️ Retorno ya procesado, saltando...');
+                return;
+            }
             
-            if (success) {
-                console.log('💳 Retorno de Mercado Pago detectado - Pago exitoso');
-                
-                // 1. Limpiar URL inmediatamente (quitar parámetros de pago)
+            const params = new URLSearchParams(location.search);
+            
+            // Verificar estados de pago de MercadoPago
+            const status = params.get('status');
+            const paymentId = params.get('payment_id') || params.get('collection_id');
+            const hasSuccessParam = params.has('success') && params.get('success') === '1';
+            
+            // Determinar el estado del pago
+            const isApproved = status === 'approved' || hasSuccessParam;
+            const isPending = status === 'pending' || status === 'in_process';
+            const isRejected = status === 'rejected' || (params.has('error') && params.get('error') === '1');
+            
+            // Solo procesar si hay parámetros de pago
+            if (!isApproved && !isPending && !isRejected && !paymentId) {
+                return; // No hay parámetros de pago, no hacer nada
+            }
+            
+            // Marcar como procesado para evitar doble ejecución
+            paymentReturnProcessed = true;
+            console.log('💳 Retorno de Mercado Pago detectado:', { status, paymentId, isApproved, isPending, isRejected });
+            
+            // Manejar pago rechazado
+            if (isRejected) {
+                console.log('❌ Pago rechazado');
                 history.replaceState({}, document.title, location.pathname);
-                console.log('🧹 URL limpiada');
+                alert('❌ El pago fue rechazado.\n\nPor favor, verifica tu método de pago e intenta nuevamente.\n\nTus reservas temporales se mantienen.');
+                return;
+            }
+            
+            // Manejar pago pendiente
+            if (isPending) {
+                console.log('⏳ Pago pendiente');
+                history.replaceState({}, document.title, location.pathname);
+                alert('⏳ Tu pago está siendo procesado.\n\nTe notificaremos cuando se confirme.\n\nNo cierres esta ventana.');
+                // No limpiar localStorage, ya que el pago aún no está confirmado
+                return;
+            }
+            
+            // Solo continuar si el pago fue aprobado
+            if (!isApproved) {
+                console.log('⚠️ Estado de pago no reconocido:', status);
+                history.replaceState({}, document.title, location.pathname);
+                return;
+            }
+            
+            console.log('✅ Pago aprobado, procesando reservas...');
+            
+            // 1. Limpiar URL inmediatamente (quitar parámetros de pago)
+            history.replaceState({}, document.title, location.pathname);
+            console.log('🧹 URL limpiada');
+            
+            // 2. Recuperar reservas temporales de localStorage
+            const tempReservationsStr = localStorage.getItem('tempReservations');
+            if (!tempReservationsStr) {
+                console.error('❌ No hay reservas temporales en localStorage');
+                alert('⚠️ No se encontraron reservas pendientes.\n\nPor favor, selecciona un plan nuevamente.');
+                return;
+            }
+            
+            let tempData;
+            try {
+                tempData = JSON.parse(tempReservationsStr);
+            } catch (e) {
+                console.error('❌ Error al parsear reservas temporales:', e);
+                alert('❌ Error al recuperar reservas. Por favor, contacta con soporte.');
+                return;
+            }
+            
+            // Validar estructura de datos
+            const { reservations, userInfo } = tempData;
+            if (!reservations || !Array.isArray(reservations) || reservations.length === 0) {
+                console.error('❌ Estructura de reservas inválida:', tempData);
+                alert('❌ Error: Reservas no válidas. Por favor, contacta con soporte.');
+                return;
+            }
+            
+            const nombre = userInfo?.nombre || localStorage.getItem('userNombre') || 'Cliente';
+            const telefono = userInfo?.telefono || localStorage.getItem('userTelefono') || '';
+            
+            console.log(`📋 Reservas recuperadas: ${reservations.length} clases para ${nombre}`);
+            
+            // 3. Mostrar mensaje de éxito inicial
+            alert(`¡Pago recibido, ${nombre}!\n\nGuardando tus ${reservations.length} clases...`);
+            
+            // 4. Esperar a que Firebase esté listo
+            const waitForFirebase = async () => {
+                let attempts = 0;
                 
-                // 2. Recuperar reservas temporales de localStorage
-                const tempReservationsStr = localStorage.getItem('tempReservations');
-                if (!tempReservationsStr) {
-                    console.error('❌ No hay reservas temporales en localStorage');
-                    alert('⚠️ No se encontraron reservas pendientes.\n\nPor favor, selecciona un plan nuevamente.');
-                    return;
+                while (attempts < MAX_FIREBASE_INIT_ATTEMPTS) {
+                    if (window.firebaseReady && window.db && typeof window.saveReservationToFirestore === 'function') {
+                        return true;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, FIREBASE_POLLING_INTERVAL_MS));
+                    attempts++;
+                    console.log(`⏳ Esperando Firebase... (${attempts}/${MAX_FIREBASE_INIT_ATTEMPTS})`);
                 }
-                
-                let tempData;
+                return false;
+            };
+            
+            const firebaseReady = await waitForFirebase();
+            if (!firebaseReady) {
+                console.error('❌ Firebase no está listo');
+                // NO limpiar localStorage para que el usuario pueda reintentar
+                alert('❌ Error: Sistema de reservas no disponible.\n\nTus reservas están guardadas temporalmente.\nPor favor, recarga la página para reintentar o contacta con soporte.');
+                return;
+            }
+            
+            console.log('✅ Firebase listo, guardando reservas...');
+            
+            // 5. Guardar todas las reservas en Firestore
+            const savedReservations = [];
+            const failedReservations = [];
+            
+            for (let i = 0; i < reservations.length; i++) {
+                const reservation = reservations[i];
                 try {
-                    tempData = JSON.parse(tempReservationsStr);
-                } catch (e) {
-                    console.error('❌ Error al parsear reservas temporales:', e);
-                    alert('❌ Error al recuperar reservas. Por favor, contacta con soporte.');
-                    return;
-                }
-                
-                const { reservations, userInfo } = tempData;
-                const nombre = userInfo?.nombre || localStorage.getItem('userNombre') || 'Cliente';
-                const telefono = userInfo?.telefono || localStorage.getItem('userTelefono') || '';
-                
-                console.log(`📋 Reservas recuperadas: ${reservations.length} clases para ${nombre}`);
-                
-                // 3. Mostrar mensaje de éxito
-                alert(`¡Pago recibido, ${nombre}!\n\nGuardando tus ${reservations.length} clases...`);
-                
-                // 4. Esperar a que Firebase esté listo
-                const waitForFirebase = async () => {
-                    let attempts = 0;
+                    console.log(`💾 Guardando reserva ${i + 1}/${reservations.length}...`, reservation);
                     
-                    while (attempts < MAX_FIREBASE_INIT_ATTEMPTS) {
-                        if (window.firebaseReady && window.db && typeof window.saveReservationToFirestore === 'function') {
-                            return true;
-                        }
-                        await new Promise(resolve => setTimeout(resolve, FIREBASE_POLLING_INTERVAL_MS));
-                        attempts++;
-                        console.log(`⏳ Esperando Firebase... (${attempts}/${MAX_FIREBASE_INIT_ATTEMPTS})`);
-                    }
-                    return false;
-                };
-                
-                const firebaseReady = await waitForFirebase();
-                if (!firebaseReady) {
-                    console.error('❌ Firebase no está listo');
-                    alert('❌ Error: Sistema de reservas no disponible.\n\nTus reservas están guardadas temporalmente.\nPor favor, contacta con soporte mostrando este mensaje.');
-                    return;
-                }
-                
-                console.log('✅ Firebase listo, guardando reservas...');
-                
-                // 5. Guardar todas las reservas en Firestore
-                const savedReservations = [];
-                const failedReservations = [];
-                
-                for (let i = 0; i < reservations.length; i++) {
-                    const reservation = reservations[i];
-                    try {
-                        console.log(`💾 Guardando reserva ${i + 1}/${reservations.length}...`);
-                        
-                        const reservaId = await window.saveReservationToFirestore(
-                            reservation.nombre,
-                            reservation.telefono,
-                            reservation.fechaHora, // ISO format: YYYY-MM-DDTHH:mm:ss
-                            '' // notas vacías por ahora
-                        );
-                        
-                        savedReservations.push(reservaId);
-                        console.log(`✅ Reserva ${i + 1} guardada con ID:`, reservaId);
-                    } catch (error) {
-                        console.error(`❌ Error al guardar reserva ${i + 1}:`, error);
+                    // Validar datos de la reserva antes de guardar
+                    if (!reservation.nombre || !reservation.telefono || !reservation.fechaHora) {
+                        console.error(`❌ Reserva ${i + 1} tiene datos incompletos:`, reservation);
                         failedReservations.push(reservation);
+                        continue;
                     }
+                    
+                    const reservaId = await window.saveReservationToFirestore(
+                        reservation.nombre,
+                        reservation.telefono,
+                        reservation.fechaHora, // ISO format: YYYY-MM-DDTHH:mm:ss
+                        '' // notas vacías por ahora
+                    );
+                    
+                    savedReservations.push(reservaId);
+                    console.log(`✅ Reserva ${i + 1} guardada con ID:`, reservaId);
+                } catch (error) {
+                    console.error(`❌ Error al guardar reserva ${i + 1}:`, error);
+                    failedReservations.push(reservation);
                 }
-                
-                // 6. Limpiar datos temporales
+            }
+            
+            // 6. Solo limpiar datos temporales si se guardó al menos una reserva
+            if (savedReservations.length > 0) {
                 localStorage.removeItem('tempReservations');
                 localStorage.removeItem('tempPlanClasses');
                 localStorage.removeItem('tempPlanPrice');
                 localStorage.removeItem('planClases');
                 localStorage.removeItem('planPrecio');
                 console.log('🧹 Datos temporales limpiados');
+            }
+            
+            // 7. Mostrar resultado
+            if (savedReservations.length === reservations.length) {
+                // Todas guardadas exitosamente
+                alert(`✅ ¡Pago recibido! Tus ${savedReservations.length} clases están confirmadas.\n\nGracias ${nombre}, nos vemos pronto!`);
                 
-                // 7. Mostrar resultado
-                if (savedReservations.length === reservations.length) {
-                    // Todas guardadas exitosamente
-                    alert(`✅ ¡Pago recibido! Tus ${savedReservations.length} clases están confirmadas.\n\nGracias ${nombre}, nos vemos pronto!`);
-                    
-                    // 8. Recargar "Mis Clases" si el usuario está logueado
-                    if (telefono && typeof window.loadUserClasses === 'function') {
-                        console.log('📚 Recargando "Mis Clases"...');
+                // 8. Recargar "Mis Clases" si el usuario está logueado
+                if (telefono && typeof window.loadUserClasses === 'function') {
+                    console.log('📚 Recargando "Mis Clases"...');
+                    try {
                         await window.loadUserClasses(telefono);
+                    } catch (e) {
+                        console.error('Error al cargar clases del usuario:', e);
                     }
-                    
-                    // 9. Recargar panel admin si está disponible
-                    if (window.isAdmin && typeof window.loadReservationsFromFirestore === 'function') {
-                        console.log('👨‍💼 Recargando panel admin...');
-                        await window.loadReservationsFromFirestore();
-                    }
-                    
-                    // 10. Scroll a "Mis Clases" si está visible
-                    const myClassesSection = document.getElementById('my-classes-section');
-                    if (myClassesSection && myClassesSection.style.display !== 'none') {
-                        setTimeout(() => {
-                            myClassesSection.scrollIntoView({ behavior: 'smooth' });
-                        }, 1000);
-                    }
-                } else if (savedReservations.length > 0) {
-                    // Algunas guardadas
-                    alert(`⚠️ Pago recibido\n\n${savedReservations.length} de ${reservations.length} clases guardadas correctamente.\n\n${failedReservations.length} clases fallaron.\n\nPor favor, contacta con soporte.`);
-                } else {
-                    // Ninguna guardada
-                    alert('❌ Error al guardar las reservas.\n\nTu pago fue recibido pero hubo un error técnico.\n\nPor favor, contacta con soporte inmediatamente.');
                 }
+                
+                // 9. Recargar panel admin si está disponible
+                if (window.isAdmin && typeof window.loadReservationsFromFirestore === 'function') {
+                    console.log('👨‍💼 Recargando panel admin...');
+                    try {
+                        await window.loadReservationsFromFirestore();
+                    } catch (e) {
+                        console.error('Error al recargar panel admin:', e);
+                    }
+                }
+                
+                // 10. Scroll a "Mis Clases" si está visible
+                const myClassesSection = document.getElementById('my-classes-section');
+                if (myClassesSection && myClassesSection.style.display !== 'none') {
+                    setTimeout(() => {
+                        myClassesSection.scrollIntoView({ behavior: 'smooth' });
+                    }, 1000);
+                }
+            } else if (savedReservations.length > 0) {
+                // Algunas guardadas
+                alert(`⚠️ Pago recibido\n\n${savedReservations.length} de ${reservations.length} clases guardadas correctamente.\n\n${failedReservations.length} clases fallaron.\n\nPor favor, contacta con soporte.`);
+            } else {
+                // Ninguna guardada - NO limpiar localStorage
+                alert('❌ Error al guardar las reservas.\n\nTu pago fue recibido pero hubo un error técnico.\n\nPor favor, recarga la página para reintentar o contacta con soporte inmediatamente.');
             }
         }
 
