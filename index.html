@@ -3470,6 +3470,17 @@
         // Variable global para saber si el usuario es admin
         let isAdmin = false;
 
+        // Helper function to detect payment return parameters
+        function isPaymentReturnFromMercadoPago() {
+            const params = new URLSearchParams(location.search);
+            return params.has('success') || 
+                   params.has('payment_id') || 
+                   params.has('collection_id') || 
+                   params.has('status') ||
+                   params.has('error') ||
+                   params.has('pending');
+        }
+        
         // FIX #1: Hacer selectPlan global (window.selectPlan)
         // NUEVO FLUJO: Mostrar calendario inmediatamente, pedir datos por reserva
         window.selectPlan = async function(classes, price, options = {}) {
@@ -3477,11 +3488,7 @@
             
             // IMPORTANTE: No limpiar tempReservations si hay un pago pendiente de procesar
             // Esto evita perder las reservas cuando el usuario retorna de MercadoPago
-            const params = new URLSearchParams(location.search);
-            const isPaymentReturn = params.has('success') || params.has('payment_id') || 
-                                    params.has('collection_id') || params.has('status');
-            
-            if (isPaymentReturn) {
+            if (isPaymentReturnFromMercadoPago()) {
                 console.log('⚠️ Retorno de pago detectado, no limpiar tempReservations');
                 return; // Dejar que detectarRetorno maneje esto
             }
@@ -6026,6 +6033,11 @@
             if (paymentReturnProcessed) {
                 console.log('⏭️ Retorno ya procesado, saltando...');
                 return;
+            }
+            
+            // Usar la función helper para verificar si es un retorno de pago
+            if (!isPaymentReturnFromMercadoPago()) {
+                return; // No hay parámetros de pago, no hacer nada
             }
             
             const params = new URLSearchParams(location.search);

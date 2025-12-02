@@ -61,7 +61,9 @@ export default async function handler(req, res) {
         area_code: "52",
         number: phoneNumber
       },
-      email: `${phoneNumber}@temp.aura.com`
+      // Email temporal requerido por MercadoPago pero no validado
+      // Se usa el teléfono como identificador único del cliente
+      email: `${phoneNumber}@cliente.aura.mx`
     },
     back_urls: {
       success: `${baseUrl}/?success=1&status=approved`,

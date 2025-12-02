@@ -4,24 +4,20 @@ service cloud.firestore {
 
     // ====== RESERVAS ======
     match /reservas/{reservaId} {
-      // Admin tiene acceso total (por email o por teléfono)
+      // Admin tiene acceso total (por email)
       allow read, write: if request.auth != null && 
           (request.auth.token.email == 'admin@aura.com' || 
            request.auth.token.email == '7151596586');
 
-      // Cualquier persona puede crear reservas (nuevo flujo sin login obligatorio)
-      // Las reservas se crean después del pago exitoso
+      // Cualquier persona puede crear reservas (nuevo flujo - después del pago exitoso)
+      // Las reservas se crean desde el frontend después de confirmar el pago
       allow create: if true;
 
-      // Usuario normal puede leer sus propias reservas por teléfono
-      // IMPORTANTE: Esta regla permite que los usuarios vean "Mis Clases"
-      // Soporta tanto email como telefono para compatibilidad
-      allow read: if request.auth == null || 
-          resource.data.telefono == request.resource.data.telefono ||
-          (request.auth != null && 
-           (resource.data.email != null && resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase()));
+      // Lectura pública para mostrar disponibilidad en el calendario
+      // Solo se muestran datos limitados (fechaHora) en el frontend
+      allow read: if true;
       
-      // Solo admin puede actualizar o borrar
+      // Solo admin puede actualizar o borrar reservas
       allow update, delete: if request.auth != null && 
           (request.auth.token.email == 'admin@aura.com' || 
            request.auth.token.email == '7151596586');
