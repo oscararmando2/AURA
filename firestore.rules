@@ -4,28 +4,36 @@ service cloud.firestore {
 
     // ====== RESERVAS ======
     match /reservas/{reservaId} {
-      // Admin tiene acceso total
-      allow read, write: if request.auth != null && request.auth.token.email == '7151596586';
+      // Admin tiene acceso total (por email)
+      allow read, write: if request.auth != null && 
+          (request.auth.token.email == 'admin@aura.com' || 
+           request.auth.token.email == '7151596586');
 
-      // Usuario normal puede crear reservas (solo necesita estar logueado)
-      allow create: if request.auth != null;
+      // Cualquier persona puede crear reservas (nuevo flujo - después del pago exitoso)
+      // Las reservas se crean desde el frontend después de confirmar el pago
+      allow create: if true;
 
-      // Usuario normal puede leer, actualizar y borrar SOLO sus propias reservas
-      // IMPORTANTE: Esta regla permite que los usuarios vean "Mis Clases"
-      allow read, update, delete: if request.auth != null && 
-          resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase();
+      // Lectura pública para mostrar disponibilidad en el calendario
+      // Solo se muestran datos limitados (fechaHora) en el frontend
+      allow read: if true;
+      
+      // Solo admin puede actualizar o borrar reservas
+      allow update, delete: if request.auth != null && 
+          (request.auth.token.email == 'admin@aura.com' || 
+           request.auth.token.email == '7151596586');
     }
 
     // ====== PERFIL DE USUARIOS ======
     match /usuarios/{userId} {
       // Admin tiene acceso total
-      allow read, write: if request.auth != null && request.auth.token.email == '7151596586';
+      allow read, write: if request.auth != null && 
+          (request.auth.token.email == 'admin@aura.com' || 
+           request.auth.token.email == '7151596586');
       
       // Usuario normal puede crear su perfil
       allow create: if request.auth != null;
       
       // Usuario normal puede leer y actualizar SOLO su propio perfil
-      // IMPORTANTE: Los usuarios necesitan leer su perfil para recuperar su nombre
       allow read, update: if request.auth != null && 
           resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase();
     }
