@@ -3562,10 +3562,10 @@
         function initCalendar() {
             console.log('Inicializando FullCalendar v6.1.15...');
             
-            // REQUISITO: Verificar que Firebase esté inicializado antes de inicializar el calendario
-            if (!window.firebaseReady) {
-                console.warn('⚠️ Firebase no está listo aún. Esperando...');
-                setTimeout(initCalendar, 500); // Reintentar después de 500ms
+            // Verificar que FullCalendar esté cargado
+            if (typeof FullCalendar === 'undefined') {
+                console.warn('⚠️ FullCalendar no está cargado aún. Esperando...');
+                setTimeout(initCalendar, 500);
                 return;
             }
             
