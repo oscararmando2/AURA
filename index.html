@@ -435,6 +435,38 @@
             height: 100%;
             object-fit: cover;
             z-index: 0;
+            /* Hide native video controls and play button */
+            pointer-events: none;
+        }
+
+        /* Hide all video controls across browsers */
+        .hero-video-background::-webkit-media-controls {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-panel {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-play-button {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-start-playback-button {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-overlay-play-button {
+            display: none !important;
+        }
+
+        /* Firefox */
+        .hero-video-background::-moz-media-controls {
+            display: none !important;
         }
 
         /* Overlay for better text readability */
@@ -2537,6 +2569,83 @@
             .event-detail-value {
                 font-size: 1rem;
             }
+
+            /* Mobile responsive styles for reservation modals */
+            #time-selection-modal > div {
+                padding: 25px 20px !important;
+                width: 95% !important;
+                border-radius: 15px !important;
+            }
+
+            #time-selection-modal h2 {
+                font-size: 1.3rem !important;
+                margin-bottom: 8px !important;
+            }
+
+            #time-selection-modal p {
+                font-size: 0.9rem !important;
+                margin-bottom: 15px !important;
+            }
+
+            #time-slots-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+                max-height: 300px !important;
+                padding: 8px !important;
+            }
+
+            #time-selection-modal button {
+                padding: 10px 15px !important;
+                font-size: 0.9rem !important;
+            }
+
+            #reservation-modal > div {
+                padding: 25px 20px !important;
+                width: 95% !important;
+                border-radius: 15px !important;
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+            }
+
+            #reservation-modal h2 {
+                font-size: 1.3rem !important;
+                margin-bottom: 15px !important;
+            }
+
+            #reservation-modal label {
+                font-size: 0.85rem !important;
+                margin-bottom: 6px !important;
+            }
+
+            #reservation-modal input {
+                padding: 12px !important;
+                font-size: 0.9rem !important;
+            }
+
+            #reservation-modal .reservation-info-box {
+                padding: 15px !important;
+                margin-bottom: 20px !important;
+            }
+
+            #reservation-date-display,
+            #reservation-time-display {
+                font-size: 0.95rem !important;
+            }
+
+            #reservation-progress {
+                font-size: 1.1rem !important;
+            }
+
+            #reservation-modal button {
+                padding: 12px !important;
+                font-size: 0.95rem !important;
+            }
+
+            #reservation-cancel,
+            #reservation-confirm {
+                padding: 14px !important;
+                font-size: 0.9rem !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -2629,6 +2738,54 @@
 
             .like-burst {
                 font-size: 80px;
+            }
+
+            /* Extra small mobile adjustments for reservation modals */
+            #time-selection-modal > div {
+                padding: 20px 15px !important;
+            }
+
+            #time-selection-modal h2 {
+                font-size: 1.15rem !important;
+            }
+
+            #time-selection-modal p {
+                font-size: 0.85rem !important;
+            }
+
+            #time-slots-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+                max-height: 250px !important;
+            }
+
+            #reservation-modal > div {
+                padding: 20px 15px !important;
+                max-height: 85vh !important;
+            }
+
+            #reservation-modal h2 {
+                font-size: 1.15rem !important;
+            }
+
+            #reservation-modal input {
+                padding: 10px !important;
+                font-size: 0.85rem !important;
+            }
+
+            #reservation-date-display,
+            #reservation-time-display {
+                font-size: 0.9rem !important;
+            }
+
+            #reservation-progress {
+                font-size: 1rem !important;
+            }
+
+            #reservation-cancel,
+            #reservation-confirm {
+                padding: 12px !important;
+                font-size: 0.85rem !important;
             }
         }
     </style>
@@ -2778,7 +2935,7 @@
     <!-- ========== 1. Welcome Section (Hero Section) ========== -->
     <section class="hero-section">
         <!-- Video Background -->
-        <video id="hero-video" class="hero-video-background" autoplay muted playsinline>
+        <video id="hero-video" class="hero-video-background" autoplay loop muted playsinline preload="auto" disablepictureinpicture disableremoteplayback>
             <source src="videoaura.mp4" type="video/mp4">
             <!-- Fallback for browsers that don't support video -->
         </video>
@@ -2833,8 +2990,8 @@
                     <div class="bg"></div>
                     <div class="blob"></div>
                     <h3>1 Clase</h3>
-                    <div class="price">$1</div>
-                    <button type="button" class="plan-btn" data-title="1 Clases" data-price="1">Agendar Clase</button>
+                    <div class="price">$5</div>
+                    <button type="button" class="plan-btn" data-title="1 Clases" data-price="5">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -3283,6 +3440,7 @@
             
             timeCancel.addEventListener('click', () => {
                 timeModal.style.display = 'none';
+                document.body.style.overflow = ''; // Restore scrolling
             });
 
             // ========== Reglamento Modal Functionality ==========
@@ -3319,11 +3477,17 @@
             });
             
             // Close modals on ESC key
+            const reservationModal = document.getElementById('reservation-modal');
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
+                    // Check if time-selection-modal or reservation-modal is visible before closing
+                    if (timeModal.style.display === 'flex' || reservationModal.style.display === 'flex') {
+                        document.body.style.overflow = ''; // Restore scrolling
+                    }
                     registerModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
                     timeModal.style.display = 'none';
+                    reservationModal.style.display = 'none';
                     menuDropdown.style.display = 'none';
                     hamburgerBtn.setAttribute('aria-expanded', 'false');
                     menuDropdown.setAttribute('aria-hidden', 'true');
@@ -3351,6 +3515,15 @@
             timeModal.addEventListener('click', (e) => {
                 if (e.target === timeModal) {
                     timeModal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            });
+            
+            // Close reservation modal when clicking outside
+            reservationModal.addEventListener('click', (e) => {
+                if (e.target === reservationModal) {
+                    reservationModal.style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
                 }
             });
             
@@ -3717,6 +3890,9 @@
                     // Usuario no admin: no mostrar eventos en el calendario público
                     // Solo se muestra el calendario limpio y al hacer clic se abre el selector de horarios
                     console.log('Usuario público: calendario limpio sin eventos');
+                    // Usuario no admin: calendario vacío para seleccionar días y horarios disponibles
+                    // El flujo correcto es: cliente elige paquete → ve calendario → hace clic en día → aparecen horarios disponibles
+                    console.log('Usuario público: calendario vacío para selección de horarios');
                 }
                 
             } catch (error) {
@@ -3967,6 +4143,19 @@
             
             // Mostrar modal
             modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        /**
+         * Convertir hora de formato 24h a formato 12h con AM/PM
+         * @param {string} time - Hora en formato HH:mm (ej: "06:00", "17:00")
+         * @returns {string} Hora en formato 12h con AM/PM (ej: "6 AM", "5 PM")
+         */
+        function formatTimeTo12Hour(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const hour12 = hours % 12 || 12;
+            return `${hour12} ${period}`;
         }
 
         /**
@@ -3979,24 +4168,25 @@
             const MAX_CAPACITY = 5;
             const button = document.createElement('button');
             const isFull = currentCount >= MAX_CAPACITY;
+            const time12h = formatTimeTo12Hour(time);
             
-            // Mostrar hora y disponibilidad
+            // Mostrar hora y disponibilidad en líneas separadas
             if (isFull) {
-                button.textContent = `${time} (Lleno)`;
+                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem; white-space: nowrap;">(Lleno)</span>`;
                 // Estilo gris cuando está lleno
-                button.style.cssText = 'padding: 15px; background: #cccccc; color: #666; border: 1px solid #999; font-size: 1rem; cursor: not-allowed; opacity: 0.6;';
+                button.style.cssText = 'padding: 15px; background: #cccccc; color: #666; border: 1px solid #999; font-size: 1rem; cursor: not-allowed; opacity: 0.6; text-align: center;';
                 button.disabled = true;
                 
                 // Mostrar mensaje al intentar hacer clic
                 button.addEventListener('click', (e) => {
                     e.preventDefault();
-                    alert(`⚠️ Lo sentimos, este horario (${time}) ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nDisponibilidad: ${MAX_CAPACITY}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario disponible.`);
+                    alert(`⚠️ Lo sentimos, este horario (${time12h}) ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nDisponibilidad: ${MAX_CAPACITY}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario disponible.`);
                 });
             } else {
                 const available = MAX_CAPACITY - currentCount;
-                button.textContent = `${time} (${available} disponibles)`;
+                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem; white-space: nowrap;">(${available} disponibles)</span>`;
                 // Estilo normal cuando hay disponibilidad
-                button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;';
+                button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; text-align: center;';
                 
                 // Efecto hover
                 button.addEventListener('mouseenter', () => {
@@ -4095,6 +4285,7 @@
             
             // Show modal
             modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
             nameInput.focus();
         }
 
@@ -4139,6 +4330,7 @@
             
             // Cerrar modal
             document.getElementById('reservation-modal').style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
             
             // Crear fecha y hora en formato ISO
             const dateTime = new Date(dateTimeStr);
@@ -5671,18 +5863,36 @@
     <!-- ========== Hero Video Control Script ========== -->
     <script>
         // Control hero video playback (play from second 1 to second 25)
+        // Enhanced for cross-device compatibility - removes play button on all devices
         document.addEventListener('DOMContentLoaded', function() {
             const heroVideo = document.getElementById('hero-video');
+            // Delay before retrying play on pause (allows browser to settle)
+            const PAUSE_RETRY_DELAY_MS = 100;
             
             if (heroVideo) {
-                // Track if video loaded successfully
+                // Track if video loaded successfully and if play was already attempted
                 let videoLoaded = false;
+                let playAttempted = false;
+                
+                // Remove controls attribute programmatically (ensures no controls appear)
+                heroVideo.controls = false;
+                heroVideo.setAttribute('webkit-playsinline', 'true');
+                heroVideo.setAttribute('x-webkit-airplay', 'deny');
                 
                 // Set start time to 1 second when video is loaded
                 heroVideo.addEventListener('loadedmetadata', function() {
                     videoLoaded = true;
                     heroVideo.currentTime = 1;
                     console.log('✅ Video loaded successfully');
+                    // Ensure video plays after metadata loads
+                    attemptPlay();
+                });
+                
+                // Also try on canplay event (consolidated from multiple events)
+                heroVideo.addEventListener('canplay', function() {
+                    if (!playAttempted) {
+                        attemptPlay();
+                    }
                 });
                 
                 // Monitor playback and loop from second 1 to 25
@@ -5692,6 +5902,48 @@
                         heroVideo.currentTime = 1;
                     }
                 });
+                
+                // If video is paused for any reason, try to resume
+                heroVideo.addEventListener('pause', function() {
+                    // Only try to resume if the video was loaded and is within playback range
+                    if (videoLoaded && heroVideo.currentTime >= 1 && heroVideo.currentTime < 25) {
+                        setTimeout(function() {
+                            attemptPlay();
+                        }, PAUSE_RETRY_DELAY_MS);
+                    }
+                });
+                
+                // Function to attempt playing the video with fallback
+                function attemptPlay() {
+                    if (heroVideo.paused) {
+                        playAttempted = true;
+                        const playPromise = heroVideo.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(function() {
+                                console.log('✅ Video autoplay successful');
+                            }).catch(function(error) {
+                                console.log('Video autoplay was prevented:', error.message);
+                                // Try again on user interaction
+                                setupUserInteractionFallback();
+                            });
+                        }
+                    }
+                }
+                
+                // Setup fallback for browsers that require user interaction
+                function setupUserInteractionFallback() {
+                    const startPlayback = function() {
+                        attemptPlay();
+                        // Remove listeners after first interaction
+                        document.removeEventListener('touchstart', startPlayback);
+                        document.removeEventListener('click', startPlayback);
+                        document.removeEventListener('scroll', startPlayback);
+                    };
+                    
+                    document.addEventListener('touchstart', startPlayback, { passive: true, once: true });
+                    document.addEventListener('click', startPlayback, { once: true });
+                    document.addEventListener('scroll', startPlayback, { passive: true, once: true });
+                }
                 
                 // Detect video load errors
                 heroVideo.addEventListener('error', function(e) {
@@ -5719,15 +5971,8 @@
                 // Ensure video starts at second 1
                 heroVideo.currentTime = 1;
                 
-                // Play the video (with error handling)
-                const playPromise = heroVideo.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(function(error) {
-                        console.log('Video autoplay was prevented:', error);
-                        // If autoplay fails (some browsers block it), show fallback
-                        // The gradient background will be visible as fallback
-                    });
-                }
+                // Initial play attempt
+                attemptPlay();
                 
                 // Check if video is actually loading after a delay
                 setTimeout(function() {
@@ -5909,6 +6154,7 @@
             if (timeCancelBtn) {
                 timeCancelBtn.addEventListener('click', () => {
                     document.getElementById('time-selection-modal').style.display = 'none';
+                    document.body.style.overflow = ''; // Restore scrolling
                 });
             }
         });
