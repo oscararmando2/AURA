@@ -2537,6 +2537,83 @@
             .event-detail-value {
                 font-size: 1rem;
             }
+
+            /* Mobile responsive styles for reservation modals */
+            #time-selection-modal > div {
+                padding: 25px 20px !important;
+                width: 95% !important;
+                border-radius: 15px !important;
+            }
+
+            #time-selection-modal h2 {
+                font-size: 1.3rem !important;
+                margin-bottom: 8px !important;
+            }
+
+            #time-selection-modal p {
+                font-size: 0.9rem !important;
+                margin-bottom: 15px !important;
+            }
+
+            #time-slots-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+                max-height: 300px !important;
+                padding: 8px !important;
+            }
+
+            #time-selection-modal button {
+                padding: 10px 15px !important;
+                font-size: 0.9rem !important;
+            }
+
+            #reservation-modal > div {
+                padding: 25px 20px !important;
+                width: 95% !important;
+                border-radius: 15px !important;
+                max-height: 90vh !important;
+                overflow-y: auto !important;
+            }
+
+            #reservation-modal h2 {
+                font-size: 1.3rem !important;
+                margin-bottom: 15px !important;
+            }
+
+            #reservation-modal label {
+                font-size: 0.85rem !important;
+                margin-bottom: 6px !important;
+            }
+
+            #reservation-modal input {
+                padding: 12px !important;
+                font-size: 0.9rem !important;
+            }
+
+            #reservation-modal .reservation-info-box {
+                padding: 15px !important;
+                margin-bottom: 20px !important;
+            }
+
+            #reservation-date-display,
+            #reservation-time-display {
+                font-size: 0.95rem !important;
+            }
+
+            #reservation-progress {
+                font-size: 1.1rem !important;
+            }
+
+            #reservation-modal button {
+                padding: 12px !important;
+                font-size: 0.95rem !important;
+            }
+
+            #reservation-cancel,
+            #reservation-confirm {
+                padding: 14px !important;
+                font-size: 0.9rem !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -2629,6 +2706,54 @@
 
             .like-burst {
                 font-size: 80px;
+            }
+
+            /* Extra small mobile adjustments for reservation modals */
+            #time-selection-modal > div {
+                padding: 20px 15px !important;
+            }
+
+            #time-selection-modal h2 {
+                font-size: 1.15rem !important;
+            }
+
+            #time-selection-modal p {
+                font-size: 0.85rem !important;
+            }
+
+            #time-slots-container {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+                max-height: 250px !important;
+            }
+
+            #reservation-modal > div {
+                padding: 20px 15px !important;
+                max-height: 85vh !important;
+            }
+
+            #reservation-modal h2 {
+                font-size: 1.15rem !important;
+            }
+
+            #reservation-modal input {
+                padding: 10px !important;
+                font-size: 0.85rem !important;
+            }
+
+            #reservation-date-display,
+            #reservation-time-display {
+                font-size: 0.9rem !important;
+            }
+
+            #reservation-progress {
+                font-size: 1rem !important;
+            }
+
+            #reservation-cancel,
+            #reservation-confirm {
+                padding: 12px !important;
+                font-size: 0.85rem !important;
             }
         }
     </style>
