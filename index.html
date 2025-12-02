@@ -3320,16 +3320,17 @@
             });
             
             // Close modals on ESC key
+            const reservationModal = document.getElementById('reservation-modal');
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     // Check if time-selection-modal or reservation-modal is visible before closing
-                    if (timeModal.style.display === 'flex' || document.getElementById('reservation-modal').style.display === 'flex') {
+                    if (timeModal.style.display === 'flex' || reservationModal.style.display === 'flex') {
                         document.body.style.overflow = ''; // Restore scrolling
                     }
                     registerModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
                     timeModal.style.display = 'none';
-                    document.getElementById('reservation-modal').style.display = 'none';
+                    reservationModal.style.display = 'none';
                     menuDropdown.style.display = 'none';
                     hamburgerBtn.setAttribute('aria-expanded', 'false');
                     menuDropdown.setAttribute('aria-hidden', 'true');
@@ -3362,7 +3363,6 @@
             });
             
             // Close reservation modal when clicking outside
-            const reservationModal = document.getElementById('reservation-modal');
             reservationModal.addEventListener('click', (e) => {
                 if (e.target === reservationModal) {
                     reservationModal.style.display = 'none';
