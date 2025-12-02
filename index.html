@@ -435,6 +435,38 @@
             height: 100%;
             object-fit: cover;
             z-index: 0;
+            /* Hide native video controls and play button */
+            pointer-events: none;
+        }
+
+        /* Hide all video controls across browsers */
+        .hero-video-background::-webkit-media-controls {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-panel {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-play-button {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-start-playback-button {
+            display: none !important;
+        }
+        
+        .hero-video-background::-webkit-media-controls-overlay-play-button {
+            display: none !important;
+        }
+
+        /* Firefox */
+        .hero-video-background::-moz-media-controls {
+            display: none !important;
         }
 
         /* Overlay for better text readability */
@@ -2903,7 +2935,7 @@
     <!-- ========== 1. Welcome Section (Hero Section) ========== -->
     <section class="hero-section">
         <!-- Video Background -->
-        <video id="hero-video" class="hero-video-background" autoplay muted playsinline>
+        <video id="hero-video" class="hero-video-background" autoplay loop muted playsinline preload="auto" disablepictureinpicture disableremoteplayback>
             <source src="videoaura.mp4" type="video/mp4">
             <!-- Fallback for browsers that don't support video -->
         </video>
@@ -5822,18 +5854,36 @@
     <!-- ========== Hero Video Control Script ========== -->
     <script>
         // Control hero video playback (play from second 1 to second 25)
+        // Enhanced for cross-device compatibility - removes play button on all devices
         document.addEventListener('DOMContentLoaded', function() {
             const heroVideo = document.getElementById('hero-video');
+            // Delay before retrying play on pause (allows browser to settle)
+            const PAUSE_RETRY_DELAY_MS = 100;
             
             if (heroVideo) {
-                // Track if video loaded successfully
+                // Track if video loaded successfully and if play was already attempted
                 let videoLoaded = false;
+                let playAttempted = false;
+                
+                // Remove controls attribute programmatically (ensures no controls appear)
+                heroVideo.controls = false;
+                heroVideo.setAttribute('webkit-playsinline', 'true');
+                heroVideo.setAttribute('x-webkit-airplay', 'deny');
                 
                 // Set start time to 1 second when video is loaded
                 heroVideo.addEventListener('loadedmetadata', function() {
                     videoLoaded = true;
                     heroVideo.currentTime = 1;
                     console.log('✅ Video loaded successfully');
+                    // Ensure video plays after metadata loads
+                    attemptPlay();
+                });
+                
+                // Also try on canplay event (consolidated from multiple events)
+                heroVideo.addEventListener('canplay', function() {
+                    if (!playAttempted) {
+                        attemptPlay();
+                    }
                 });
                 
                 // Monitor playback and loop from second 1 to 25
@@ -5843,6 +5893,48 @@
                         heroVideo.currentTime = 1;
                     }
                 });
+                
+                // If video is paused for any reason, try to resume
+                heroVideo.addEventListener('pause', function() {
+                    // Only try to resume if the video was loaded and is within playback range
+                    if (videoLoaded && heroVideo.currentTime >= 1 && heroVideo.currentTime < 25) {
+                        setTimeout(function() {
+                            attemptPlay();
+                        }, PAUSE_RETRY_DELAY_MS);
+                    }
+                });
+                
+                // Function to attempt playing the video with fallback
+                function attemptPlay() {
+                    if (heroVideo.paused) {
+                        playAttempted = true;
+                        const playPromise = heroVideo.play();
+                        if (playPromise !== undefined) {
+                            playPromise.then(function() {
+                                console.log('✅ Video autoplay successful');
+                            }).catch(function(error) {
+                                console.log('Video autoplay was prevented:', error.message);
+                                // Try again on user interaction
+                                setupUserInteractionFallback();
+                            });
+                        }
+                    }
+                }
+                
+                // Setup fallback for browsers that require user interaction
+                function setupUserInteractionFallback() {
+                    const startPlayback = function() {
+                        attemptPlay();
+                        // Remove listeners after first interaction
+                        document.removeEventListener('touchstart', startPlayback);
+                        document.removeEventListener('click', startPlayback);
+                        document.removeEventListener('scroll', startPlayback);
+                    };
+                    
+                    document.addEventListener('touchstart', startPlayback, { passive: true, once: true });
+                    document.addEventListener('click', startPlayback, { once: true });
+                    document.addEventListener('scroll', startPlayback, { passive: true, once: true });
+                }
                 
                 // Detect video load errors
                 heroVideo.addEventListener('error', function(e) {
@@ -5870,15 +5962,8 @@
                 // Ensure video starts at second 1
                 heroVideo.currentTime = 1;
                 
-                // Play the video (with error handling)
-                const playPromise = heroVideo.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(function(error) {
-                        console.log('Video autoplay was prevented:', error);
-                        // If autoplay fails (some browsers block it), show fallback
-                        // The gradient background will be visible as fallback
-                    });
-                }
+                // Initial play attempt
+                attemptPlay();
                 
                 // Check if video is actually loading after a delay
                 setTimeout(function() {
