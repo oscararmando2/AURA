@@ -3981,6 +3981,18 @@
         }
 
         /**
+         * Convertir hora de formato 24h a formato 12h con AM/PM
+         * @param {string} time - Hora en formato HH:mm (ej: "06:00", "17:00")
+         * @returns {string} Hora en formato 12h con AM/PM (ej: "6 AM", "5 PM")
+         */
+        function formatTimeTo12Hour(time) {
+            const [hours, minutes] = time.split(':').map(Number);
+            const period = hours >= 12 ? 'PM' : 'AM';
+            const hour12 = hours % 12 || 12;
+            return `${hour12} ${period}`;
+        }
+
+        /**
          * Crear botón de horario
          * @param {string} dateStr - Fecha en formato YYYY-MM-DD
          * @param {string} time - Hora en formato HH:mm
@@ -3990,24 +4002,25 @@
             const MAX_CAPACITY = 5;
             const button = document.createElement('button');
             const isFull = currentCount >= MAX_CAPACITY;
+            const time12h = formatTimeTo12Hour(time);
             
-            // Mostrar hora y disponibilidad
+            // Mostrar hora y disponibilidad en líneas separadas
             if (isFull) {
-                button.textContent = `${time} (Lleno)`;
+                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem;">(Lleno)</span>`;
                 // Estilo gris cuando está lleno
-                button.style.cssText = 'padding: 15px; background: #cccccc; color: #666; border: 1px solid #999; font-size: 1rem; cursor: not-allowed; opacity: 0.6;';
+                button.style.cssText = 'padding: 15px; background: #cccccc; color: #666; border: 1px solid #999; font-size: 1rem; cursor: not-allowed; opacity: 0.6; text-align: center;';
                 button.disabled = true;
                 
                 // Mostrar mensaje al intentar hacer clic
                 button.addEventListener('click', (e) => {
                     e.preventDefault();
-                    alert(`⚠️ Lo sentimos, este horario (${time}) ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nDisponibilidad: ${MAX_CAPACITY}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario disponible.`);
+                    alert(`⚠️ Lo sentimos, este horario (${time12h}) ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nDisponibilidad: ${MAX_CAPACITY}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario disponible.`);
                 });
             } else {
                 const available = MAX_CAPACITY - currentCount;
-                button.textContent = `${time} (${available} disponibles)`;
+                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem;">(${available} disponibles)</span>`;
                 // Estilo normal cuando hay disponibilidad
-                button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;';
+                button.style.cssText = 'padding: 15px; background: #f6c8c7; color: #fff; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; text-align: center;';
                 
                 // Efecto hover
                 button.addEventListener('mouseenter', () => {
