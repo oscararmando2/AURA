@@ -3732,13 +3732,21 @@
         // Incluye: iniciarPagoAura, guardarRegistroLocalYPagar, crearPreferenciaYRedirigir, detectarRetornoDePago
         // ========== FIN MERCADO PAGO PAYMENT FLOW ==========
 
+        let calendarInitRetries = 0;
+        const MAX_CALENDAR_INIT_RETRIES = 20;
+        
         function initCalendar() {
             console.log('Inicializando FullCalendar v6.1.15...');
             
-            // REQUISITO: Verificar que Firebase esté inicializado antes de inicializar el calendario
-            if (!window.firebaseReady) {
-                console.warn('⚠️ Firebase no está listo aún. Esperando...');
-                setTimeout(initCalendar, 500); // Reintentar después de 500ms
+            // Verificar que FullCalendar esté cargado
+            if (typeof FullCalendar === 'undefined') {
+                calendarInitRetries++;
+                if (calendarInitRetries >= MAX_CALENDAR_INIT_RETRIES) {
+                    console.error('❌ ERROR: FullCalendar no se pudo cargar después de varios intentos');
+                    return;
+                }
+                console.warn(`⚠️ FullCalendar no está cargado aún. Intento ${calendarInitRetries}/${MAX_CALENDAR_INIT_RETRIES}...`);
+                setTimeout(initCalendar, 500);
                 return;
             }
             
@@ -3879,6 +3887,9 @@
                     console.log(`✅ ${querySnapshot.size} reservas cargadas desde Firestore`);
                     
                 } else {
+                    // Usuario no admin: no mostrar eventos en el calendario público
+                    // Solo se muestra el calendario limpio y al hacer clic se abre el selector de horarios
+                    console.log('Usuario público: calendario limpio sin eventos');
                     // Usuario no admin: calendario vacío para seleccionar días y horarios disponibles
                     // El flujo correcto es: cliente elige paquete → ve calendario → hace clic en día → aparecen horarios disponibles
                     console.log('Usuario público: calendario vacío para selección de horarios');
@@ -4022,22 +4033,20 @@
                 }
                 alert(message);
             } else {
-                // Si es un evento del usuario, permitir eliminarlo
-                const isUserEvent = selectedPlan.bookedEvents.includes(event.id);
-                if (isUserEvent) {
+                // Si es un evento temporal del usuario, permitir eliminarlo
+                const userEventIndex = selectedPlan.bookedEvents.findIndex(e => e.eventId === event.id);
+                if (userEventIndex !== -1) {
                     const confirmDelete = confirm(`${message}\n\n¿Deseas eliminar esta clase reservada?`);
                     if (confirmDelete) {
                         event.remove();
                         selectedPlan.bookedClasses--;
-                        const index = selectedPlan.bookedEvents.indexOf(event.id);
-                        if (index > -1) {
-                            selectedPlan.bookedEvents.splice(index, 1);
-                        }
+                        selectedPlan.bookedEvents.splice(userEventIndex, 1);
+                        // Actualizar localStorage
+                        saveTempReservations();
                         updateCalendarInfo();
                     }
-                } else {
-                    alert(message);
                 }
+                // No mostrar ningún alert para otros eventos (calendario limpio para usuarios públicos)
             }
         }
 
