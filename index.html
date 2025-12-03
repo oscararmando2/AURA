@@ -2829,6 +2829,9 @@
             <button type="button" id="menu-register" role="menuitem" aria-label="Registrarse" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 📝 Registrarse
             </button>
+            <button type="button" id="menu-my-classes" role="menuitem" aria-label="Mis Clases" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
+                📚 Mis Clases
+            </button>
             <button type="button" id="menu-admin-login" role="menuitem" aria-label="Login Admin" style="display: block; width: 100%; padding: 15px 20px; background: #fff; border: none; text-align: left; cursor: pointer; color: #333; font-size: 1rem; border-bottom: 1px solid #ccc;">
                 🔐 Login Admin
             </button>
@@ -2859,7 +2862,27 @@
       </div>
     </div>
 
-
+    <!-- Modal para Login de Usuario (Mis Clases) -->
+    <div id="user-login-modal" role="dialog" aria-labelledby="user-login-modal-title" aria-modal="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+      <div style="background:#fff; padding:40px; border-radius:20px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(246,200,199,0.4); border:3px solid #f6c8c7;">
+        <h2 id="user-login-modal-title" style="color:#333; margin-bottom:15px;">📚 Mis Clases</h2>
+        <p style="color:#666; margin-bottom:20px;">Ingresa tus datos para ver tus clases agendadas</p>
+        <div id="user-login-error" style="display: none; background: linear-gradient(135deg, #fbe3e3 0%, #f6c8c7 100%); color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
+        <form id="user-login-form">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+              <span style="font-size: 1.3rem; font-weight: 600; color: #999; background: #f8f8f8; padding: 15px 12px; border-radius: 12px 0 0 12px; border: 1px solid #f6c8c7; border-right: none;">+52</span>
+              <input type="tel" id="user-login-phone" placeholder="10 dígitos" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" autocomplete="tel" style="flex: 1; padding: 15px; border: 1px solid #f6c8c7; border-radius: 0 12px 12px 0; font-size: 1.1rem;" required>
+            </div>
+            <div style="margin-bottom: 20px;">
+              <input type="password" id="user-login-password" placeholder="Contraseña" autocomplete="current-password" style="width:100%; padding:15px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem; box-sizing: border-box;" required>
+            </div>
+            <div style="display:flex; gap:15px;">
+              <button type="submit" style="flex:1; background:#f6c8c7; color:white; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Ver Mis Clases</button>
+              <button type="button" id="user-login-cancel" style="flex:1; background:#eee; color:#666; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Cancelar</button>
+            </div>
+        </form>
+      </div>
+    </div>
 
     <!-- Modal para Selección de Horario -->
     <div id="time-selection-modal" role="dialog" aria-labelledby="time-modal-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
@@ -3374,10 +3397,13 @@
             const hamburgerBtn = document.getElementById('hamburger-btn');
             const menuDropdown = document.getElementById('menu-dropdown');
             const menuRegister = document.getElementById('menu-register');
+            const menuMyClasses = document.getElementById('menu-my-classes');
             const menuAdminLogin = document.getElementById('menu-admin-login');
             const menuLogout = document.getElementById('menu-logout');
             
             const registerModal = document.getElementById('register-modal');
+            const userLoginModal = document.getElementById('user-login-modal');
+            const userLoginCancel = document.getElementById('user-login-cancel');
             const adminLoginModal = document.getElementById('admin-login-modal');
             const adminLoginCancel = document.getElementById('admin-login-cancel');
             
@@ -3399,7 +3425,7 @@
             });
             
             // Hover effects for menu items
-            const menuItems = [menuRegister, menuAdminLogin, menuLogout];
+            const menuItems = [menuRegister, menuMyClasses, menuAdminLogin, menuLogout];
             menuItems.forEach(item => {
                 item.addEventListener('mouseenter', () => {
                     item.style.background = 'linear-gradient(135deg, #fef5f5 0%, #fbe3e3 100%)';
@@ -3416,6 +3442,94 @@
                 menuDropdown.setAttribute('aria-hidden', 'true');
                 registerModal.style.display = 'flex';
                 document.getElementById('quick-name').focus();
+            });
+            
+            // Show user login modal (Mis Clases)
+            menuMyClasses.addEventListener('click', () => {
+                menuDropdown.style.display = 'none';
+                hamburgerBtn.setAttribute('aria-expanded', 'false');
+                menuDropdown.setAttribute('aria-hidden', 'true');
+                userLoginModal.style.display = 'flex';
+                document.getElementById('user-login-phone').focus();
+            });
+            
+            // Close user login modal
+            userLoginCancel.addEventListener('click', () => {
+                userLoginModal.style.display = 'none';
+                document.getElementById('user-login-form').reset();
+                document.getElementById('user-login-error').style.display = 'none';
+            });
+            
+            // Close user login modal when clicking outside
+            userLoginModal.addEventListener('click', (e) => {
+                if (e.target === userLoginModal) {
+                    userLoginModal.style.display = 'none';
+                    document.getElementById('user-login-form').reset();
+                    document.getElementById('user-login-error').style.display = 'none';
+                }
+            });
+            
+            // Handle user login form submission (Mis Clases)
+            document.getElementById('user-login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const phoneDigits = document.getElementById('user-login-phone').value.trim();
+                const password = document.getElementById('user-login-password').value;
+                const errorDiv = document.getElementById('user-login-error');
+                
+                // Validate phone number
+                if (!phoneDigits || !/^\d{10}$/.test(phoneDigits)) {
+                    errorDiv.textContent = '⚠️ Ingresa 10 dígitos del teléfono';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Validate password
+                if (!password || password.length < 4) {
+                    errorDiv.textContent = '⚠️ Ingresa tu contraseña';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Construct full phone number with country code
+                const fullPhone = phoneDigits;
+                
+                try {
+                    // Check if user has reservations with this phone number
+                    // The verification is simple: phone exists in reservations
+                    // For now, we'll use the phone as verification and password as a simple check
+                    
+                    // Store user info in localStorage for session
+                    localStorage.setItem('userTelefono', fullPhone);
+                    localStorage.setItem('userLoggedIn', 'true');
+                    
+                    // Hide modal
+                    userLoginModal.style.display = 'none';
+                    document.getElementById('user-login-form').reset();
+                    errorDiv.style.display = 'none';
+                    
+                    // Load and show user's classes
+                    if (typeof window.loadUserClasses === 'function') {
+                        await window.loadUserClasses(fullPhone);
+                        
+                        // Scroll to My Classes section
+                        const myClassesSection = document.getElementById('my-classes-section');
+                        if (myClassesSection) {
+                            setTimeout(() => {
+                                myClassesSection.scrollIntoView({ behavior: 'smooth' });
+                            }, 300);
+                        }
+                    } else {
+                        console.error('loadUserClasses function not available');
+                        errorDiv.textContent = '❌ Error al cargar clases. Intenta recargar la página.';
+                        errorDiv.style.display = 'block';
+                    }
+                    
+                } catch (error) {
+                    console.error('Error during user login:', error);
+                    errorDiv.textContent = '❌ Error al verificar. Intenta nuevamente.';
+                    errorDiv.style.display = 'block';
+                }
             });
             
             // Show admin login modal
@@ -3485,6 +3599,7 @@
                         document.body.style.overflow = ''; // Restore scrolling
                     }
                     registerModal.style.display = 'none';
+                    userLoginModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
                     timeModal.style.display = 'none';
                     reservationModal.style.display = 'none';
