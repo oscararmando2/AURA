@@ -6,6 +6,20 @@ const PHONE_PATTERN = /^\d{10}$/;
 // Global variable to store the selected package
 let selectedPackage = { title: '', price: 0 };
 
+/**
+ * Hash a password using SHA-256 for secure storage
+ * @param {string} password - The plain text password
+ * @returns {Promise<string>} - The hashed password as a hex string
+ */
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
 function showRegisterModal() {
   document.getElementById("register-modal").style.display = "flex";
 }
@@ -28,9 +42,10 @@ function iniciarPago(button) {
   }
 }
 
-function guardarRegistroLocalYPagar() {
+async function guardarRegistroLocalYPagar() {
   const name = document.getElementById('quick-name').value.trim();
   const phoneDigits = document.getElementById('quick-phone-digits').value.trim();
+  const password = document.getElementById('quick-password').value;
   
   // Validate name
   if (!name) {
@@ -44,11 +59,22 @@ function guardarRegistroLocalYPagar() {
     return;
   }
   
+  // Validate password: minimum 4 characters
+  if (!password || password.length < 4) {
+    alert('⚠️ Por favor crea una contraseña de al menos 4 caracteres');
+    return;
+  }
+  
   // Construct full phone number with country code: 52 + 10 digits
   const fullPhoneNumber = '52' + phoneDigits;
   
+  // Hash password before storing for security
+  const hashedPassword = await hashPassword(password);
+  
   localStorage.setItem('userName', name);
   localStorage.setItem('userTelefono', fullPhoneNumber);
+  // Store hashed password associated with phone number for login verification
+  localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
   localStorage.setItem('registered', 'true');
   document.getElementById('register-modal').style.display = 'none';
   crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
