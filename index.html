@@ -2854,12 +2854,16 @@
         <h2 id="register-modal-title" style="color:#333; margin-bottom:15px;">¡Bienvenida a Aura!</h2>
         <p style="color:#666; margin-bottom:20px;">Ingresa tus datos para continuar</p>
         <input type="text" id="quick-name" placeholder="Nombre completo" aria-label="Nombre completo" autocomplete="name" required style="width:100%; padding:15px; margin-bottom:15px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem;">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
           <span style="font-size: 1.3rem; font-weight: 600; color: #999; background: #f8f8f8; padding: 15px 12px; border-radius: 12px 0 0 12px; border: 1px solid #f6c8c7; border-right: none;">+52</span>
           <input type="tel" id="quick-phone-digits" placeholder="715 159 6586" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" autocomplete="tel" style="flex: 1; padding: 15px; border: 1px solid #f6c8c7; border-radius: 0 12px 12px 0; font-size: 1.1rem;" required>
         </div>
+        <div style="margin-bottom: 20px;">
+          <input type="password" id="quick-password" placeholder="Crear contraseña (mínimo 4 caracteres)" aria-label="Crear contraseña" autocomplete="new-password" minlength="4" required style="width:100%; padding:15px; border:1px solid #f6c8c7; border-radius:12px; font-size:1.1rem; box-sizing: border-box;">
+          <p style="color:#999; font-size:0.85rem; margin-top:6px; text-align:left;">Esta contraseña te permitirá ver tus clases</p>
+        </div>
         <div style="display:flex; gap:15px;">
-          <button type="button" onclick="guardarRegistroLocalYPagar()" style="flex:1; background:#f6c8c7; color:white; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Continuar al Pago</button>
+          <button type="button" onclick="guardarRegistroLocalYPagar()" style="flex:1; background:#f6c8c7; color:white; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Continuar</button>
           <button type="button" onclick="document.getElementById('register-modal').style.display='none'" style="flex:1; background:#eee; color:#666; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Cancelar</button>
         </div>
       </div>
@@ -3508,12 +3512,29 @@
                 }
                 
                 // Validate password (basic validation - minimum 4 characters)
-                // Note: Full password verification requires backend implementation
-                // For now, password is used as a simple verification that the user
-                // remembers their registered password. The loadUserClasses function
-                // will only show classes that match the phone number in Firestore.
                 if (!password || password.length < 4) {
                     errorDiv.textContent = '⚠️ Ingresa tu contraseña';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Verify password against stored hashed password for this phone number
+                const storedPasswordHash = localStorage.getItem('userPassword_' + phoneDigits);
+                if (!storedPasswordHash) {
+                    errorDiv.textContent = '⚠️ No hay cuenta registrada con este teléfono. Por favor regístrate primero.';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Hash the entered password for comparison
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const enteredPasswordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                if (enteredPasswordHash !== storedPasswordHash) {
+                    errorDiv.textContent = '❌ Contraseña incorrecta. Intenta nuevamente.';
                     errorDiv.style.display = 'block';
                     return;
                 }
@@ -3523,10 +3544,8 @@
                 
                 try {
                     // Store user info in localStorage for session
-                    // The password is used as a simple verification step
-                    // Actual security is provided by Firestore rules and
-                    // the fact that only matching phone reservations are shown
-                    localStorage.setItem('userTelefono', phoneNumber);
+                    // Store with country code prefix for consistency with registration
+                    localStorage.setItem('userTelefono', '52' + phoneNumber);
                     localStorage.setItem('userLoggedIn', 'true');
                     
                     // Hide modal
@@ -3646,7 +3665,8 @@
                     registerModal.style.display = 'none';
                     // Clear input fields
                     document.getElementById('quick-name').value = '';
-                    document.getElementById('quick-phone').value = '';
+                    document.getElementById('quick-phone-digits').value = '';
+                    document.getElementById('quick-password').value = '';
                 }
             });
             
