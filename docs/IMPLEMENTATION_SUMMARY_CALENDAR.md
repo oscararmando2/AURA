@@ -119,8 +119,8 @@ adminCalendar.addEvent({
     title: "Ketzy",  // First name only
     start: startDate,
     end: endDate,
-    backgroundColor: '#f6c8c7',
-    borderColor: '#e8cccc',
+    backgroundColor: '#EFE9E1',
+    borderColor: '#EFE9E1',
     textColor: '#333',
     extendedProps: {
         fullName: "Ketzy Gallegos",  // Full name

@@ -103,10 +103,10 @@ businessHours: [
 
 The color palette is defined in CSS. Search and replace:
 
-- `#f6c8c7` → Your primary color (About, Image Scroll backgrounds)
+- `#EFE9E1` → Your primary color (About, Image Scroll backgrounds)
 - `#eebbbb` → Your secondary color (Plan cards, Contact background, text boxes)
-- `#fbe3e3` → Your button color
-- `#e8cccc` → Your button hover color
+- `#EFE9E1` → Your button color
+- `#EFE9E1` → Your button hover color
 
 ### 6. Updating Text Content
 

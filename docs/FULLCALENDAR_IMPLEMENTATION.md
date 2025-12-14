@@ -230,7 +230,7 @@ Usuario público: mostrando clases fijas de pilates
 ## 🎨 Diseño
 
 **IMPORTANTE**: No se ha modificado ningún estilo CSS existente. El diseño rosa característico de AURA Studio se mantiene intacto:
-- Gradientes rosa (#f6c8c7, #fbe3e3)
+- Gradientes rosa (#EFE9E1, #EFE9E1)
 - Botones con estilo consistente
 - Animaciones originales preservadas
 - Responsive design sin cambios
@@ -238,7 +238,7 @@ Usuario público: mostrando clases fijas de pilates
 El calendario se integra perfectamente con el diseño existente:
 - Contenedor con fondo degradado rosa claro
 - Botones de navegación con los mismos colores del sitio
-- Eventos con colores coordinados (#fbe3e3, #f6c8c7)
+- Eventos con colores coordinados (#EFE9E1, #EFE9E1)
 - Máximo 900px de ancho para mantener legibilidad
 
 ## 📊 Flujo de Datos

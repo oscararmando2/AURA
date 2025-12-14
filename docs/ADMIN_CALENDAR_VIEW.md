@@ -11,7 +11,7 @@ The admin panel now features a modern calendar view for managing reservations, d
 - **Time Range**: Shows business hours from 6:00 AM to 8:00 PM
 - **Spanish Locale**: All dates and times are displayed in Spanish
 - **First Name Display**: Events show only the client's first name (e.g., "Ketzy" instead of "Ketzy Gallegos")
-- **Color-Coded Events**: Reservations appear in AURA brand colors (#f6c8c7)
+- **Color-Coded Events**: Reservations appear in AURA brand colors (#EFE9E1)
 
 ### 2. View Toggle
 - **Two Views Available**:

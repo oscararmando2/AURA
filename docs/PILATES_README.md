@@ -59,10 +59,10 @@ Upload `index.html` to any web hosting service:
 ## Color Palette
 
 The website uses a cohesive color scheme:
-- **#f6c8c7**: Primary background (About & Image Scroll sections)
+- **#EFE9E1**: Primary background (About & Image Scroll sections)
 - **#eebbbb**: Secondary background (Booking cards & Contact section)
-- **#fbe3e3**: Button color with white text
-- **#e8cccc**: Button hover effect
+- **#EFE9E1**: Button color with white text
+- **#EFE9E1**: Button hover effect
 - **#333**: Dark text on light backgrounds
 - **#fff**: White text on hero section
 

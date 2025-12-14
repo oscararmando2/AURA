@@ -174,12 +174,12 @@ service cloud.firestore {
 ### Filosofía de Diseño
 - **Sin modificaciones CSS:** Todo el diseño usa el estilo rosa existente de AURA Studio
 - **Inline styles:** Los nuevos elementos usan estilos inline que coinciden con el diseño actual
-- **Consistencia:** Botones, inputs y colores siguen el esquema de gradientes rosa (#f6c8c7, #fbe3e3)
+- **Consistencia:** Botones, inputs y colores siguen el esquema de gradientes rosa (#EFE9E1, #EFE9E1)
 - **Responsive:** Todo funciona en móviles y escritorio
 
 ### Colores Utilizados
-- Gradiente rosa: `linear-gradient(135deg, #f6c8c7 0%, #fbe3e3 100%)`
-- Fondo claro: `#fef5f5`, `#ffffff`
+- Gradiente rosa: `linear-gradient(135deg, #EFE9E1 0%, #EFE9E1 100%)`
+- Fondo claro: `#EFE9E1`, `#ffffff`
 - Texto: `#333`, `#666`
 - Bordes: `rgba(246, 200, 199, 0.3)`
 
