@@ -176,7 +176,7 @@ reservas_aura_2025-11-14.csv
 **DESPUÉS:**
 - Tarjetas con gradiente blanco/rosa
 - Iconos grandes y coloridos
-- Valores destacados en rosa (#f6c8c7)
+- Valores destacados en rosa (#EFE9E1)
 - Etiquetas descriptivas
 - Efectos hover con elevación
 

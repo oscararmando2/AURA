@@ -118,7 +118,7 @@ if (error.code === 'permission-denied') {
 +     }
 +     
       gridDiv.innerHTML = `
-          <div style="text-align:center;padding:40px;color:#f6c8c7;grid-column:1/-1">
+          <div style="text-align:center;padding:40px;color:#EFE9E1;grid-column:1/-1">
 -             <p style="font-size:1.2rem">Error al cargar tus clases</p>
 -             <p style="margin-top:10px;color:#999">Intenta recargar la página</p>
 +             <p style="font-size:1.2rem">${errorMessage}</p>
