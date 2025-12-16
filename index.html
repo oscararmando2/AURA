@@ -397,7 +397,7 @@
             left: 0;
             width: 100%;
             background-color: #ffffff;
-            padding: 0;
+            padding: 0 10px;
             box-shadow: none;
             z-index: 900;
             display: flex;
@@ -416,8 +416,34 @@
 
         /* ========== Hamburger Menu Container ========== */
         #hamburger-container {
+            position: fixed;
+            top: 0;
+            right: 20px;
             height: 80px;
-            top: 0 !important;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #hamburger-btn {
+            background: transparent;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #hamburger-btn .hamburger-line {
+            width: 28px;
+            height: 2.5px;
+            background-color: #000000;
+            margin: 5px 0;
+            border-radius: 2px;
+            transition: all 0.3s ease;
         }
 
         /* ========== 1. Welcome Section (Hero Section) ========== */
@@ -2260,6 +2286,11 @@
                 height: 70px;
             }
             
+            #hamburger-btn .hamburger-line {
+                width: 26px;
+                height: 2.5px;
+            }
+            
             .hero-content h1 {
                 font-size: 2.5rem;
                 letter-spacing: 4px;
@@ -2839,12 +2870,12 @@
 
     <!-- ========== Hamburger Menu ========== -->
     <!-- Menú hamburguesa en la esquina superior derecha -->
-    <div id="hamburger-container" style="position: fixed; top: 0; right: 20px; z-index: 1000; display: flex; align-items: center; justify-content: center;">
+    <div id="hamburger-container">
         <!-- Botón hamburguesa (tres líneas) -->
-        <button type="button" id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown" style="background: transparent; border: none; padding: 10px; cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-            <div style="width: 28px; height: 2.5px; background-color: #000000; margin: 5px 0; border-radius: 2px; transition: all 0.3s ease;"></div>
-            <div style="width: 28px; height: 2.5px; background-color: #000000; margin: 5px 0; border-radius: 2px; transition: all 0.3s ease;"></div>
-            <div style="width: 28px; height: 2.5px; background-color: #000000; margin: 5px 0; border-radius: 2px; transition: all 0.3s ease;"></div>
+        <button type="button" id="hamburger-btn" aria-label="Abrir menú de opciones" aria-expanded="false" aria-controls="menu-dropdown">
+            <div class="hamburger-line"></div>
+            <div class="hamburger-line"></div>
+            <div class="hamburger-line"></div>
         </button>
         
         <!-- Menú desplegable -->
