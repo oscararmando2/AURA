@@ -93,7 +93,7 @@ class CalendarPDF extends FPDF {
         // Texto del pie
         $this->SetFont('Arial', 'I', 8);
         $this->SetTextColor(120, 120, 120);
-        $this->Cell(0, 5, 'AURA Studio - Sistema de Gestion de Reservaciones', 0, 1, 'C');
+        $this->Cell(0, 5, 'AURA Studio - Sistema de Gestión de Reservaciones', 0, 1, 'C');
         
         // Número de página
         $this->SetFont('Arial', '', 8);
@@ -113,7 +113,7 @@ class CalendarPDF extends FPDF {
             $dateObj = new DateTime($date);
         }
         
-        $dias = ['Domingo', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
+        $dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         $meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
         $diaNombre = $dias[$dateObj->format('w')];
@@ -224,7 +224,7 @@ class CalendarPDF extends FPDF {
         $this->SetX(15);
         $this->Cell(185, 5, "Total de Reservaciones: $totalReservations", 0, 1, 'C');
         $this->SetX(15);
-        $this->Cell(185, 5, "Total de Dias con Reservaciones: $totalDays", 0, 1, 'C');
+        $this->Cell(185, 5, "Total de Días con Reservaciones: $totalDays", 0, 1, 'C');
     }
 }
 
