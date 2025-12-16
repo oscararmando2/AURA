@@ -4396,8 +4396,10 @@
             // Generar horarios disponibles
             slotsContainer.innerHTML = '';
             
-            const morningSlots = ['06:00', '07:00', '08:00', '09:00', '10:00'];
-            const eveningSlots = ['17:00', '18:00', '19:00'];
+            // Horarios de mañana: 6:00 AM - 11:00 AM
+            const morningSlots = ['06:00', '07:00', '08:00', '09:00', '10:00', '11:00'];
+            // Horarios de tarde: 5:00 PM - 8:00 PM
+            const eveningSlots = ['17:00', '18:00', '19:00', '20:00'];
             
             // Agregar horarios de mañana
             const morningTitle = document.createElement('div');
