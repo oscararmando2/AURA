@@ -5743,53 +5743,93 @@
         }
         
         /**
-         * Export calendar data to CSV
+         * Export calendar data to PDF with calendar format
          */
-        function exportCalendarData() {
+        async function exportCalendarData() {
             if (!allReservationsData || allReservationsData.length === 0) {
                 alert('⚠️ No hay datos para exportar');
                 return;
             }
             
-            // Create CSV content
-            let csv = 'Cliente,Teléfono,Fecha,Hora,Notas\n';
-            
-            allReservationsData.forEach(event => {
-                const date = event.start.toLocaleDateString('es-ES');
-                const time = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            try {
+                // Prepare data for PDF generation
+                const reservations = [];
                 
-                // Check if grouped event
-                if (event.extendedProps.isGrouped && event.extendedProps.participants) {
-                    // Export each participant as a separate row
-                    event.extendedProps.participants.forEach(participant => {
-                        const fullName = participant.fullName || '';
-                        const telefono = participant.telefono || '';
-                        const notes = (participant.notas || '').replace(/,/g, ';');
-                        csv += `"${fullName}","${telefono}","${date}","${time}","${notes}"\n`;
-                    });
+                allReservationsData.forEach(event => {
+                    const date = event.start.toISOString().split('T')[0]; // YYYY-MM-DD format
+                    const time = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                    
+                    // Check if grouped event
+                    if (event.extendedProps.isGrouped && event.extendedProps.participants) {
+                        // Export each participant as a separate reservation
+                        event.extendedProps.participants.forEach(participant => {
+                            reservations.push({
+                                date: date,
+                                time: time,
+                                name: participant.fullName || '',
+                                phone: participant.telefono || '',
+                                notes: participant.notas || ''
+                            });
+                        });
+                    } else {
+                        // Single reservation
+                        reservations.push({
+                            date: date,
+                            time: time,
+                            name: event.extendedProps.fullName || '',
+                            phone: event.extendedProps.telefono || '',
+                            notes: event.extendedProps.notas || ''
+                        });
+                    }
+                });
+                
+                // Show loading indicator
+                const btnExport = document.getElementById('btn-export-calendar');
+                const originalText = btnExport.textContent;
+                btnExport.textContent = '⏳ Generando PDF...';
+                btnExport.disabled = true;
+                
+                // Send data to PHP endpoint
+                const response = await fetch('exportar_calendario.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reservations: reservations })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Download the generated PDF
+                    const link = document.createElement('a');
+                    link.href = result.filepath;
+                    link.download = result.filename;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    console.log(`✅ Calendario exportado: ${result.filename}`);
+                    alert('✅ Calendario exportado exitosamente en formato PDF');
                 } else {
-                    // Single reservation
-                    const fullName = event.extendedProps.fullName || '';
-                    const telefono = event.extendedProps.telefono || '';
-                    const notes = (event.extendedProps.notas || '').replace(/,/g, ';');
-                    csv += `"${fullName}","${telefono}","${date}","${time}","${notes}"\n`;
+                    console.error('❌ Error al exportar:', result.error);
+                    alert('❌ Error al exportar el calendario: ' + result.error);
                 }
-            });
-            
-            // Download CSV
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const filename = `reservas_aura_${new Date().toISOString().split('T')[0]}.csv`;
-            
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            console.log(`✅ Datos exportados: ${filename}`);
+                
+                // Restore button
+                btnExport.textContent = originalText;
+                btnExport.disabled = false;
+                
+            } catch (error) {
+                console.error('❌ Error al exportar calendario:', error);
+                alert('❌ Error al exportar el calendario. Por favor, intente nuevamente.');
+                
+                // Restore button
+                const btnExport = document.getElementById('btn-export-calendar');
+                btnExport.textContent = '📥 Exportar';
+                btnExport.disabled = false;
+            }
         }
         
         /**
