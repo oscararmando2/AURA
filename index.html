@@ -3366,6 +3366,7 @@
                     <button type="button" id="btn-filter-clear">✖️ Limpiar</button>
                     <button type="button" id="btn-refresh-calendar">🔄 Actualizar</button>
                     <button type="button" id="btn-export-calendar">📥 Exportar</button>
+                    <button type="button" id="btn-admin-schedule">📅 AGENDAR</button>
                 </div>
             </div>
             
@@ -3427,6 +3428,61 @@
                     <button type="button" class="btn-secondary" id="detail-close-btn">Cerrar</button>
                     <button type="button" class="btn-primary" id="detail-contact-btn">📧 Contactar</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Admin Schedule Modal -->
+        <div id="admin-schedule-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2000; justify-content: center; align-items: center;">
+            <div style="background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 500px; width: 90%; border: 2px solid rgba(239, 233, 225, 0.3);">
+                <h2 style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">📅 Agendar Nueva Clase</h2>
+                <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Crear una reserva sin necesidad de pago</p>
+                <div id="schedule-error" style="display: none; background: #ff5252; color: #fff; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
+                <form id="admin-schedule-form">
+                    <div style="margin-bottom: 15px;">
+                        <label for="schedule-client-name" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Nombre del Cliente</label>
+                        <input type="text" id="schedule-client-name" required style="width: 100%; padding: 12px; border: 1px solid rgba(239, 233, 225, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="schedule-client-phone" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Teléfono del Cliente</label>
+                        <input type="tel" id="schedule-client-phone" required placeholder="10 dígitos" style="width: 100%; padding: 12px; border: 1px solid rgba(239, 233, 225, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="schedule-date" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Fecha</label>
+                        <input type="date" id="schedule-date" required style="width: 100%; padding: 12px; border: 1px solid rgba(239, 233, 225, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="schedule-time" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Hora</label>
+                        <select id="schedule-time" required style="width: 100%; padding: 12px; border: 1px solid rgba(239, 233, 225, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
+                            <option value="">Selecciona una hora</option>
+                            <option value="07:00">07:00</option>
+                            <option value="08:00">08:00</option>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="13:00">13:00</option>
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                            <option value="18:00">18:00</option>
+                            <option value="19:00">19:00</option>
+                            <option value="20:00">20:00</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label for="schedule-notes" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Notas (opcional)</label>
+                        <textarea id="schedule-notes" rows="3" style="width: 100%; padding: 12px; border: 1px solid rgba(239, 233, 225, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box; resize: vertical;"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit" id="schedule-submit-btn" style="flex: 1; background: linear-gradient(135deg, #C51162 0%, #e91e63 100%); color: #fff; padding: 12px 20px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;">
+                            Agendar Clase
+                        </button>
+                        <button type="button" id="schedule-cancel-btn" style="flex: 1; background: #e0e0e0; color: #666; padding: 12px 20px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </section>
@@ -5203,11 +5259,13 @@
          * @param {string} telefono - Teléfono del cliente (nuevo sistema)
          * @param {string} fechaHora - Fecha y hora en formato ISO (YYYY-MM-DDTHH:mm:ss)
          * @param {string} notas - Notas adicionales (opcional)
+         * @param {boolean} requiresPayment - Si la reserva requiere pago (opcional, por defecto true)
+         * @param {string} createdBy - Quien creó la reserva (opcional, ej: 'admin', 'user')
          * @returns {Promise<string>} ID del documento creado
          */
-        async function saveReservation(nombre, telefono, fechaHora, notas = '') {
+        async function saveReservation(nombre, telefono, fechaHora, notas = '', requiresPayment = true, createdBy = null) {
             try {
-                console.log('💾 Intentando guardar reserva:', { nombre, telefono, fechaHora, notas });
+                console.log('💾 Intentando guardar reserva:', { nombre, telefono, fechaHora, notas, requiresPayment, createdBy });
                 
                 // Validar que Firebase esté inicializado
                 if (!db) {
@@ -5225,15 +5283,24 @@
                     throw new Error('❌ Nombre y teléfono son requeridos');
                 }
                 
-                const docRef = await addDoc(collection(db, 'reservas'), {
+                // Prepare document data
+                const docData = {
                     nombre: nombre,
                     telefono: telefono.trim(),
                     fechaHora: fechaHora, // Formato ISO: YYYY-MM-DDTHH:mm:ss
                     notas: notas || '',
+                    requiresPayment: requiresPayment,
                     timestamp: serverTimestamp()
-                });
+                };
                 
-                console.log('✅ Reserva guardada con ID:', docRef.id, '- fechaHora (ISO):', fechaHora);
+                // Add createdBy field if provided
+                if (createdBy) {
+                    docData.createdBy = createdBy;
+                }
+                
+                const docRef = await addDoc(collection(db, 'reservas'), docData);
+                
+                console.log('✅ Reserva guardada con ID:', docRef.id, '- fechaHora (ISO):', fechaHora, '- requiresPayment:', requiresPayment);
                 return docRef.id;
                 
             } catch (error) {
@@ -5653,6 +5720,18 @@
                 loadAdminCalendarReservations();
             });
             document.getElementById('btn-export-calendar').addEventListener('click', exportCalendarData);
+            document.getElementById('btn-admin-schedule').addEventListener('click', openAdminScheduleModal);
+            
+            // Admin schedule modal controls
+            document.getElementById('schedule-cancel-btn').addEventListener('click', closeAdminScheduleModal);
+            document.getElementById('admin-schedule-form').addEventListener('submit', submitAdminSchedule);
+            
+            // Close modal on background click
+            document.getElementById('admin-schedule-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAdminScheduleModal();
+                }
+            });
             
             // Event detail modal controls
             document.getElementById('event-detail-close').addEventListener('click', closeEventDetailModal);
@@ -5831,6 +5910,112 @@
                 const btnExport = document.getElementById('btn-export-calendar');
                 btnExport.textContent = '📥 Exportar';
                 btnExport.disabled = false;
+            }
+        }
+        
+        /**
+         * Open admin schedule modal
+         */
+        function openAdminScheduleModal() {
+            const modal = document.getElementById('admin-schedule-modal');
+            const form = document.getElementById('admin-schedule-form');
+            
+            // Reset form
+            form.reset();
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('schedule-date').value = today;
+            
+            // Hide error message
+            document.getElementById('schedule-error').style.display = 'none';
+            
+            // Show modal
+            modal.style.display = 'flex';
+        }
+        
+        /**
+         * Close admin schedule modal
+         */
+        function closeAdminScheduleModal() {
+            const modal = document.getElementById('admin-schedule-modal');
+            modal.style.display = 'none';
+        }
+        
+        /**
+         * Submit admin schedule form
+         */
+        async function submitAdminSchedule(e) {
+            e.preventDefault();
+            
+            const errorDiv = document.getElementById('schedule-error');
+            const submitBtn = document.getElementById('schedule-submit-btn');
+            
+            // Get form values
+            const nombre = document.getElementById('schedule-client-name').value.trim();
+            const telefono = document.getElementById('schedule-client-phone').value.trim();
+            const fecha = document.getElementById('schedule-date').value;
+            const hora = document.getElementById('schedule-time').value;
+            const notas = document.getElementById('schedule-notes').value.trim();
+            
+            // Validate phone (10 digits)
+            const phonePattern = /^\d{10}$/;
+            if (!phonePattern.test(telefono)) {
+                errorDiv.textContent = '⚠️ El teléfono debe tener exactamente 10 dígitos';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Validate date and time
+            if (!fecha || !hora) {
+                errorDiv.textContent = '⚠️ Por favor selecciona fecha y hora';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            // Create fechaHora in ISO format (YYYY-MM-DDTHH:mm:ss)
+            const fechaHora = `${fecha}T${hora}:00`;
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Agendando...';
+            
+            try {
+                // Add country code prefix using existing constant
+                const telefonoCompleto = MEXICO_COUNTRY_CODE + telefono;
+                
+                // Save reservation with requiresPayment: false using the standard function
+                console.log('💾 Agendando clase para admin:', { nombre, telefono: telefonoCompleto, fechaHora, notas });
+                
+                // Use the saveReservation function for consistency
+                const reservaId = await saveReservation(
+                    nombre,
+                    telefonoCompleto,
+                    fechaHora,
+                    notas,
+                    false, // requiresPayment
+                    'admin' // createdBy
+                );
+                
+                console.log('✅ Clase agendada con ID:', reservaId);
+                
+                // Show success message
+                alert('✅ Clase agendada exitosamente');
+                
+                // Close modal
+                closeAdminScheduleModal();
+                
+                // Reload calendar
+                loadAdminCalendarReservations();
+                
+            } catch (error) {
+                console.error('❌ Error al agendar clase:', error);
+                errorDiv.textContent = '❌ Error al agendar la clase. Por favor, intenta nuevamente.';
+                errorDiv.style.display = 'block';
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Agendar Clase';
             }
         }
         
