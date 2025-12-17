@@ -4738,6 +4738,7 @@
          */
         async function selectTimeSlot(dateStr, time) {
             const MAX_CAPACITY = 5;
+            const MAX_ATTEMPTS_MULTIPLIER = 3; // Allow up to 3x attempts to find consecutive dates (to handle Sundays and full slots)
             
             // Cerrar modal de selección de horario
             document.getElementById('time-selection-modal').style.display = 'none';
@@ -4753,7 +4754,7 @@
             // Generar fechas consecutivas (saltando domingos)
             const consecutiveDates = [];
             let currentDate = new Date(dateStr + 'T00:00:00');
-            let attemptsLeft = classesToBook * 3; // Límite de intentos para evitar bucles infinitos
+            let attemptsLeft = classesToBook * MAX_ATTEMPTS_MULTIPLIER; // Límite de intentos para evitar bucles infinitos
             
             while (consecutiveDates.length < classesToBook && attemptsLeft > 0) {
                 attemptsLeft--;
@@ -4768,7 +4769,7 @@
                     if (currentCount < MAX_CAPACITY) {
                         consecutiveDates.push({
                             dateStr: currentDateStr,
-                            date: new Date(currentDate)
+                            date: new Date(currentDate.getTime()) // Create independent date object
                         });
                     } else {
                         // Si algún horario está lleno, notificar y abortar
@@ -4832,7 +4833,7 @@
             
             // Establecer la primera fecha de clase si es necesario
             if (!selectedPlan.firstClassDate) {
-                selectedPlan.firstClassDate = new Date(consecutiveDates[0].date);
+                selectedPlan.firstClassDate = new Date(consecutiveDates[0].dateStr + 'T00:00:00');
                 selectedPlan.firstClassDate.setHours(0, 0, 0, 0);
                 localStorage.setItem('firstClassDate', selectedPlan.firstClassDate.toISOString());
                 updateCalendarValidRange(selectedPlan.firstClassDate);
@@ -4954,12 +4955,13 @@
             };
             
             // Agregar todos los eventos al calendario
+            let eventCounter = 0;
             selectedPlan.bookedEvents.forEach((booking) => {
                 if (!booking.tempAdded) {
                     const dateTime = new Date(booking.fechaHora);
                     const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
                     
-                    const eventId = `temp-${Date.now()}-${Math.random()}`;
+                    const eventId = `temp-${Date.now()}-${eventCounter++}`;
                     booking.eventId = eventId;
                     booking.nombre = nombre;
                     booking.telefono = telefono;
