@@ -4760,14 +4760,14 @@
                 
                 // Saltar domingos (día 0)
                 if (currentDate.getDay() !== 0) {
-                    const dateStr = currentDate.toISOString().split('T')[0];
+                    const currentDateStr = currentDate.toISOString().split('T')[0];
                     
                     // Verificar capacidad para este horario
-                    const currentCount = await getReservationCountForTimeSlot(dateStr, time);
+                    const currentCount = await getReservationCountForTimeSlot(currentDateStr, time);
                     
                     if (currentCount < MAX_CAPACITY) {
                         consecutiveDates.push({
-                            dateStr: dateStr,
+                            dateStr: currentDateStr,
                             date: new Date(currentDate)
                         });
                     } else {
@@ -4797,7 +4797,9 @@
             }
             
             // Mostrar resumen de las clases que se reservarán
-            let summary = `📅 Se reservarán ${classesToBook} clases consecutivas:\n\n`;
+            const classWord = classesToBook === 1 ? 'clase' : 'clases';
+            const consecutiveWord = classesToBook === 1 ? '' : ' consecutivas';
+            let summary = `📅 Se reservará${classesToBook === 1 ? '' : 'n'} ${classesToBook} ${classWord}${consecutiveWord}:\n\n`;
             consecutiveDates.forEach((dateInfo, index) => {
                 const formatted = dateInfo.date.toLocaleDateString('es-ES', { 
                     weekday: 'short', 
@@ -4806,7 +4808,7 @@
                 });
                 summary += `${index + 1}. ${formatted} a las ${formatTimeTo12Hour(time)}\n`;
             });
-            summary += `\n¿Deseas continuar con estas fechas?`;
+            summary += `\n¿Deseas continuar con ${classesToBook === 1 ? 'esta fecha' : 'estas fechas'}?`;
             
             if (!confirm(summary)) {
                 // Usuario canceló, volver a mostrar selector de horario
@@ -4875,7 +4877,8 @@
             });
             
             // Mostrar el resumen completo
-            dateDisplay.textContent = `${selectedPlan.bookedClasses} clases seleccionadas`;
+            const classWord = selectedPlan.bookedClasses === 1 ? 'clase seleccionada' : 'clases seleccionadas';
+            dateDisplay.textContent = `${selectedPlan.bookedClasses} ${classWord}`;
             timeDisplay.innerHTML = `<div style="white-space: pre-line; text-align: left; font-size: 0.95rem;">${datesSummary}</div>`;
             
             // Mostrar progreso
