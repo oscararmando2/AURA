@@ -3792,6 +3792,11 @@
             const timeModal = document.getElementById('time-selection-modal');
             
             timeCancel.addEventListener('click', () => {
+                // Clear the time slots container to prevent any potential duplication issues
+                const slotsContainer = document.getElementById('time-slots-container');
+                if (slotsContainer) {
+                    slotsContainer.innerHTML = '';
+                }
                 timeModal.style.display = 'none';
                 document.body.style.overflow = ''; // Restore scrolling
             });
@@ -3836,6 +3841,11 @@
                     // Check if time-selection-modal or reservation-modal is visible before closing
                     if (timeModal.style.display === 'flex' || reservationModal.style.display === 'flex') {
                         document.body.style.overflow = ''; // Restore scrolling
+                        // Clear the time slots container when closing
+                        const slotsContainer = document.getElementById('time-slots-container');
+                        if (slotsContainer && timeModal.style.display === 'flex') {
+                            slotsContainer.innerHTML = '';
+                        }
                     }
                     registerModal.style.display = 'none';
                     // Reset user login modal when closing with ESC
@@ -4592,6 +4602,7 @@
 
         /**
          * Mostrar modal de selección de horario
+         * Version: 2.0 - Fixed time slot display (2025-12-17)
          */
         async function showTimeSelectionModal(dateStr) {
             const modal = document.getElementById('time-selection-modal');
@@ -4609,16 +4620,18 @@
             
             dateDisplay.textContent = dateFormatted;
             
-            // Generar horarios disponibles
+            // IMPORTANTE: Limpiar completamente el contenedor antes de regenerar
+            // Esto previene duplicación de horarios si la función se llama múltiples veces
             slotsContainer.innerHTML = '';
             
-            // Horarios de mañana: 6:00 AM - 11:00 AM
+            // Horarios de mañana: 6:00 AM - 11:00 AM (en orden)
             const morningSlots = ['06:00', '07:00', '08:00', '09:00', '10:00', '11:00'];
-            // Horarios de tarde: 5:00 PM - 7:00 PM
+            // Horarios de tarde: 5:00 PM - 7:00 PM (en orden)
             const eveningSlots = ['17:00', '18:00', '19:00'];
             
             // Agregar horarios de mañana
             const morningTitle = document.createElement('div');
+            morningTitle.className = 'time-section-title morning-title';
             morningTitle.style.cssText = 'grid-column: 1 / -1; padding: 8px; font-weight: 600; color: #EFE9E1; text-align: center; background: rgba(239, 233, 225, 0.1); border-radius: 8px; margin-bottom: 5px;';
             morningTitle.textContent = '🌅 Mañana';
             slotsContainer.appendChild(morningTitle);
@@ -4627,11 +4640,14 @@
             for (const time of morningSlots) {
                 const count = await getReservationCountForTimeSlot(dateStr, time);
                 const button = createTimeSlotButton(dateStr, time, count);
+                button.setAttribute('data-period', 'morning');
+                button.setAttribute('data-time', time);
                 slotsContainer.appendChild(button);
             }
             
             // Agregar horarios de tarde
             const eveningTitle = document.createElement('div');
+            eveningTitle.className = 'time-section-title evening-title';
             eveningTitle.style.cssText = 'grid-column: 1 / -1; padding: 8px; font-weight: 600; color: #EFE9E1; text-align: center; background: rgba(239, 233, 225, 0.1); border-radius: 8px; margin: 10px 0 5px 0;';
             eveningTitle.textContent = '🌆 Tarde';
             slotsContainer.appendChild(eveningTitle);
@@ -4640,6 +4656,8 @@
             for (const time of eveningSlots) {
                 const count = await getReservationCountForTimeSlot(dateStr, time);
                 const button = createTimeSlotButton(dateStr, time, count);
+                button.setAttribute('data-period', 'evening');
+                button.setAttribute('data-time', time);
                 slotsContainer.appendChild(button);
             }
             
@@ -4652,6 +4670,14 @@
          * Convertir hora de formato 24h a formato 12h con AM/PM
          * @param {string} time - Hora en formato HH:mm (ej: "06:00", "17:00")
          * @returns {string} Hora en formato 12h con AM/PM (ej: "6 AM", "5 PM")
+         * 
+         * Ejemplos:
+         * - "06:00" -> "6 AM"
+         * - "08:00" -> "8 AM"
+         * - "11:00" -> "11 AM"
+         * - "12:00" -> "12 PM"
+         * - "17:00" -> "5 PM"
+         * - "19:00" -> "7 PM"
          */
         function formatTimeTo12Hour(time) {
             const [hours, minutes] = time.split(':').map(Number);
@@ -6872,6 +6898,11 @@
             const timeCancelBtn = document.getElementById('time-cancel');
             if (timeCancelBtn) {
                 timeCancelBtn.addEventListener('click', () => {
+                    // Clear the time slots container to prevent any potential duplication issues
+                    const slotsContainer = document.getElementById('time-slots-container');
+                    if (slotsContainer) {
+                        slotsContainer.innerHTML = '';
+                    }
                     document.getElementById('time-selection-modal').style.display = 'none';
                     document.body.style.overflow = ''; // Restore scrolling
                 });
