@@ -5260,11 +5260,12 @@
          * @param {string} fechaHora - Fecha y hora en formato ISO (YYYY-MM-DDTHH:mm:ss)
          * @param {string} notas - Notas adicionales (opcional)
          * @param {boolean} requiresPayment - Si la reserva requiere pago (opcional, por defecto true)
+         * @param {string} createdBy - Quien creó la reserva (opcional, ej: 'admin', 'user')
          * @returns {Promise<string>} ID del documento creado
          */
-        async function saveReservation(nombre, telefono, fechaHora, notas = '', requiresPayment = true) {
+        async function saveReservation(nombre, telefono, fechaHora, notas = '', requiresPayment = true, createdBy = null) {
             try {
-                console.log('💾 Intentando guardar reserva:', { nombre, telefono, fechaHora, notas, requiresPayment });
+                console.log('💾 Intentando guardar reserva:', { nombre, telefono, fechaHora, notas, requiresPayment, createdBy });
                 
                 // Validar que Firebase esté inicializado
                 if (!db) {
@@ -5282,14 +5283,22 @@
                     throw new Error('❌ Nombre y teléfono son requeridos');
                 }
                 
-                const docRef = await addDoc(collection(db, 'reservas'), {
+                // Prepare document data
+                const docData = {
                     nombre: nombre,
                     telefono: telefono.trim(),
                     fechaHora: fechaHora, // Formato ISO: YYYY-MM-DDTHH:mm:ss
                     notas: notas || '',
                     requiresPayment: requiresPayment,
                     timestamp: serverTimestamp()
-                });
+                };
+                
+                // Add createdBy field if provided
+                if (createdBy) {
+                    docData.createdBy = createdBy;
+                }
+                
+                const docRef = await addDoc(collection(db, 'reservas'), docData);
                 
                 console.log('✅ Reserva guardada con ID:', docRef.id, '- fechaHora (ISO):', fechaHora, '- requiresPayment:', requiresPayment);
                 return docRef.id;
@@ -5972,24 +5981,23 @@
             submitBtn.textContent = '⏳ Agendando...';
             
             try {
-                // Add country code prefix
-                const telefonoCompleto = '52' + telefono;
+                // Add country code prefix using existing constant
+                const telefonoCompleto = MEXICO_COUNTRY_CODE + telefono;
                 
-                // Save reservation with requiresPayment: false
+                // Save reservation with requiresPayment: false using the standard function
                 console.log('💾 Agendando clase para admin:', { nombre, telefono: telefonoCompleto, fechaHora, notas });
                 
-                // Save to Firestore
-                const docRef = await addDoc(collection(window.db, 'reservas'), {
-                    nombre: nombre,
-                    telefono: telefonoCompleto,
-                    fechaHora: fechaHora,
-                    notas: notas || '',
-                    requiresPayment: false, // Admin-created reservations don't require payment
-                    createdBy: 'admin',
-                    timestamp: serverTimestamp()
-                });
+                // Use the saveReservation function for consistency
+                const reservaId = await saveReservation(
+                    nombre,
+                    telefonoCompleto,
+                    fechaHora,
+                    notas,
+                    false, // requiresPayment
+                    'admin' // createdBy
+                );
                 
-                console.log('✅ Clase agendada con ID:', docRef.id);
+                console.log('✅ Clase agendada con ID:', reservaId);
                 
                 // Show success message
                 alert('✅ Clase agendada exitosamente');
