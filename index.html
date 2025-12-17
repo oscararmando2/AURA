@@ -1322,6 +1322,84 @@
             border: 2px solid #EFE9E1;
         }
 
+        /* Class counter display */
+        #class-counter-display {
+            display: none;
+            background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(239, 233, 225, 0.3);
+        }
+
+        #class-counter-display h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        #class-counter-display .counter-text {
+            color: #666;
+            font-size: 1.1rem;
+            margin-top: 8px;
+        }
+
+        #class-counter-display .counter-number {
+            color: #EFE9E1;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+
+        /* Payment button container */
+        #payment-button-container {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        #final-payment-btn {
+            background: linear-gradient(135deg, #EFE9E1 0%, #EFE9E1 100%);
+            color: #fff;
+            padding: 20px 50px;
+            border: 2px solid #EFE9E1;
+            border-radius: 15px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(239, 233, 225, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #final-payment-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(239, 233, 225, 0.6);
+        }
+
+        #final-payment-btn:active {
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            #class-counter-display h3 {
+                font-size: 1.2rem;
+            }
+
+            #class-counter-display .counter-text {
+                font-size: 1rem;
+            }
+
+            #final-payment-btn {
+                padding: 16px 35px;
+                font-size: 1.1rem;
+            }
+        }
+
         /* ========== 3.5. My Classes Section ========== */
         .my-classes-section {
             display: none; /* Hidden by default, shown when user is logged in */
@@ -3219,7 +3297,21 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Contador de clases seleccionadas -->
+                <div id="class-counter-display">
+                    <h3>📋 Progreso de Selección</h3>
+                    <p class="counter-text">Has elegido <span class="counter-number" id="counter-current">0</span> de <span class="counter-number" id="counter-total">0</span> clases</p>
+                </div>
+
                 <div id="calendar"></div>
+
+                <!-- Botón de pago (solo visible cuando se seleccionaron todas las clases) -->
+                <div id="payment-button-container">
+                    <button type="button" id="final-payment-btn">
+                        💳 Pagar y confirmar mis <span id="payment-btn-count">0</span> clases
+                    </button>
+                </div>
             </div>
         </div>
     </section>
@@ -4077,6 +4169,12 @@
 
             // Actualizar el mensaje informativo
             updateCalendarInfo();
+            
+            // Actualizar contador
+            updateClassCounter();
+            
+            // Ocultar botón de pago
+            hidePaymentButton();
 
             // Scroll to calendar
             console.log('📜 Scrolling al calendario...');
@@ -4202,6 +4300,54 @@
                 }
                 
                 infoDiv.innerHTML = infoText;
+            }
+        }
+
+        /**
+         * Actualizar el contador visible de clases seleccionadas
+         */
+        function updateClassCounter() {
+            const counterDisplay = document.getElementById('class-counter-display');
+            const counterCurrent = document.getElementById('counter-current');
+            const counterTotal = document.getElementById('counter-total');
+            
+            if (counterDisplay && counterCurrent && counterTotal) {
+                if (selectedPlan.classes > 0) {
+                    counterDisplay.style.display = 'block';
+                    counterCurrent.textContent = selectedPlan.bookedClasses;
+                    counterTotal.textContent = selectedPlan.classes;
+                } else {
+                    counterDisplay.style.display = 'none';
+                }
+            }
+        }
+
+        /**
+         * Mostrar el botón de pago cuando se hayan seleccionado todas las clases
+         */
+        function showPaymentButton() {
+            const paymentContainer = document.getElementById('payment-button-container');
+            const paymentBtn = document.getElementById('final-payment-btn');
+            const paymentCount = document.getElementById('payment-btn-count');
+            
+            if (paymentContainer && paymentBtn && paymentCount) {
+                paymentCount.textContent = selectedPlan.classes;
+                paymentContainer.style.display = 'block';
+                
+                // Scroll hacia el botón para que sea visible
+                setTimeout(() => {
+                    paymentBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+            }
+        }
+
+        /**
+         * Ocultar el botón de pago
+         */
+        function hidePaymentButton() {
+            const paymentContainer = document.getElementById('payment-button-container');
+            if (paymentContainer) {
+                paymentContainer.style.display = 'none';
             }
         }
 
@@ -4520,6 +4666,14 @@
                         selectedPlan.bookedClasses--;
                         selectedPlan.bookedEvents.splice(userEventIndex, 1);
                         
+                        // Actualizar contador
+                        updateClassCounter();
+                        
+                        // Ocultar botón de pago si ya no están todas las clases seleccionadas
+                        if (selectedPlan.bookedClasses < selectedPlan.classes) {
+                            hidePaymentButton();
+                        }
+                        
                         // Si se eliminaron todas las clases, resetear el rango del calendario
                         if (selectedPlan.bookedClasses === 0) {
                             selectedPlan.firstClassDate = null;
@@ -4743,13 +4897,15 @@
 
         /**
          * Seleccionar horario y reservar UNA clase
-         * El usuario debe elegir cada clase manualmente, respetando su elección de horarios
+         * NUEVO FLUJO: Agregar la clase directamente al contador y calendario SIN pedir datos
+         * Solo pedir datos al final cuando todas las clases estén seleccionadas
          */
         async function selectTimeSlot(dateStr, time) {
             const MAX_CAPACITY = 5;
             
             // Cerrar modal de selección de horario
             document.getElementById('time-selection-modal').style.display = 'none';
+            document.body.style.overflow = '';
             
             // Verificar que no hayamos excedido el límite
             if (selectedPlan.bookedClasses >= selectedPlan.classes) {
@@ -4774,35 +4930,208 @@
                 return;
             }
             
-            // NUEVO FLUJO: Reservar SOLO UNA clase a la vez
+            // Crear fecha y hora en formato ISO
             const dateTimeStr = `${dateStr}T${time}:00`;
+            const dateTime = new Date(dateTimeStr);
+            const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
+            
+            // Agregar evento al calendario temporalmente (sin nombre aún)
+            const eventId = `temp-${Date.now()}`;
+            calendar.addEvent({
+                id: eventId,
+                title: `✓ Clase ${selectedPlan.bookedClasses + 1}`,
+                start: dateTime,
+                end: endDateTime,
+                backgroundColor: '#EFE9E1',
+                borderColor: '#EFE9E1',
+                textColor: '#333',
+                extendedProps: {
+                    fechaHora: dateTimeStr,
+                    temporal: true
+                }
+            });
             
             // Guardar esta fecha seleccionada en selectedPlan
             selectedPlan.bookedEvents.push({
-                eventId: null, // Se asignará después
+                eventId: eventId,
                 fechaHora: dateTimeStr,
                 dateStr: dateStr,
-                time: time,
-                tempAdded: false // Para marcar si ya se agregó al calendario visualmente
+                time: time
             });
             
             selectedPlan.bookedClasses += 1;
             
             // Establecer la primera fecha de clase si es necesario
-            if (!selectedPlan.firstClassDate) {
+            if (selectedPlan.bookedClasses === 1) {
                 selectedPlan.firstClassDate = new Date(dateStr + 'T00:00:00');
                 selectedPlan.firstClassDate.setHours(0, 0, 0, 0);
                 localStorage.setItem('firstClassDate', selectedPlan.firstClassDate.toISOString());
                 updateCalendarValidRange(selectedPlan.firstClassDate);
             }
             
-            // Ahora mostrar el modal de confirmación SOLO para esta clase
-            showReservationModalForAllClasses();
+            // Actualizar contador visible
+            updateClassCounter();
+            
+            // Guardar en localStorage (temporal, hasta pago exitoso)
+            saveTempReservations();
+            
+            // Actualizar información del calendario
+            updateCalendarInfo();
+            
+            const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
+            
+            // Verificar si completó todas las reservas
+            if (selectedPlan.bookedClasses >= selectedPlan.classes) {
+                // Todas las clases seleccionadas -> mostrar botón de pago
+                showPaymentButton();
+                alert(`✅ ¡Has seleccionado todas tus ${selectedPlan.classes} clases!\n\nAhora haz clic en el botón "Pagar y confirmar mis ${selectedPlan.classes} clases" para continuar.`);
+            } else {
+                // Continuar seleccionando
+                const nextClassNumber = selectedPlan.bookedClasses + 1;
+                alert(`✅ Clase ${selectedPlan.bookedClasses}/${selectedPlan.classes} agregada!\n\n📅 ${dateTime.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n🕐 ${dateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}\n\n➡️ Ahora selecciona tu Clase ${nextClassNumber}/${selectedPlan.classes}\n\nContinúa seleccionando en el calendario.`);
+            }
         }
 
         // Constants for phone number handling
         const MEXICO_COUNTRY_CODE = '52';
         const PHONE_DIGITS_LENGTH = 10;
+        
+        /**
+         * Mostrar modal de confirmación final cuando el usuario hace clic en el botón de pago
+         * Pide nombre y teléfono una sola vez al final, antes de proceder al pago
+         */
+        function showFinalReservationModal() {
+            const modal = document.getElementById('reservation-modal');
+            const dateDisplay = document.getElementById('reservation-date-display');
+            const timeDisplay = document.getElementById('reservation-time-display');
+            const nameInput = document.getElementById('reservation-name');
+            const phoneInput = document.getElementById('reservation-phone');
+            const progressDisplay = document.getElementById('reservation-progress');
+            const confirmBtn = document.getElementById('reservation-confirm');
+            const cancelBtn = document.getElementById('reservation-cancel');
+            
+            // Construir resumen de todas las clases seleccionadas
+            let datesSummary = '';
+            selectedPlan.bookedEvents.forEach((event, index) => {
+                const dateTime = new Date(event.fechaHora);
+                const dateFormatted = dateTime.toLocaleDateString('es-ES', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short' 
+                });
+                const timeFormatted = dateTime.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                datesSummary += `${index + 1}. ${dateFormatted} - ${timeFormatted}\n`;
+            });
+            
+            // Mostrar el resumen completo
+            const classWord = selectedPlan.bookedClasses === 1 ? 'clase seleccionada' : 'clases seleccionadas';
+            dateDisplay.textContent = `${selectedPlan.bookedClasses} ${classWord}`;
+            
+            // Use textContent to avoid XSS vulnerabilities
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.whiteSpace = 'pre-line';
+            summaryDiv.style.textAlign = 'left';
+            summaryDiv.style.fontSize = '0.95rem';
+            summaryDiv.textContent = datesSummary;
+            timeDisplay.innerHTML = ''; // Clear existing content
+            timeDisplay.appendChild(summaryDiv);
+            
+            // Mostrar progreso
+            progressDisplay.textContent = `${selectedPlan.bookedClasses} de ${selectedPlan.classes} clases seleccionadas`;
+            
+            // Pre-llenar con datos si ya están en localStorage
+            const savedName = localStorage.getItem('userNombre') || '';
+            const savedPhone = localStorage.getItem('userTelefono') || '';
+            nameInput.value = savedName;
+            if (savedPhone.startsWith(MEXICO_COUNTRY_CODE) && savedPhone.length > MEXICO_COUNTRY_CODE.length) {
+                phoneInput.value = savedPhone.substring(MEXICO_COUNTRY_CODE.length);
+            } else {
+                phoneInput.value = savedPhone;
+            }
+            
+            // Event handlers
+            confirmBtn.onclick = () => {
+                confirmFinalPayment();
+            };
+            
+            cancelBtn.onclick = () => {
+                // Simplemente cerrar el modal, no cancelar las clases seleccionadas
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            };
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            nameInput.focus();
+        }
+        
+        /**
+         * Confirmar el pago final después de ingresar nombre y teléfono
+         */
+        function confirmFinalPayment() {
+            const nameInput = document.getElementById('reservation-name');
+            const phoneInput = document.getElementById('reservation-phone');
+            
+            const nombre = nameInput.value.trim();
+            const phoneDigits = phoneInput.value.trim().replace(/\D/g, '');
+            
+            // Validar campos
+            if (!nombre) {
+                alert('⚠️ Por favor ingresa tu nombre completo');
+                nameInput.focus();
+                return;
+            }
+            
+            if (phoneDigits.length !== PHONE_DIGITS_LENGTH) {
+                alert(`⚠️ Por favor ingresa ${PHONE_DIGITS_LENGTH} dígitos de teléfono (sin espacios ni guiones)`);
+                phoneInput.focus();
+                return;
+            }
+            
+            const telefono = MEXICO_COUNTRY_CODE + phoneDigits;
+            
+            // Guardar datos del cliente
+            localStorage.setItem('userNombre', nombre);
+            localStorage.setItem('userTelefono', telefono);
+            
+            selectedPlan.userInfo = {
+                nombre: nombre,
+                telefono: telefono,
+                notas: ''
+            };
+            
+            // Actualizar todos los eventos del calendario con el nombre
+            selectedPlan.bookedEvents.forEach((booking, index) => {
+                booking.nombre = nombre;
+                booking.telefono = telefono;
+                
+                // Actualizar el evento en el calendario visual
+                const event = calendar.getEventById(booking.eventId);
+                if (event) {
+                    event.setProp('title', `✓ ${nombre}`);
+                    event.setExtendedProp('nombre', nombre);
+                    event.setExtendedProp('telefono', telefono);
+                }
+            });
+            
+            // Cerrar modal
+            document.getElementById('reservation-modal').style.display = 'none';
+            document.body.style.overflow = '';
+            
+            // Guardar estado en localStorage
+            saveTempReservations();
+            
+            // Proceder al pago
+            alert(`✅ Perfecto ${nombre}!\n\nAhora serás redirigido a MercadoPago para completar tu pago de $${selectedPlan.price} por ${selectedPlan.classes} clases.`);
+            
+            setTimeout(() => {
+                proceedToPayment();
+            }, 1000);
+        }
         
         /**
          * Mostrar modal de confirmación para las clases seleccionadas hasta ahora
@@ -7101,6 +7430,15 @@
                     window.selectPlan(clases, precio);
                 });
             });
+            
+            // Setup payment button click handler
+            const finalPaymentBtn = document.getElementById('final-payment-btn');
+            if (finalPaymentBtn) {
+                finalPaymentBtn.addEventListener('click', () => {
+                    // Mostrar modal para pedir nombre y teléfono antes de proceder al pago
+                    showFinalReservationModal();
+                });
+            }
             
             // Setup time selection modal cancel button
             const timeCancelBtn = document.getElementById('time-cancel');
