@@ -5186,13 +5186,16 @@
             if (menuRegister) menuRegister.style.display = 'block';
         }
         
+        // ========== MOBILE ADMIN VIEW CONSTANTS ==========
+        const MOBILE_BREAKPOINT = 768; // Max width for mobile view
+        
         /**
          * Apply mobile-admin-view class to body on mobile devices
          * This hides all sections except admin panel, header, and hamburger menu
          */
         function applyMobileAdminView() {
-            // Check if we're on a mobile device (max-width: 768px)
-            if (window.innerWidth <= 768) {
+            // Check if we're on a mobile device
+            if (window.innerWidth <= MOBILE_BREAKPOINT) {
                 document.body.classList.add('mobile-admin-view');
                 console.log('✅ Mobile admin view applied - hiding non-admin sections');
             }
@@ -6406,14 +6409,19 @@
             setupAuthObserver();
             
             // Handle window resize to apply/remove mobile-admin-view class
+            // Use debouncing to improve performance
+            let resizeTimer;
             window.addEventListener('resize', () => {
-                if (window.isAdmin === true) {
-                    if (window.innerWidth <= 768) {
-                        document.body.classList.add('mobile-admin-view');
-                    } else {
-                        document.body.classList.remove('mobile-admin-view');
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (window.isAdmin) {
+                        if (window.innerWidth <= MOBILE_BREAKPOINT) {
+                            document.body.classList.add('mobile-admin-view');
+                        } else {
+                            document.body.classList.remove('mobile-admin-view');
+                        }
                     }
-                }
+                }, 150); // Debounce delay of 150ms
             });
             
             console.log('✅ Sistema de autenticación y reservas inicializado');
