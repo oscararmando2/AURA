@@ -2767,6 +2767,28 @@
                 padding: 14px !important;
                 font-size: 0.9rem !important;
             }
+
+            /* Hide all sections except admin panel on mobile when admin is logged in */
+            body.mobile-admin-view .hero-section,
+            body.mobile-admin-view .about-section,
+            body.mobile-admin-view .booking-section,
+            body.mobile-admin-view #my-classes-section,
+            body.mobile-admin-view .image-scroll-section,
+            body.mobile-admin-view .contact-section,
+            body.mobile-admin-view .reglamento-link {
+                display: none !important;
+            }
+
+            /* Ensure header and hamburger remain visible for mobile admin */
+            body.mobile-admin-view .site-header,
+            body.mobile-admin-view #hamburger-container {
+                display: flex !important;
+            }
+
+            /* Ensure admin panel is visible on mobile when admin is logged in */
+            body.mobile-admin-view #admin-panel-section {
+                display: block !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -5165,6 +5187,27 @@
         }
         
         /**
+         * Apply mobile-admin-view class to body on mobile devices
+         * This hides all sections except admin panel, header, and hamburger menu
+         */
+        function applyMobileAdminView() {
+            // Check if we're on a mobile device (max-width: 768px)
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('mobile-admin-view');
+                console.log('✅ Mobile admin view applied - hiding non-admin sections');
+            }
+        }
+        
+        /**
+         * Remove mobile-admin-view class from body
+         * This restores visibility of all sections
+         */
+        function removeMobileAdminView() {
+            document.body.classList.remove('mobile-admin-view');
+            console.log('✅ Mobile admin view removed - showing all sections');
+        }
+        
+        /**
          * Observar cambios en el estado de autenticación
          * SISTEMA SUPER SIMPLE: Verificar localStorage al cargar la página
          */
@@ -5203,6 +5246,9 @@
                         adminLoginModal.style.display = 'none';
                         adminPanel.style.display = 'block';
                         
+                        // Apply mobile-admin-view class on mobile devices
+                        applyMobileAdminView();
+                        
                         // Mostrar nombre del admin
                         document.getElementById('admin-email-display').textContent = 'Michel';
                         
@@ -5232,6 +5278,9 @@
                     // No hay admin autenticado
                     window.isAdmin = false;
                     isAdmin = false;
+                    
+                    // Remove mobile-admin-view class
+                    removeMobileAdminView();
                     
                     // Ocultar panel de admin
                     adminPanel.style.display = 'none';
@@ -6355,6 +6404,17 @@
             
             // Observar cambios de autenticación
             setupAuthObserver();
+            
+            // Handle window resize to apply/remove mobile-admin-view class
+            window.addEventListener('resize', () => {
+                if (window.isAdmin === true) {
+                    if (window.innerWidth <= 768) {
+                        document.body.classList.add('mobile-admin-view');
+                    } else {
+                        document.body.classList.remove('mobile-admin-view');
+                    }
+                }
+            });
             
             console.log('✅ Sistema de autenticación y reservas inicializado');
         });
