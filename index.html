@@ -4183,7 +4183,16 @@
             const infoDiv = document.querySelector('.calendar-info h3');
             if (infoDiv && selectedPlan.classes > 0) {
                 const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
-                let infoText = `📅 Selecciona tus Clases (${selectedPlan.bookedClasses}/${selectedPlan.classes} seleccionadas, ${remaining} restantes)`;
+                const classNumber = selectedPlan.bookedClasses + 1; // Próxima clase a seleccionar
+                
+                let infoText = '';
+                if (selectedPlan.bookedClasses === 0) {
+                    infoText = `📅 Selecciona tu Primera Clase (0/${selectedPlan.classes} seleccionadas)`;
+                } else if (remaining > 0) {
+                    infoText = `📅 Selecciona tu Clase ${classNumber}/${selectedPlan.classes} (${selectedPlan.bookedClasses} seleccionadas, ${remaining} restantes)`;
+                } else {
+                    infoText = `✅ Todas las clases seleccionadas (${selectedPlan.bookedClasses}/${selectedPlan.classes})`;
+                }
                 
                 // Si hay una primera clase seleccionada, mostrar la fecha de expiración
                 if (selectedPlan.firstClassDate) {
@@ -4733,113 +4742,61 @@
         }
 
         /**
-         * Seleccionar horario y reservar clases consecutivas automáticamente
-         * NUEVO FLUJO: Reservar todas las clases del paquete de forma consecutiva
+         * Seleccionar horario y reservar UNA clase
+         * El usuario debe elegir cada clase manualmente, respetando su elección de horarios
          */
         async function selectTimeSlot(dateStr, time) {
             const MAX_CAPACITY = 5;
-            const MAX_ATTEMPTS_MULTIPLIER = 3; // Allow up to 3x attempts to find consecutive dates (to handle Sundays and full slots)
             
             // Cerrar modal de selección de horario
             document.getElementById('time-selection-modal').style.display = 'none';
             
-            // Determinar cuántas clases necesitamos reservar
-            const classesToBook = selectedPlan.classes - selectedPlan.bookedClasses;
-            
-            if (classesToBook <= 0) {
+            // Verificar que no hayamos excedido el límite
+            if (selectedPlan.bookedClasses >= selectedPlan.classes) {
                 alert('✅ Ya has reservado todas las clases de tu plan.');
                 return;
             }
             
-            // Generar fechas consecutivas (saltando domingos)
-            const consecutiveDates = [];
-            let currentDate = new Date(dateStr + 'T00:00:00');
-            let attemptsLeft = classesToBook * MAX_ATTEMPTS_MULTIPLIER; // Límite de intentos para evitar bucles infinitos
+            // Verificar capacidad para este horario específico
+            const currentCount = await getReservationCountForTimeSlot(dateStr, time);
             
-            while (consecutiveDates.length < classesToBook && attemptsLeft > 0) {
-                attemptsLeft--;
-                
-                // Saltar domingos (día 0)
-                if (currentDate.getDay() !== 0) {
-                    const currentDateStr = currentDate.toISOString().split('T')[0];
-                    
-                    // Verificar capacidad para este horario
-                    const currentCount = await getReservationCountForTimeSlot(currentDateStr, time);
-                    
-                    if (currentCount < MAX_CAPACITY) {
-                        consecutiveDates.push({
-                            dateStr: currentDateStr,
-                            date: new Date(currentDate.getTime()) // Create independent date object to avoid mutation bugs when modifying currentDate
-                        });
-                    } else {
-                        // Si algún horario está lleno, notificar y abortar
-                        const dateFormatted = currentDate.toLocaleDateString('es-ES', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                        });
-                        alert(`⚠️ Lo sentimos, el horario del ${dateFormatted} a las ${formatTimeTo12Hour(time)} ya está completo.\n\nNo se pudieron reservar todas las clases consecutivas.\n\nPor favor, selecciona otro horario o fecha de inicio.`);
-                        // Reabrir modal de selección de horario
-                        showTimeSelectionModal(dateStr);
-                        return;
-                    }
-                }
-                
-                // Avanzar al siguiente día
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            
-            // Verificar que se encontraron suficientes fechas
-            if (consecutiveDates.length < classesToBook) {
-                alert(`⚠️ No se pudieron encontrar ${classesToBook} fechas consecutivas disponibles.\n\nPor favor, selecciona otra fecha de inicio.`);
+            if (currentCount >= MAX_CAPACITY) {
+                const date = new Date(dateStr + 'T00:00:00');
+                const dateFormatted = date.toLocaleDateString('es-ES', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                alert(`⚠️ Lo sentimos, el horario del ${dateFormatted} a las ${formatTimeTo12Hour(time)} ya está completo.\n\nPor favor, selecciona otro horario o fecha.`);
+                // Reabrir modal de selección de horario
                 showTimeSelectionModal(dateStr);
                 return;
             }
             
-            // Mostrar resumen de las clases que se reservarán
-            const classWord = classesToBook === 1 ? 'clase' : 'clases';
-            const consecutiveWord = classesToBook === 1 ? '' : ' consecutivas';
-            let summary = `📅 Se reservará${classesToBook === 1 ? '' : 'n'} ${classesToBook} ${classWord}${consecutiveWord}:\n\n`;
-            consecutiveDates.forEach((dateInfo, index) => {
-                const formatted = dateInfo.date.toLocaleDateString('es-ES', { 
-                    weekday: 'short', 
-                    day: 'numeric', 
-                    month: 'short' 
-                });
-                summary += `${index + 1}. ${formatted} a las ${formatTimeTo12Hour(time)}\n`;
-            });
-            summary += `\n¿Deseas continuar con ${classesToBook === 1 ? 'esta fecha' : 'estas fechas'}?`;
+            // NUEVO FLUJO: Reservar SOLO UNA clase a la vez
+            const dateTimeStr = `${dateStr}T${time}:00`;
             
-            if (!confirm(summary)) {
-                // Usuario canceló, volver a mostrar selector de horario
-                showTimeSelectionModal(dateStr);
-                return;
-            }
-            
-            // Guardar todas las fechas seleccionadas en selectedPlan
-            consecutiveDates.forEach((dateInfo) => {
-                const dateTimeStr = `${dateInfo.dateStr}T${time}:00`;
-                selectedPlan.bookedEvents.push({
-                    eventId: null, // Se asignará después
-                    fechaHora: dateTimeStr,
-                    dateStr: dateInfo.dateStr,
-                    time: time,
-                    tempAdded: false // Para marcar si ya se agregó al calendario visualmente
-                });
+            // Guardar esta fecha seleccionada en selectedPlan
+            selectedPlan.bookedEvents.push({
+                eventId: null, // Se asignará después
+                fechaHora: dateTimeStr,
+                dateStr: dateStr,
+                time: time,
+                tempAdded: false // Para marcar si ya se agregó al calendario visualmente
             });
             
-            selectedPlan.bookedClasses += classesToBook;
+            selectedPlan.bookedClasses += 1;
             
             // Establecer la primera fecha de clase si es necesario
             if (!selectedPlan.firstClassDate) {
-                selectedPlan.firstClassDate = new Date(consecutiveDates[0].dateStr + 'T00:00:00');
+                selectedPlan.firstClassDate = new Date(dateStr + 'T00:00:00');
                 selectedPlan.firstClassDate.setHours(0, 0, 0, 0);
                 localStorage.setItem('firstClassDate', selectedPlan.firstClassDate.toISOString());
                 updateCalendarValidRange(selectedPlan.firstClassDate);
             }
             
-            // Ahora mostrar el modal de confirmación UNA SOLA VEZ con todos los datos
+            // Ahora mostrar el modal de confirmación SOLO para esta clase
             showReservationModalForAllClasses();
         }
 
@@ -4848,8 +4805,8 @@
         const PHONE_DIGITS_LENGTH = 10;
         
         /**
-         * Mostrar modal de confirmación para TODAS las clases seleccionadas
-         * NUEVO FLUJO: Una sola confirmación después de seleccionar todas las clases consecutivas
+         * Mostrar modal de confirmación para las clases seleccionadas hasta ahora
+         * Muestra un resumen de todas las clases que el usuario ha elegido manualmente
          */
         function showReservationModalForAllClasses() {
             const modal = document.getElementById('reservation-modal');
@@ -5166,8 +5123,10 @@
                     proceedToPayment();
                 }, 1000);
             } else {
-                // Continuar seleccionando
-                alert(`✅ Clase agregada!\n\n📅 ${dateTime.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n🕐 ${dateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}\n\nClases seleccionadas: ${selectedPlan.bookedClasses}/${selectedPlan.classes}\nClases restantes: ${remaining}\n\nContinúa seleccionando tus clases en el calendario.`);
+                // Continuar seleccionando - Mostrar progreso con número de clase
+                const classNumber = selectedPlan.bookedClasses;
+                const nextClassNumber = selectedPlan.bookedClasses + 1;
+                alert(`✅ Clase ${classNumber}/${selectedPlan.classes} agregada!\n\n📅 ${dateTime.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n🕐 ${dateTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}\n\n➡️ Ahora selecciona tu Clase ${nextClassNumber}/${selectedPlan.classes}\n\nContinúa seleccionando en el calendario.`);
             }
         }
 
