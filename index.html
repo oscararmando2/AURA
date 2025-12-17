@@ -3056,14 +3056,14 @@
             <h2 style="color: #333; margin-bottom: 20px; font-size: 1.8rem; font-weight: 600; text-align: center;">Confirma tu Reserva</h2>
             
             <!-- Información del horario seleccionado -->
-            <div style="background: rgba(239, 233, 225, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(239, 233, 225, 0.3);">
+            <div style="background: rgba(239, 233, 225, 0.1); padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(239, 233, 225, 0.3); max-height: 250px; overflow-y: auto;">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                     <span style="font-size: 1.5rem;">📅</span>
                     <span id="reservation-date-display" style="color: #333; font-weight: 600; font-size: 1.1rem;"></span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
                     <span style="font-size: 1.5rem;">🕐</span>
-                    <span id="reservation-time-display" style="color: #666; font-weight: 500; font-size: 1.05rem;"></span>
+                    <span id="reservation-time-display" style="color: #666; font-weight: 500; font-size: 1.05rem; flex: 1;"></span>
                 </div>
             </div>
             
@@ -4733,34 +4733,114 @@
         }
 
         /**
-         * Seleccionar horario y mostrar modal de datos + pago
-         * NUEVO FLUJO: Pedir nombre y teléfono por cada reserva
+         * Seleccionar horario y reservar clases consecutivas automáticamente
+         * NUEVO FLUJO: Reservar todas las clases del paquete de forma consecutiva
          */
         async function selectTimeSlot(dateStr, time) {
             const MAX_CAPACITY = 5;
-            
-            // Verificar capacidad antes de continuar
-            const currentCount = await getReservationCountForTimeSlot(dateStr, time);
-            if (currentCount >= MAX_CAPACITY) {
-                alert(`⚠️ Lo sentimos, este horario ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nActualmente reservado: ${currentCount}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario.`);
-                return;
-            }
+            const MAX_ATTEMPTS_MULTIPLIER = 3; // Allow up to 3x attempts to find consecutive dates (to handle Sundays and full slots)
             
             // Cerrar modal de selección de horario
             document.getElementById('time-selection-modal').style.display = 'none';
             
-            // Crear fecha y hora en formato ISO
-            const dateTimeStr = `${dateStr}T${time}:00`;
-            const dateTime = new Date(dateTimeStr);
+            // Determinar cuántas clases necesitamos reservar
+            const classesToBook = selectedPlan.classes - selectedPlan.bookedClasses;
             
-            // Format date and time for display in modal
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const timeOptions = { hour: '2-digit', minute: '2-digit' };
-            const dateFormatted = dateTime.toLocaleDateString('es-ES', dateOptions);
-            const timeFormatted = dateTime.toLocaleTimeString('es-ES', timeOptions);
+            if (classesToBook <= 0) {
+                alert('✅ Ya has reservado todas las clases de tu plan.');
+                return;
+            }
             
-            // Mostrar modal de confirmación con datos del cliente
-            showReservationModal(dateStr, time, dateFormatted, timeFormatted, dateTimeStr);
+            // Generar fechas consecutivas (saltando domingos)
+            const consecutiveDates = [];
+            let currentDate = new Date(dateStr + 'T00:00:00');
+            let attemptsLeft = classesToBook * MAX_ATTEMPTS_MULTIPLIER; // Límite de intentos para evitar bucles infinitos
+            
+            while (consecutiveDates.length < classesToBook && attemptsLeft > 0) {
+                attemptsLeft--;
+                
+                // Saltar domingos (día 0)
+                if (currentDate.getDay() !== 0) {
+                    const currentDateStr = currentDate.toISOString().split('T')[0];
+                    
+                    // Verificar capacidad para este horario
+                    const currentCount = await getReservationCountForTimeSlot(currentDateStr, time);
+                    
+                    if (currentCount < MAX_CAPACITY) {
+                        consecutiveDates.push({
+                            dateStr: currentDateStr,
+                            date: new Date(currentDate.getTime()) // Create independent date object to avoid mutation bugs when modifying currentDate
+                        });
+                    } else {
+                        // Si algún horario está lleno, notificar y abortar
+                        const dateFormatted = currentDate.toLocaleDateString('es-ES', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                        });
+                        alert(`⚠️ Lo sentimos, el horario del ${dateFormatted} a las ${formatTimeTo12Hour(time)} ya está completo.\n\nNo se pudieron reservar todas las clases consecutivas.\n\nPor favor, selecciona otro horario o fecha de inicio.`);
+                        // Reabrir modal de selección de horario
+                        showTimeSelectionModal(dateStr);
+                        return;
+                    }
+                }
+                
+                // Avanzar al siguiente día
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            // Verificar que se encontraron suficientes fechas
+            if (consecutiveDates.length < classesToBook) {
+                alert(`⚠️ No se pudieron encontrar ${classesToBook} fechas consecutivas disponibles.\n\nPor favor, selecciona otra fecha de inicio.`);
+                showTimeSelectionModal(dateStr);
+                return;
+            }
+            
+            // Mostrar resumen de las clases que se reservarán
+            const classWord = classesToBook === 1 ? 'clase' : 'clases';
+            const consecutiveWord = classesToBook === 1 ? '' : ' consecutivas';
+            let summary = `📅 Se reservará${classesToBook === 1 ? '' : 'n'} ${classesToBook} ${classWord}${consecutiveWord}:\n\n`;
+            consecutiveDates.forEach((dateInfo, index) => {
+                const formatted = dateInfo.date.toLocaleDateString('es-ES', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short' 
+                });
+                summary += `${index + 1}. ${formatted} a las ${formatTimeTo12Hour(time)}\n`;
+            });
+            summary += `\n¿Deseas continuar con ${classesToBook === 1 ? 'esta fecha' : 'estas fechas'}?`;
+            
+            if (!confirm(summary)) {
+                // Usuario canceló, volver a mostrar selector de horario
+                showTimeSelectionModal(dateStr);
+                return;
+            }
+            
+            // Guardar todas las fechas seleccionadas en selectedPlan
+            consecutiveDates.forEach((dateInfo) => {
+                const dateTimeStr = `${dateInfo.dateStr}T${time}:00`;
+                selectedPlan.bookedEvents.push({
+                    eventId: null, // Se asignará después
+                    fechaHora: dateTimeStr,
+                    dateStr: dateInfo.dateStr,
+                    time: time,
+                    tempAdded: false // Para marcar si ya se agregó al calendario visualmente
+                });
+            });
+            
+            selectedPlan.bookedClasses += classesToBook;
+            
+            // Establecer la primera fecha de clase si es necesario
+            if (!selectedPlan.firstClassDate) {
+                selectedPlan.firstClassDate = new Date(consecutiveDates[0].dateStr + 'T00:00:00');
+                selectedPlan.firstClassDate.setHours(0, 0, 0, 0);
+                localStorage.setItem('firstClassDate', selectedPlan.firstClassDate.toISOString());
+                updateCalendarValidRange(selectedPlan.firstClassDate);
+            }
+            
+            // Ahora mostrar el modal de confirmación UNA SOLA VEZ con todos los datos
+            showReservationModalForAllClasses();
         }
 
         // Constants for phone number handling
@@ -4768,8 +4848,177 @@
         const PHONE_DIGITS_LENGTH = 10;
         
         /**
+         * Mostrar modal de confirmación para TODAS las clases seleccionadas
+         * NUEVO FLUJO: Una sola confirmación después de seleccionar todas las clases consecutivas
+         */
+        function showReservationModalForAllClasses() {
+            const modal = document.getElementById('reservation-modal');
+            const dateDisplay = document.getElementById('reservation-date-display');
+            const timeDisplay = document.getElementById('reservation-time-display');
+            const nameInput = document.getElementById('reservation-name');
+            const phoneInput = document.getElementById('reservation-phone');
+            const progressDisplay = document.getElementById('reservation-progress');
+            const confirmBtn = document.getElementById('reservation-confirm');
+            const cancelBtn = document.getElementById('reservation-cancel');
+            
+            // Construir resumen de todas las clases seleccionadas
+            let datesSummary = '';
+            selectedPlan.bookedEvents.forEach((event, index) => {
+                const dateTime = new Date(event.fechaHora);
+                const dateFormatted = dateTime.toLocaleDateString('es-ES', { 
+                    weekday: 'short', 
+                    day: 'numeric', 
+                    month: 'short' 
+                });
+                const timeFormatted = dateTime.toLocaleTimeString('es-ES', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                datesSummary += `${index + 1}. ${dateFormatted} - ${timeFormatted}\n`;
+            });
+            
+            // Mostrar el resumen completo
+            const classWord = selectedPlan.bookedClasses === 1 ? 'clase seleccionada' : 'clases seleccionadas';
+            dateDisplay.textContent = `${selectedPlan.bookedClasses} ${classWord}`;
+            
+            // Use textContent to avoid XSS vulnerabilities
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.whiteSpace = 'pre-line';
+            summaryDiv.style.textAlign = 'left';
+            summaryDiv.style.fontSize = '0.95rem';
+            summaryDiv.textContent = datesSummary;
+            timeDisplay.innerHTML = ''; // Clear existing content
+            timeDisplay.appendChild(summaryDiv);
+            
+            // Mostrar progreso
+            progressDisplay.textContent = `${selectedPlan.bookedClasses} de ${selectedPlan.classes} clases seleccionadas`;
+            
+            // Pre-llenar con datos si ya están en localStorage
+            const savedName = localStorage.getItem('userNombre') || '';
+            const savedPhone = localStorage.getItem('userTelefono') || '';
+            nameInput.value = savedName;
+            if (savedPhone.startsWith(MEXICO_COUNTRY_CODE) && savedPhone.length > MEXICO_COUNTRY_CODE.length) {
+                phoneInput.value = savedPhone.substring(MEXICO_COUNTRY_CODE.length);
+            } else {
+                phoneInput.value = savedPhone;
+            }
+            
+            // Event handlers
+            confirmBtn.onclick = () => {
+                confirmAllReservations();
+            };
+            
+            cancelBtn.onclick = () => {
+                // Cancelar todas las reservas temporales
+                if (confirm('¿Deseas cancelar la reserva de estas clases?')) {
+                    selectedPlan.bookedEvents = [];
+                    selectedPlan.bookedClasses = 0;
+                    selectedPlan.firstClassDate = null;
+                    localStorage.removeItem('firstClassDate');
+                    modal.style.display = 'none';
+                    document.body.style.overflow = '';
+                    updateCalendarInfo();
+                }
+            };
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            nameInput.focus();
+        }
+        
+        /**
+         * Confirmar todas las reservas y agregar eventos al calendario
+         */
+        function confirmAllReservations() {
+            const nameInput = document.getElementById('reservation-name');
+            const phoneInput = document.getElementById('reservation-phone');
+            
+            const nombre = nameInput.value.trim();
+            const phoneDigits = phoneInput.value.trim().replace(/\D/g, '');
+            
+            // Validar campos
+            if (!nombre) {
+                alert('⚠️ Por favor ingresa tu nombre completo');
+                nameInput.focus();
+                return;
+            }
+            
+            if (phoneDigits.length !== PHONE_DIGITS_LENGTH) {
+                alert(`⚠️ Por favor ingresa ${PHONE_DIGITS_LENGTH} dígitos de teléfono (sin espacios ni guiones)`);
+                phoneInput.focus();
+                return;
+            }
+            
+            const telefono = MEXICO_COUNTRY_CODE + phoneDigits;
+            
+            // Guardar datos del cliente
+            localStorage.setItem('userNombre', nombre);
+            localStorage.setItem('userTelefono', telefono);
+            
+            selectedPlan.userInfo = {
+                nombre: nombre,
+                telefono: telefono,
+                notas: ''
+            };
+            
+            // Agregar todos los eventos al calendario
+            let eventCounter = 0;
+            selectedPlan.bookedEvents.forEach((booking) => {
+                if (!booking.tempAdded) {
+                    const dateTime = new Date(booking.fechaHora);
+                    const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
+                    
+                    const eventId = `temp-${Date.now()}-${eventCounter++}`;
+                    booking.eventId = eventId;
+                    booking.nombre = nombre;
+                    booking.telefono = telefono;
+                    booking.tempAdded = true;
+                    
+                    calendar.addEvent({
+                        id: eventId,
+                        title: `✓ ${nombre}`,
+                        start: dateTime,
+                        end: endDateTime,
+                        backgroundColor: '#EFE9E1',
+                        borderColor: '#EFE9E1',
+                        textColor: '#333',
+                        extendedProps: {
+                            fechaHora: booking.fechaHora,
+                            temporal: true,
+                            nombre: nombre,
+                            telefono: telefono
+                        }
+                    });
+                }
+            });
+            
+            // Cerrar modal
+            document.getElementById('reservation-modal').style.display = 'none';
+            document.body.style.overflow = '';
+            
+            // Guardar estado en localStorage
+            localStorage.setItem('reservationState', JSON.stringify({
+                reservations: selectedPlan.bookedEvents,
+                userInfo: selectedPlan.userInfo,
+                firstClassDate: selectedPlan.firstClassDate ? selectedPlan.firstClassDate.toISOString() : null
+            }));
+            
+            // Actualizar información del calendario
+            updateCalendarInfo();
+            
+            // Mostrar mensaje de éxito y proceder al pago
+            alert(`✅ ¡Has seleccionado todas tus ${selectedPlan.classes} clases!\n\nAhora serás redirigido al pago...`);
+            
+            // Proceder al pago
+            setTimeout(() => {
+                proceedToPayment();
+            }, 1000);
+        }
+        
+        /**
          * Mostrar modal de confirmación de reserva con datos del cliente
-         * NUEVO FLUJO: Pedir nombre y teléfono por cada horario
+         * FLUJO ANTIGUO: Pedir nombre y teléfono por cada horario (mantenido para compatibilidad)
          */
         function showReservationModal(dateStr, time, dateFormatted, timeFormatted, dateTimeStr) {
             const modal = document.getElementById('reservation-modal');
