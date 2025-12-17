@@ -4769,7 +4769,7 @@
                     if (currentCount < MAX_CAPACITY) {
                         consecutiveDates.push({
                             dateStr: currentDateStr,
-                            date: new Date(currentDate.getTime()) // Create independent date object
+                            date: new Date(currentDate.getTime()) // Create independent date object to avoid mutation bugs when modifying currentDate
                         });
                     } else {
                         // Si algún horario está lleno, notificar y abortar
@@ -4880,7 +4880,15 @@
             // Mostrar el resumen completo
             const classWord = selectedPlan.bookedClasses === 1 ? 'clase seleccionada' : 'clases seleccionadas';
             dateDisplay.textContent = `${selectedPlan.bookedClasses} ${classWord}`;
-            timeDisplay.innerHTML = `<div style="white-space: pre-line; text-align: left; font-size: 0.95rem;">${datesSummary}</div>`;
+            
+            // Use textContent to avoid XSS vulnerabilities
+            const summaryDiv = document.createElement('div');
+            summaryDiv.style.whiteSpace = 'pre-line';
+            summaryDiv.style.textAlign = 'left';
+            summaryDiv.style.fontSize = '0.95rem';
+            summaryDiv.textContent = datesSummary;
+            timeDisplay.innerHTML = ''; // Clear existing content
+            timeDisplay.appendChild(summaryDiv);
             
             // Mostrar progreso
             progressDisplay.textContent = `${selectedPlan.bookedClasses} de ${selectedPlan.classes} clases seleccionadas`;
