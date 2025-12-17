@@ -4030,6 +4030,7 @@
             localStorage.removeItem('tempReservations');
             localStorage.removeItem('tempPlanClasses');
             localStorage.removeItem('tempPlanPrice');
+            localStorage.removeItem('firstClassDate'); // Limpiar fecha de primera clase
             
             // Guardar plan seleccionado en localStorage (sobrevive al reload)
             localStorage.setItem('tempPlanClasses', classes);
@@ -4040,6 +4041,7 @@
             selectedPlan.bookedClasses = 0;
             selectedPlan.bookedEvents = [];
             selectedPlan.userInfo = null;
+            selectedPlan.firstClassDate = null; // Reset first class date
 
             // Show calendar immediately WITHOUT requiring login
             const calendarContainer = document.getElementById('calendar-container');
@@ -4078,12 +4080,91 @@
         // Mantener referencia local para compatibilidad
         const selectPlan = window.selectPlan;
 
+        /**
+         * Calcular días hábiles desde una fecha dada
+         * @param {Date} startDate - Fecha de inicio
+         * @param {number} businessDays - Número de días hábiles a agregar
+         * @returns {Date} Fecha final después de agregar días hábiles
+         */
+        function addBusinessDays(startDate, businessDays) {
+            let currentDate = new Date(startDate);
+            let daysAdded = 0;
+            
+            while (daysAdded < businessDays) {
+                currentDate.setDate(currentDate.getDate() + 1);
+                // Saltar domingos (0) - los domingos no cuentan como días hábiles
+                if (currentDate.getDay() !== 0) {
+                    daysAdded++;
+                }
+            }
+            
+            return currentDate;
+        }
+
+        /**
+         * Calcular la fecha de expiración según el paquete seleccionado
+         * @param {Date} firstClassDate - Fecha de la primera clase
+         * @param {number} classes - Número de clases del paquete
+         * @returns {Date} Fecha de expiración
+         */
+        function calculateExpirationDate(firstClassDate, classes) {
+            // Para paquetes de 4 y 8 clases: 15 días hábiles
+            if (classes === 4 || classes === 8) {
+                return addBusinessDays(firstClassDate, 15);
+            }
+            // Para paquetes de 12 y 15 clases: 30 días calendario
+            else if (classes === 12 || classes === 15) {
+                const expirationDate = new Date(firstClassDate);
+                expirationDate.setDate(expirationDate.getDate() + 30);
+                return expirationDate;
+            }
+            // Para otros paquetes, usar lógica por defecto (30 días)
+            else {
+                const expirationDate = new Date(firstClassDate);
+                expirationDate.setDate(expirationDate.getDate() + 30);
+                return expirationDate;
+            }
+        }
+
+        /**
+         * Actualizar el validRange del calendario según la primera clase seleccionada
+         * @param {Date} firstClassDate - Fecha de la primera clase seleccionada
+         */
+        function updateCalendarValidRange(firstClassDate) {
+            if (!calendar) return;
+            
+            const expirationDate = calculateExpirationDate(firstClassDate, selectedPlan.classes);
+            
+            // Configurar el rango válido del calendario
+            calendar.setOption('validRange', {
+                start: new Date(), // Hoy como mínimo
+                end: expirationDate // Hasta la fecha de expiración
+            });
+            
+            console.log(`📅 Rango del calendario actualizado: hasta ${expirationDate.toLocaleDateString('es-ES')}`);
+            
+            // Mostrar mensaje informativo al usuario
+            const daysType = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 'días hábiles' : 'días';
+            const daysCount = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 15 : 30;
+            alert(`📅 Importante: Tienes ${daysCount} ${daysType} desde tu primera clase (${firstClassDate.toLocaleDateString('es-ES')}) para completar todas tus clases.\n\nFecha límite: ${expirationDate.toLocaleDateString('es-ES')}`);
+        }
+
         // Función para actualizar el mensaje informativo del calendario
         function updateCalendarInfo() {
             const infoDiv = document.querySelector('.calendar-info h3');
             if (infoDiv && selectedPlan.classes > 0) {
                 const remaining = selectedPlan.classes - selectedPlan.bookedClasses;
-                infoDiv.innerHTML = `📅 Selecciona tus Clases (${selectedPlan.bookedClasses}/${selectedPlan.classes} seleccionadas, ${remaining} restantes)`;
+                let infoText = `📅 Selecciona tus Clases (${selectedPlan.bookedClasses}/${selectedPlan.classes} seleccionadas, ${remaining} restantes)`;
+                
+                // Si hay una primera clase seleccionada, mostrar la fecha de expiración
+                if (selectedPlan.firstClassDate) {
+                    const expirationDate = calculateExpirationDate(selectedPlan.firstClassDate, selectedPlan.classes);
+                    const daysType = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 'días hábiles' : 'días';
+                    const daysCount = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 15 : 30;
+                    infoText += `<br><small style="color: #666;">⏰ Tienes hasta el ${expirationDate.toLocaleDateString('es-ES')} (${daysCount} ${daysType})</small>`;
+                }
+                
+                infoDiv.innerHTML = infoText;
             }
         }
 
@@ -4401,6 +4482,47 @@
                         event.remove();
                         selectedPlan.bookedClasses--;
                         selectedPlan.bookedEvents.splice(userEventIndex, 1);
+                        
+                        // Si se eliminaron todas las clases, resetear el rango del calendario
+                        if (selectedPlan.bookedClasses === 0) {
+                            selectedPlan.firstClassDate = null;
+                            localStorage.removeItem('firstClassDate');
+                            
+                            // Restaurar validRange a solo "desde hoy"
+                            if (calendar) {
+                                calendar.setOption('validRange', {
+                                    start: new Date()
+                                });
+                            }
+                            console.log('📅 Rango del calendario restaurado (sin límite de expiración)');
+                        } else {
+                            // Si aún hay clases, recalcular la primera clase
+                            // Encontrar la clase más temprana
+                            let earliestDate = null;
+                            selectedPlan.bookedEvents.forEach(booking => {
+                                const bookingDate = new Date(booking.fechaHora);
+                                if (!earliestDate || bookingDate < earliestDate) {
+                                    earliestDate = bookingDate;
+                                }
+                            });
+                            
+                            if (earliestDate) {
+                                earliestDate.setHours(0, 0, 0, 0); // Normalizar a medianoche
+                                selectedPlan.firstClassDate = earliestDate;
+                                localStorage.setItem('firstClassDate', earliestDate.toISOString());
+                                
+                                // Actualizar el rango del calendario
+                                const expirationDate = calculateExpirationDate(earliestDate, selectedPlan.classes);
+                                if (calendar) {
+                                    calendar.setOption('validRange', {
+                                        start: new Date(),
+                                        end: expirationDate
+                                    });
+                                }
+                                console.log(`📅 Primera clase actualizada a: ${earliestDate.toLocaleDateString('es-ES')}`);
+                            }
+                        }
+                        
                         // Actualizar localStorage
                         saveTempReservations();
                         updateCalendarInfo();
@@ -4698,6 +4820,16 @@
             const dateTime = new Date(dateTimeStr);
             const endDateTime = new Date(dateTime.getTime() + 60 * 60 * 1000); // +1 hora
             
+            // Si es la primera clase, establecer la fecha y actualizar el rango del calendario
+            if (selectedPlan.bookedClasses === 0) {
+                selectedPlan.firstClassDate = new Date(dateTime);
+                selectedPlan.firstClassDate.setHours(0, 0, 0, 0); // Normalizar a medianoche
+                localStorage.setItem('firstClassDate', selectedPlan.firstClassDate.toISOString());
+                
+                // Actualizar el rango válido del calendario
+                updateCalendarValidRange(selectedPlan.firstClassDate);
+            }
+            
             // Agregar evento al calendario temporalmente
             const eventId = `temp-${Date.now()}`;
             calendar.addEvent({
@@ -4752,7 +4884,8 @@
         function saveTempReservations() {
             const tempData = {
                 reservations: selectedPlan.bookedEvents,
-                userInfo: selectedPlan.userInfo
+                userInfo: selectedPlan.userInfo,
+                firstClassDate: selectedPlan.firstClassDate ? selectedPlan.firstClassDate.toISOString() : null
             };
             localStorage.setItem('tempReservations', JSON.stringify(tempData));
             console.log('💾 Reservas temporales guardadas en localStorage');
