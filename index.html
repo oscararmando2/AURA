@@ -4083,7 +4083,7 @@
         /**
          * Calcular días hábiles desde una fecha dada
          * @param {Date} startDate - Fecha de inicio
-         * @param {number} businessDays - Número de días hábiles a agregar
+         * @param {number} businessDays - Número de días hábiles a agregar (puede ser 0)
          * @returns {Date} Fecha final después de agregar días hábiles
          */
         function addBusinessDays(startDate, businessDays) {
@@ -4092,7 +4092,7 @@
                 throw new Error('startDate debe ser un objeto Date válido');
             }
             if (typeof businessDays !== 'number' || businessDays < 0 || !Number.isInteger(businessDays)) {
-                throw new Error('businessDays debe ser un número entero positivo');
+                throw new Error('businessDays debe ser un número entero no negativo');
             }
             
             let currentDate = new Date(startDate);
@@ -4112,7 +4112,7 @@
         /**
          * Calcular la fecha de expiración según el paquete seleccionado
          * @param {Date} firstClassDate - Fecha de la primera clase
-         * @param {number} classes - Número de clases del paquete
+         * @param {number} classes - Número de clases del paquete (esperados: 4, 8, 12, 15)
          * @returns {Date} Fecha de expiración
          */
         function calculateExpirationDate(firstClassDate, classes) {
@@ -4120,7 +4120,8 @@
             if (classes === 4 || classes === 8) {
                 return addBusinessDays(firstClassDate, 15);
             }
-            // Para otros paquetes (incluyendo 12 y 15): 30 días calendario
+            // Para paquetes de 12, 15, o cualquier otro tamaño: 30 días calendario
+            // Nota: Los paquetes estándar son 4, 8, 12, y 15 clases
             else {
                 const expirationDate = new Date(firstClassDate);
                 expirationDate.setDate(expirationDate.getDate() + 30);
