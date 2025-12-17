@@ -4087,6 +4087,14 @@
          * @returns {Date} Fecha final después de agregar días hábiles
          */
         function addBusinessDays(startDate, businessDays) {
+            // Validación de entrada
+            if (!startDate || !(startDate instanceof Date) || isNaN(startDate.getTime())) {
+                throw new Error('startDate debe ser un objeto Date válido');
+            }
+            if (typeof businessDays !== 'number' || businessDays < 0 || !Number.isInteger(businessDays)) {
+                throw new Error('businessDays debe ser un número entero positivo');
+            }
+            
             let currentDate = new Date(startDate);
             let daysAdded = 0;
             
@@ -4112,17 +4120,24 @@
             if (classes === 4 || classes === 8) {
                 return addBusinessDays(firstClassDate, 15);
             }
-            // Para paquetes de 12 y 15 clases: 30 días calendario
-            else if (classes === 12 || classes === 15) {
-                const expirationDate = new Date(firstClassDate);
-                expirationDate.setDate(expirationDate.getDate() + 30);
-                return expirationDate;
-            }
-            // Para otros paquetes, usar lógica por defecto (30 días)
+            // Para otros paquetes (incluyendo 12 y 15): 30 días calendario
             else {
                 const expirationDate = new Date(firstClassDate);
                 expirationDate.setDate(expirationDate.getDate() + 30);
                 return expirationDate;
+            }
+        }
+
+        /**
+         * Obtener información de plazo según número de clases
+         * @param {number} classes - Número de clases del paquete
+         * @returns {Object} Objeto con daysType y daysCount
+         */
+        function getExpirationInfo(classes) {
+            if (classes === 4 || classes === 8) {
+                return { daysType: 'días hábiles', daysCount: 15 };
+            } else {
+                return { daysType: 'días', daysCount: 30 };
             }
         }
 
@@ -4134,6 +4149,7 @@
             if (!calendar) return;
             
             const expirationDate = calculateExpirationDate(firstClassDate, selectedPlan.classes);
+            const { daysType, daysCount } = getExpirationInfo(selectedPlan.classes);
             
             // Configurar el rango válido del calendario
             calendar.setOption('validRange', {
@@ -4144,9 +4160,11 @@
             console.log(`📅 Rango del calendario actualizado: hasta ${expirationDate.toLocaleDateString('es-ES')}`);
             
             // Mostrar mensaje informativo al usuario
-            const daysType = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 'días hábiles' : 'días';
-            const daysCount = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 15 : 30;
-            alert(`📅 Importante: Tienes ${daysCount} ${daysType} desde tu primera clase (${firstClassDate.toLocaleDateString('es-ES')}) para completar todas tus clases.\n\nFecha límite: ${expirationDate.toLocaleDateString('es-ES')}`);
+            showCustomAlert(
+                `Tienes ${daysCount} ${daysType} desde tu primera clase (${firstClassDate.toLocaleDateString('es-ES')}) para completar todas tus clases.\n\nFecha límite: ${expirationDate.toLocaleDateString('es-ES')}`,
+                'info',
+                '📅 Importante'
+            );
         }
 
         // Función para actualizar el mensaje informativo del calendario
@@ -4159,8 +4177,7 @@
                 // Si hay una primera clase seleccionada, mostrar la fecha de expiración
                 if (selectedPlan.firstClassDate) {
                     const expirationDate = calculateExpirationDate(selectedPlan.firstClassDate, selectedPlan.classes);
-                    const daysType = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 'días hábiles' : 'días';
-                    const daysCount = (selectedPlan.classes === 4 || selectedPlan.classes === 8) ? 15 : 30;
+                    const { daysType, daysCount } = getExpirationInfo(selectedPlan.classes);
                     infoText += `<br><small style="color: #666;">⏰ Tienes hasta el ${expirationDate.toLocaleDateString('es-ES')} (${daysCount} ${daysType})</small>`;
                 }
                 
