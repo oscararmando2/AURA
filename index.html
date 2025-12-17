@@ -4742,8 +4742,8 @@
         }
 
         /**
-         * Seleccionar horario y reservar clases consecutivas automáticamente
-         * NUEVO FLUJO: Reservar todas las clases del paquete de forma consecutiva
+         * Seleccionar horario y reservar UNA clase
+         * El usuario debe elegir cada clase manualmente, respetando su elección de horarios
          */
         async function selectTimeSlot(dateStr, time) {
             const MAX_CAPACITY = 5;
@@ -4805,8 +4805,8 @@
         const PHONE_DIGITS_LENGTH = 10;
         
         /**
-         * Mostrar modal de confirmación para TODAS las clases seleccionadas
-         * NUEVO FLUJO: Una sola confirmación después de seleccionar todas las clases consecutivas
+         * Mostrar modal de confirmación para las clases seleccionadas hasta ahora
+         * Muestra un resumen de todas las clases que el usuario ha elegido manualmente
          */
         function showReservationModalForAllClasses() {
             const modal = document.getElementById('reservation-modal');
