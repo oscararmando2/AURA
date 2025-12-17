@@ -4629,8 +4629,6 @@
             // Horarios de tarde: 5:00 PM - 7:00 PM (en orden)
             const eveningSlots = ['17:00', '18:00', '19:00'];
             
-            console.log('📋 Generando horarios - Mañana:', morningSlots.length, 'slots, Tarde:', eveningSlots.length, 'slots');
-            
             // Agregar horarios de mañana
             const morningTitle = document.createElement('div');
             morningTitle.className = 'time-section-title morning-title';
@@ -4663,8 +4661,6 @@
                 slotsContainer.appendChild(button);
             }
             
-            console.log('✅ Horarios generados correctamente: Total', slotsContainer.children.length, 'elementos');
-            
             // Mostrar modal
             modal.style.display = 'flex';
             document.body.style.overflow = 'hidden'; // Prevent background scrolling
@@ -4687,9 +4683,7 @@
             const [hours, minutes] = time.split(':').map(Number);
             const period = hours >= 12 ? 'PM' : 'AM';
             const hour12 = hours % 12 || 12;
-            const formattedTime = `${hour12} ${period}`;
-            console.log(`🕐 Formato: ${time} -> ${formattedTime}`);
-            return formattedTime;
+            return `${hour12} ${period}`;
         }
 
         /**
