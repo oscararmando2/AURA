@@ -244,8 +244,8 @@ Potential improvements:
 
 ## Maintenance Notes
 
-- Studio WhatsApp number: Update at line 7279 if needed
+- Studio WhatsApp number: Update at line 7258 if needed
 - Date format: Modify `formatDateToSpanish()` for different formats
-- Message template: Edit in `generateWhatsAppMessage()` line 7229-7235
-- Button styling: Update CSS at lines 1575-1642
-- Modal styling: Update inline styles at line 8008-8069
+- Message template: Edit in `generateWhatsAppMessage()` lines 7215-7221
+- Button styling: Update CSS at lines 1564-1631
+- Modal styling: Update inline styles at lines 7994-8063
