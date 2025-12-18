@@ -7306,7 +7306,12 @@
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('📱 WhatsApp button clicked', { userTelefono, userName });
-                await sendWhatsAppMessage(userTelefono, userName);
+                try {
+                    await sendWhatsAppMessage(userTelefono, userName);
+                } catch (error) {
+                    console.error('❌ Error in button click handler:', error);
+                    showCustomAlert('Error al abrir WhatsApp. Por favor, intenta nuevamente.', 'error', 'Error');
+                }
             });
             return button;
         }
@@ -8082,10 +8087,16 @@
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('📱 Enviar mis clases button clicked', { telefono, nombre });
-                // Send WhatsApp message with class schedule
-                await sendWhatsAppMessage(telefono, nombre);
-                // Close modal after sending
-                modal.remove();
+                try {
+                    // Send WhatsApp message with class schedule
+                    await sendWhatsAppMessage(telefono, nombre);
+                    // Close modal after successful send
+                    modal.remove();
+                } catch (error) {
+                    console.error('❌ Error sending WhatsApp message:', error);
+                    // Don't close modal if there was an error
+                    // Error is already shown by sendWhatsAppMessage function
+                }
             });
             
             // Close on background click
