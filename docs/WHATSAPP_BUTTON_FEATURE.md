@@ -12,7 +12,7 @@ After successful payment, users see a custom modal with:
 - Large WhatsApp button to share schedule
 - Close button
 
-**Location:** Appears automatically after payment completion (line 7950)
+**Location:** Appears automatically after payment completion (line 7948)
 
 ### 2. WhatsApp Button in "Mis Clases" Section
 For logged-in users viewing their classes:
@@ -20,7 +20,7 @@ For logged-in users viewing their classes:
 - Only shown when user has reservations
 - Uses same styling as payment success button
 
-**Location:** HTML line 3424, Logic line 7126-7142
+**Location:** HTML line 3413, Logic line 7118-7134
 
 ### 3. Personalized WhatsApp Message
 The button generates a message with:
@@ -99,16 +99,14 @@ Converts ISO date format to Spanish readable format
 
 ### Query Used
 ```javascript
-const q = query(collection(db, 'reservas'));
+// Efficient server-side filtering
+const q = query(collection(db, 'reservas'), where('telefono', '==', userTelefonoTrimmed));
 const querySnapshot = await getDocs(q);
 
-// Filter client-side by telefono
+// Collect all matching reservations
 const userReservations = [];
 querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    if (data.telefono && data.telefono.trim() === userTelefono.trim()) {
-        userReservations.push({ id: doc.id, ...data });
-    }
+    userReservations.push({ id: doc.id, ...doc.data() });
 });
 ```
 
