@@ -1,7 +1,7 @@
 # Fix: WhatsApp Button Not Sending
 
 ## Problem Statement (Spanish)
-> cuando dan click en enviar por ewhatsapp no funcionan los botones, no envia nada
+> cuando dan click en enviar por whatsapp no funcionan los botones, no envia nada
 
 **Translation:** When they click send by WhatsApp, the buttons don't work, it doesn't send anything.
 
@@ -157,7 +157,7 @@ sendBtn.addEventListener('click', async (e) => {
 - `index.html` (2 locations)
   - Line ~7297: Added `button.type = 'button'`
   - Line ~7304-7313: Changed to addEventListener with error handling
-  - Line ~8045: Added `type="button"` to modal button
+  - Line ~8057: Added `type="button"` to modal button
   - Line ~8081-8094: Enhanced event handler with error handling
 
 ## Browser Console Messages
