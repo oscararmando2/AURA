@@ -7299,6 +7299,9 @@
             }
         }
         
+        // Expose sendWhatsAppMessage to window for access from dynamically created buttons
+        window.sendWhatsAppMessage = sendWhatsAppMessage;
+        
         /**
          * Create WhatsApp button element
          * @param {string} userTelefono - User's phone number
@@ -8103,7 +8106,16 @@
                 console.log('📱 Enviar mis clases button clicked', { telefono, nombre });
                 try {
                     // Send WhatsApp message with class schedule
-                    await sendWhatsAppMessage(telefono, nombre);
+                    if (typeof window.sendWhatsAppMessage === 'function') {
+                        await window.sendWhatsAppMessage(telefono, nombre);
+                    } else {
+                        console.error('❌ sendWhatsAppMessage function not available yet');
+                        // Fallback: open WhatsApp directly without class details
+                        const studioNumber = '527151596586';
+                        const mensaje = `Hola, soy ${nombre}. Acabo de completar mi pago y me gustaría recibir el detalle de mis clases.`;
+                        const whatsappUrl = `https://wa.me/${studioNumber}?text=${encodeURIComponent(mensaje)}`;
+                        window.open(whatsappUrl, '_blank');
+                    }
                     // Close modal after successful send
                     modal.remove();
                 } catch (error) {
@@ -8130,6 +8142,9 @@
                 sendBtn.style.boxShadow = '0 4px 15px rgba(37, 211, 102, 0.3)';
             });
         }
+        
+        // Expose showPaymentSuccessWithWhatsApp to window for debugging and testing
+        window.showPaymentSuccessWithWhatsApp = showPaymentSuccessWithWhatsApp;
 
         // Ejecutar al cargar
         document.addEventListener('DOMContentLoaded', detectarRetorno);
