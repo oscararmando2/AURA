@@ -7198,10 +7198,14 @@
                 console.log(`📱 Generando mensaje de WhatsApp para: ${userName} (${userTelefono})`);
                 
                 // Wait for Firebase to be ready
-                if (!window.firebaseReady || !window.db) {
+                if (!window.firebaseReady || !window.db || !window.firestoreExports) {
                     console.error('❌ Firebase no está listo');
                     return null;
                 }
+                
+                // Get Firestore functions from global exports
+                const { query, collection, where, getDocs } = window.firestoreExports;
+                const db = window.db;
                 
                 // Normalize telefono
                 const userTelefonoTrimmed = userTelefono.trim();
@@ -7249,6 +7253,7 @@
                 return mensaje;
             } catch (error) {
                 console.error('❌ Error al generar mensaje de WhatsApp:', error);
+                console.error('Error details:', error.message, error.stack);
                 return null;
             }
         }
