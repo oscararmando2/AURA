@@ -7198,10 +7198,14 @@
                 console.log(`📱 Generando mensaje de WhatsApp para: ${userName} (${userTelefono})`);
                 
                 // Wait for Firebase to be ready
-                if (!window.firebaseReady || !window.db) {
+                if (!window.firebaseReady || !window.db || !window.firestoreExports) {
                     console.error('❌ Firebase no está listo');
                     return null;
                 }
+                
+                // Get Firestore functions from global exports
+                const { query, collection, where, getDocs } = window.firestoreExports;
+                const db = window.db;
                 
                 // Normalize telefono
                 const userTelefonoTrimmed = userTelefono.trim();
@@ -7249,6 +7253,7 @@
                 return mensaje;
             } catch (error) {
                 console.error('❌ Error al generar mensaje de WhatsApp:', error);
+                console.error('Error details:', error.message, error.stack);
                 return null;
             }
         }
@@ -7260,13 +7265,18 @@
          */
         async function sendWhatsAppMessage(userTelefono, userName) {
             try {
+                console.log('📱 Iniciando envío de WhatsApp para:', userName, userTelefono);
+                
                 // Generate message with real data from Firebase
                 const mensaje = await generateWhatsAppMessage(userTelefono, userName);
                 
                 if (!mensaje) {
+                    console.warn('⚠️ No se pudo generar el mensaje (sin clases o error de Firebase)');
                     showCustomAlert('No se pudieron cargar tus clases.\n\nPor favor, intenta más tarde o contacta con soporte.', 'warning', 'Atención');
-                    return;
+                    return false; // Return false to indicate failure
                 }
+                
+                console.log('✅ Mensaje generado correctamente');
                 
                 // Studio WhatsApp number
                 const studioNumber = '527151596586'; // +52 7151596586
@@ -7276,12 +7286,16 @@
                 
                 // Open WhatsApp
                 const whatsappUrl = `https://wa.me/${studioNumber}?text=${mensajeEncoded}`;
+                console.log('🔗 Abriendo WhatsApp con URL:', whatsappUrl.substring(0, 100) + '...');
                 window.open(whatsappUrl, '_blank');
                 
                 console.log('✅ WhatsApp abierto con mensaje personalizado');
+                return true; // Return true to indicate success
             } catch (error) {
                 console.error('❌ Error al abrir WhatsApp:', error);
+                console.error('Error details:', error.message, error.stack);
                 showCustomAlert('Error al abrir WhatsApp. Por favor, intenta nuevamente.', 'error', 'Error');
+                return false; // Return false to indicate failure
             }
         }
         
@@ -7301,6 +7315,7 @@
                 </svg>
                 Recibir mi rol de clases por WhatsApp
             `;
+            button.addEventListener('click', () => sendWhatsAppMessage(userTelefono, userName));
             // Use addEventListener instead of onclick for better event handling
             button.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -8083,6 +8098,12 @@
             
             // Send classes button handler - sends WhatsApp and closes modal
             const sendBtn = modalContent.querySelector('#send-classes-modal');
+            sendBtn.addEventListener('click', async () => {
+                // Send WhatsApp message with class schedule
+                const success = await sendWhatsAppMessage(telefono, nombre);
+                // Only close modal if WhatsApp was opened successfully
+                if (success) {
+                    modal.remove();
             sendBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
