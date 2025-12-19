@@ -7265,13 +7265,18 @@
          */
         async function sendWhatsAppMessage(userTelefono, userName) {
             try {
+                console.log('📱 Iniciando envío de WhatsApp para:', userName, userTelefono);
+                
                 // Generate message with real data from Firebase
                 const mensaje = await generateWhatsAppMessage(userTelefono, userName);
                 
                 if (!mensaje) {
+                    console.warn('⚠️ No se pudo generar el mensaje (sin clases o error de Firebase)');
                     showCustomAlert('No se pudieron cargar tus clases.\n\nPor favor, intenta más tarde o contacta con soporte.', 'warning', 'Atención');
                     return;
                 }
+                
+                console.log('✅ Mensaje generado correctamente');
                 
                 // Studio WhatsApp number
                 const studioNumber = '527151596586'; // +52 7151596586
@@ -7281,11 +7286,13 @@
                 
                 // Open WhatsApp
                 const whatsappUrl = `https://wa.me/${studioNumber}?text=${mensajeEncoded}`;
+                console.log('🔗 Abriendo WhatsApp con URL:', whatsappUrl.substring(0, 100) + '...');
                 window.open(whatsappUrl, '_blank');
                 
                 console.log('✅ WhatsApp abierto con mensaje personalizado');
             } catch (error) {
                 console.error('❌ Error al abrir WhatsApp:', error);
+                console.error('Error details:', error.message, error.stack);
                 showCustomAlert('Error al abrir WhatsApp. Por favor, intenta nuevamente.', 'error', 'Error');
             }
         }
