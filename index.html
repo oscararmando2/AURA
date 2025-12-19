@@ -7315,7 +7315,6 @@
                 </svg>
                 Recibir mi rol de clases por WhatsApp
             `;
-            button.addEventListener('click', () => sendWhatsAppMessage(userTelefono, userName));
             // Use addEventListener instead of onclick for better event handling
             button.addEventListener('click', async (e) => {
                 e.preventDefault();
@@ -8098,12 +8097,6 @@
             
             // Send classes button handler - sends WhatsApp and closes modal
             const sendBtn = modalContent.querySelector('#send-classes-modal');
-            sendBtn.addEventListener('click', async () => {
-                // Send WhatsApp message with class schedule
-                const success = await sendWhatsAppMessage(telefono, nombre);
-                // Only close modal if WhatsApp was opened successfully
-                if (success) {
-                    modal.remove();
             sendBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
