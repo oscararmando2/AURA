@@ -7273,7 +7273,7 @@
                 if (!mensaje) {
                     console.warn('⚠️ No se pudo generar el mensaje (sin clases o error de Firebase)');
                     showCustomAlert('No se pudieron cargar tus clases.\n\nPor favor, intenta más tarde o contacta con soporte.', 'warning', 'Atención');
-                    return;
+                    return false; // Return false to indicate failure
                 }
                 
                 console.log('✅ Mensaje generado correctamente');
@@ -7290,10 +7290,12 @@
                 window.open(whatsappUrl, '_blank');
                 
                 console.log('✅ WhatsApp abierto con mensaje personalizado');
+                return true; // Return true to indicate success
             } catch (error) {
                 console.error('❌ Error al abrir WhatsApp:', error);
                 console.error('Error details:', error.message, error.stack);
                 showCustomAlert('Error al abrir WhatsApp. Por favor, intenta nuevamente.', 'error', 'Error');
+                return false; // Return false to indicate failure
             }
         }
         
@@ -7312,7 +7314,7 @@
                 </svg>
                 Recibir mi rol de clases por WhatsApp
             `;
-            button.onclick = () => sendWhatsAppMessage(userTelefono, userName);
+            button.addEventListener('click', () => sendWhatsAppMessage(userTelefono, userName));
             return button;
         }
 
@@ -8085,9 +8087,11 @@
             const sendBtn = modalContent.querySelector('#send-classes-modal');
             sendBtn.addEventListener('click', async () => {
                 // Send WhatsApp message with class schedule
-                await sendWhatsAppMessage(telefono, nombre);
-                // Close modal after sending
-                modal.remove();
+                const success = await sendWhatsAppMessage(telefono, nombre);
+                // Only close modal if WhatsApp was opened successfully
+                if (success) {
+                    modal.remove();
+                }
             });
             
             // Close on background click
