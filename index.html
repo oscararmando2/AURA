@@ -7133,28 +7133,46 @@
          * Export calendar data to PDF with calendar format
          */
         async function exportCalendarData() {
-            if (!allReservationsData || allReservationsData.length === 0) {
-                alert('⚠️ No hay datos para exportar');
+            console.log('🔍 Export button clicked');
+            
+            // Check if allReservationsData exists and has data
+            if (!allReservationsData) {
+                console.error('❌ allReservationsData is undefined');
+                alert('⚠️ Error: Sistema de reservas no inicializado.\n\nPor favor, recarga la página.');
                 return;
             }
+            
+            if (allReservationsData.length === 0) {
+                console.warn('⚠️ No hay datos para exportar');
+                alert('⚠️ No hay reservas para exportar.\n\nAgenda algunas clases primero.');
+                return;
+            }
+            
+            console.log(`📊 Exportando ${allReservationsData.length} eventos...`);
             
             try {
                 // Prepare data for PDF generation
                 const reservations = [];
                 
                 allReservationsData.forEach(event => {
+                    // Validate event has required data
+                    if (!event.start) {
+                        console.warn('⚠️ Evento sin fecha:', event);
+                        return;
+                    }
+                    
                     const date = event.start.toISOString().split('T')[0]; // YYYY-MM-DD format
                     const time = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
                     
                     // Check if grouped event
-                    if (event.extendedProps.isGrouped && event.extendedProps.participants) {
+                    if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
                         // Export each participant as a separate reservation
                         event.extendedProps.participants.forEach(participant => {
                             reservations.push({
                                 date: date,
                                 time: time,
-                                name: participant.fullName || '',
-                                phone: participant.telefono || '',
+                                name: participant.fullName || 'Sin nombre',
+                                phone: participant.telefono || 'Sin teléfono',
                                 notes: participant.notas || ''
                             });
                         });
@@ -7163,20 +7181,35 @@
                         reservations.push({
                             date: date,
                             time: time,
-                            name: event.extendedProps.fullName || '',
-                            phone: event.extendedProps.telefono || '',
-                            notes: event.extendedProps.notas || ''
+                            name: (event.extendedProps && event.extendedProps.fullName) || event.title || 'Sin nombre',
+                            phone: (event.extendedProps && event.extendedProps.telefono) || 'Sin teléfono',
+                            notes: (event.extendedProps && event.extendedProps.notas) || ''
                         });
                     }
                 });
                 
+                if (reservations.length === 0) {
+                    console.warn('⚠️ No se pudieron procesar las reservas');
+                    alert('⚠️ No hay datos válidos para exportar.\n\nVerifica que las reservas tengan fecha y hora.');
+                    return;
+                }
+                
+                console.log(`📋 ${reservations.length} reservas procesadas para exportación`);
+                
                 // Show loading indicator
                 const btnExport = document.getElementById('btn-export-calendar');
+                if (!btnExport) {
+                    console.error('❌ Botón de exportar no encontrado');
+                    alert('⚠️ Error: Botón de exportar no encontrado.\n\nPor favor, recarga la página.');
+                    return;
+                }
+                
                 const originalText = btnExport.textContent;
                 btnExport.textContent = '⏳ Generando PDF...';
                 btnExport.disabled = true;
                 
                 // Send data to PHP endpoint
+                console.log('🔗 Enviando datos al servidor...');
                 const response = await fetch('exportar_calendario.php', {
                     method: 'POST',
                     headers: {
@@ -7185,7 +7218,15 @@
                     body: JSON.stringify({ reservations: reservations })
                 });
                 
+                console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+                
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+                }
+                
                 const result = await response.json();
+                console.log('📄 Resultado:', result);
                 
                 if (result.success) {
                     // Download the generated PDF
@@ -7198,10 +7239,10 @@
                     document.body.removeChild(link);
                     
                     console.log(`✅ Calendario exportado: ${result.filename}`);
-                    alert('✅ Calendario exportado exitosamente en formato PDF');
+                    alert(`✅ Calendario exportado exitosamente\n\nArchivo: ${result.filename}`);
                 } else {
                     console.error('❌ Error al exportar:', result.error);
-                    alert('❌ Error al exportar el calendario: ' + result.error);
+                    alert(`❌ Error al exportar el calendario:\n\n${result.error}\n\nVerifica que el servidor tenga permisos de escritura.`);
                 }
                 
                 // Restore button
@@ -7210,12 +7251,28 @@
                 
             } catch (error) {
                 console.error('❌ Error al exportar calendario:', error);
-                alert('❌ Error al exportar el calendario. Por favor, intente nuevamente.');
+                console.error('Detalles:', error.message, error.stack);
+                
+                // Determine error type
+                let errorMessage = 'Error al exportar el calendario.';
+                let errorDetails = 'Por favor, intente nuevamente.';
+                
+                if (error.message.includes('fetch')) {
+                    errorDetails = 'Error de red. Verifica tu conexión a internet.';
+                } else if (error.message.includes('HTTP')) {
+                    errorDetails = 'Error del servidor. Contacta al administrador.';
+                } else if (error.message.includes('JSON')) {
+                    errorDetails = 'Error al procesar respuesta del servidor.';
+                }
+                
+                alert(`❌ ${errorMessage}\n\n${errorDetails}\n\nDetalles técnicos: ${error.message}`);
                 
                 // Restore button
                 const btnExport = document.getElementById('btn-export-calendar');
-                btnExport.textContent = '📥 Exportar';
-                btnExport.disabled = false;
+                if (btnExport) {
+                    btnExport.textContent = '📥 Exportar';
+                    btnExport.disabled = false;
+                }
             }
         }
         
