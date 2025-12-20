@@ -6757,7 +6757,7 @@
             
             // Store state
             adminScheduleState.clientName = name;
-            adminScheduleState.clientPhone = '52' + phone; // Add country code
+            adminScheduleState.clientPhone = COUNTRY_CODE + phone; // Add country code
             adminScheduleState.packageSize = packageSize;
             adminScheduleState.selectedDates = [];
             
@@ -6906,10 +6906,20 @@
             adminScheduleState.selectedDates.forEach((dateInfo, index) => {
                 const itemEl = document.createElement('div');
                 itemEl.className = 'admin-selected-time-item';
-                itemEl.innerHTML = `
-                    <span>${dateInfo.displayText}</span>
-                    <button type="button" onclick="removeAdminSelectedTime(${index})">✕ Quitar</button>
-                `;
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = dateInfo.displayText;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.textContent = '✕ Quitar';
+                removeBtn.dataset.index = index;
+                removeBtn.addEventListener('click', function() {
+                    removeAdminSelectedTime(parseInt(this.dataset.index));
+                });
+                
+                itemEl.appendChild(textSpan);
+                itemEl.appendChild(removeBtn);
                 listEl.appendChild(itemEl);
             });
         }
@@ -6938,9 +6948,6 @@
             
             updateAdminSelectedTimesList();
         }
-        
-        // Expose removeAdminSelectedTime to window for onclick handler
-        window.removeAdminSelectedTime = removeAdminSelectedTime;
         
         /**
          * Confirm and save all admin scheduled classes
@@ -7171,8 +7178,8 @@
                             reservations.push({
                                 date: date,
                                 time: time,
-                                name: participant.fullName || 'Sin nombre',
-                                phone: participant.telefono || 'Sin teléfono',
+                                name: participant.fullName || DEFAULT_NAME,
+                                phone: participant.telefono || DEFAULT_PHONE,
                                 notes: participant.notas || ''
                             });
                         });
@@ -7181,8 +7188,8 @@
                         reservations.push({
                             date: date,
                             time: time,
-                            name: (event.extendedProps && event.extendedProps.fullName) || event.title || 'Sin nombre',
-                            phone: (event.extendedProps && event.extendedProps.telefono) || 'Sin teléfono',
+                            name: (event.extendedProps && event.extendedProps.fullName) || event.title || DEFAULT_NAME,
+                            phone: (event.extendedProps && event.extendedProps.telefono) || DEFAULT_PHONE,
                             notes: (event.extendedProps && event.extendedProps.notas) || ''
                         });
                     }
@@ -8227,6 +8234,11 @@
             }
         }
 
+        // Constants for the application
+        const COUNTRY_CODE = '52'; // Mexico country code
+        const DEFAULT_NAME = 'Sin nombre';
+        const DEFAULT_PHONE = 'Sin teléfono';
+        
         // Constants for Firebase initialization
         const MAX_FIREBASE_INIT_ATTEMPTS = 20;
         const FIREBASE_POLLING_INTERVAL_MS = 500;
