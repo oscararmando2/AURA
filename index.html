@@ -2433,6 +2433,59 @@
             background: #d0d0d0;
         }
 
+        /* Admin package selection buttons */
+        .admin-package-btn {
+            padding: 12px 16px;
+            border: 2px solid rgba(239, 233, 225, 0.5);
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .admin-package-btn:hover {
+            border-color: #EFE9E1;
+            background: rgba(239, 233, 225, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .admin-package-btn.selected {
+            border-color: #EFE9E1;
+            background: #EFE9E1;
+            color: #000;
+            font-weight: 600;
+        }
+
+        /* Selected times list */
+        .admin-selected-time-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%);
+            border-radius: 8px;
+            border-left: 3px solid #EFE9E1;
+        }
+
+        .admin-selected-time-item button {
+            background: #e0e0e0;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s ease;
+        }
+
+        .admin-selected-time-item button:hover {
+            background: #d0d0d0;
+        }
+
         /* Admin calendar time grid */
         #admin-calendar .fc-timegrid-slot {
             height: 4.5rem;
@@ -3633,14 +3686,15 @@
             </div>
         </div>
         
-        <!-- Admin Schedule Modal -->
+        <!-- Admin Schedule Modal - Multi-Step Interface -->
         <div id="admin-schedule-modal" class="event-detail-modal">
-            <div class="event-detail-content">
-                <div class="event-detail-header">
-                    <h3>📅 Agendar Nueva Clase</h3>
-                    <button type="button" class="event-detail-close" id="admin-schedule-close">×</button>
-                </div>
-                <form id="admin-schedule-form">
+            <div class="event-detail-content" style="max-width: 800px;">
+                <!-- Step 1: Client Info & Package Selection -->
+                <div id="admin-schedule-step1">
+                    <div class="event-detail-header">
+                        <h3>📅 Agendar Nueva Clase - Paso 1/2</h3>
+                        <button type="button" class="event-detail-close" id="admin-schedule-close">×</button>
+                    </div>
                     <div class="event-detail-body">
                         <div class="event-detail-row">
                             <div class="event-detail-icon">👤</div>
@@ -3652,37 +3706,59 @@
                         <div class="event-detail-row">
                             <div class="event-detail-icon">📱</div>
                             <div class="event-detail-info" style="width: 100%;">
-                                <div class="event-detail-label">Teléfono *</div>
-                                <input type="tel" id="admin-schedule-phone" required pattern="[0-9]{10}" placeholder="10 dígitos" style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                                <div class="event-detail-label">Teléfono * (10 dígitos)</div>
+                                <input type="tel" id="admin-schedule-phone" required pattern="[0-9]{10}" placeholder="10 dígitos sin guiones" style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
                             </div>
                         </div>
                         <div class="event-detail-row">
-                            <div class="event-detail-icon">📅</div>
+                            <div class="event-detail-icon">📦</div>
                             <div class="event-detail-info" style="width: 100%;">
-                                <div class="event-detail-label">Fecha *</div>
-                                <input type="date" id="admin-schedule-date" required style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
-                            </div>
-                        </div>
-                        <div class="event-detail-row">
-                            <div class="event-detail-icon">🕐</div>
-                            <div class="event-detail-info" style="width: 100%;">
-                                <div class="event-detail-label">Hora *</div>
-                                <input type="time" id="admin-schedule-time" required style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
-                            </div>
-                        </div>
-                        <div class="event-detail-row">
-                            <div class="event-detail-icon">📝</div>
-                            <div class="event-detail-info" style="width: 100%;">
-                                <div class="event-detail-label">Notas (opcional)</div>
-                                <textarea id="admin-schedule-notes" rows="3" style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px; resize: vertical;"></textarea>
+                                <div class="event-detail-label">Número de Clases *</div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 10px;">
+                                    <button type="button" class="admin-package-btn" data-classes="1">1 Clase</button>
+                                    <button type="button" class="admin-package-btn" data-classes="4">4 Clases</button>
+                                    <button type="button" class="admin-package-btn" data-classes="8">8 Clases</button>
+                                    <button type="button" class="admin-package-btn" data-classes="12">12 Clases</button>
+                                    <button type="button" class="admin-package-btn" data-classes="15">15 Clases</button>
+                                </div>
+                                <input type="hidden" id="admin-schedule-package" required>
                             </div>
                         </div>
                     </div>
                     <div class="event-detail-actions">
-                        <button type="button" class="btn-secondary" id="admin-schedule-cancel">Cancelar</button>
-                        <button type="submit" class="btn-primary" id="admin-schedule-submit">✅ Guardar</button>
+                        <button type="button" class="btn-secondary" id="admin-schedule-cancel-step1">Cancelar</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-next">Siguiente →</button>
                     </div>
-                </form>
+                </div>
+                
+                <!-- Step 2: Calendar Selection -->
+                <div id="admin-schedule-step2" style="display: none;">
+                    <div class="event-detail-header">
+                        <h3>📅 Seleccionar Horarios - Paso 2/2</h3>
+                        <button type="button" class="event-detail-close" id="admin-schedule-close-step2">×</button>
+                    </div>
+                    <div class="event-detail-body">
+                        <div style="background: linear-gradient(135deg, #EFE9E1 0%, #ffffff 100%); padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+                            <p style="margin: 0; color: #333; font-size: 0.95rem;">
+                                <strong id="admin-schedule-client-name-display"></strong> - 
+                                <span id="admin-schedule-selected-count">0</span> de 
+                                <span id="admin-schedule-total-classes">0</span> clases seleccionadas
+                            </p>
+                        </div>
+                        <!-- Calendar for admin scheduling -->
+                        <div id="admin-schedule-calendar" style="margin-bottom: 20px;"></div>
+                        
+                        <!-- Selected times list -->
+                        <div id="admin-selected-times-container" style="display: none; margin-top: 20px;">
+                            <h4 style="color: #333; margin-bottom: 10px;">Horarios seleccionados:</h4>
+                            <div id="admin-selected-times-list" style="max-height: 200px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                    <div class="event-detail-actions">
+                        <button type="button" class="btn-secondary" id="admin-schedule-back">← Atrás</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-confirm">✅ Confirmar Reservas</button>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -6575,12 +6651,50 @@
                 }
             });
             
-            // Admin schedule modal controls
+            // Admin schedule modal controls - Multi-step
+            setupAdminScheduleModalHandlers();
+        }
+        
+        // Global variable to store admin scheduling state
+        let adminScheduleState = {
+            clientName: '',
+            clientPhone: '',
+            packageSize: 0,
+            selectedDates: [],
+            scheduleCalendar: null
+        };
+        
+        /**
+         * Setup admin schedule modal event handlers
+         */
+        function setupAdminScheduleModalHandlers() {
+            // Close buttons for both steps
             document.getElementById('admin-schedule-close').addEventListener('click', closeAdminScheduleModal);
-            document.getElementById('admin-schedule-cancel').addEventListener('click', closeAdminScheduleModal);
-            document.getElementById('admin-schedule-form').addEventListener('submit', handleAdminScheduleSubmit);
+            document.getElementById('admin-schedule-close-step2').addEventListener('click', closeAdminScheduleModal);
+            document.getElementById('admin-schedule-cancel-step1').addEventListener('click', closeAdminScheduleModal);
             
-            // Close admin schedule modal on background click
+            // Package selection buttons
+            document.querySelectorAll('.admin-package-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove selected class from all buttons
+                    document.querySelectorAll('.admin-package-btn').forEach(b => b.classList.remove('selected'));
+                    // Add selected class to clicked button
+                    this.classList.add('selected');
+                    // Store package size
+                    document.getElementById('admin-schedule-package').value = this.dataset.classes;
+                });
+            });
+            
+            // Next button (step 1 to step 2)
+            document.getElementById('admin-schedule-next').addEventListener('click', goToScheduleStep2);
+            
+            // Back button (step 2 to step 1)
+            document.getElementById('admin-schedule-back').addEventListener('click', goToScheduleStep1);
+            
+            // Confirm button (save all reservations)
+            document.getElementById('admin-schedule-confirm').addEventListener('click', confirmAdminSchedule);
+            
+            // Close modal on background click
             document.getElementById('admin-schedule-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeAdminScheduleModal();
@@ -6589,21 +6703,317 @@
         }
         
         /**
-         * Open admin schedule modal
+         * Open admin schedule modal (Step 1)
          */
         function openAdminScheduleModal() {
             const modal = document.getElementById('admin-schedule-modal');
-            const form = document.getElementById('admin-schedule-form');
             
-            // Reset form
-            form.reset();
+            // Reset state
+            adminScheduleState = {
+                clientName: '',
+                clientPhone: '',
+                packageSize: 0,
+                selectedDates: [],
+                scheduleCalendar: null
+            };
             
-            // Set default date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('admin-schedule-date').value = today;
+            // Clear form
+            document.getElementById('admin-schedule-name').value = '';
+            document.getElementById('admin-schedule-phone').value = '';
+            document.getElementById('admin-schedule-package').value = '';
+            document.querySelectorAll('.admin-package-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Show step 1, hide step 2
+            document.getElementById('admin-schedule-step1').style.display = 'block';
+            document.getElementById('admin-schedule-step2').style.display = 'none';
             
             // Show modal
             modal.style.display = 'flex';
+        }
+        
+        /**
+         * Go to step 2 (calendar selection)
+         */
+        function goToScheduleStep2() {
+            const name = document.getElementById('admin-schedule-name').value.trim();
+            const phone = document.getElementById('admin-schedule-phone').value.trim();
+            const packageSize = parseInt(document.getElementById('admin-schedule-package').value);
+            
+            // Validate inputs
+            if (!name) {
+                alert('⚠️ Por favor ingresa el nombre del cliente');
+                return;
+            }
+            
+            if (!phone || !/^\d{10}$/.test(phone)) {
+                alert('⚠️ Por favor ingresa un teléfono válido de 10 dígitos');
+                return;
+            }
+            
+            if (!packageSize || packageSize <= 0) {
+                alert('⚠️ Por favor selecciona el número de clases');
+                return;
+            }
+            
+            // Store state
+            adminScheduleState.clientName = name;
+            adminScheduleState.clientPhone = COUNTRY_CODE + phone; // Add country code
+            adminScheduleState.packageSize = packageSize;
+            adminScheduleState.selectedDates = [];
+            
+            // Update display
+            document.getElementById('admin-schedule-client-name-display').textContent = name;
+            document.getElementById('admin-schedule-total-classes').textContent = packageSize;
+            document.getElementById('admin-schedule-selected-count').textContent = '0';
+            
+            // Show step 2, hide step 1
+            document.getElementById('admin-schedule-step1').style.display = 'none';
+            document.getElementById('admin-schedule-step2').style.display = 'block';
+            
+            // Initialize calendar for date/time selection
+            initAdminScheduleCalendar();
+        }
+        
+        /**
+         * Go back to step 1
+         */
+        function goToScheduleStep1() {
+            // Destroy calendar if it exists
+            if (adminScheduleState.scheduleCalendar) {
+                adminScheduleState.scheduleCalendar.destroy();
+                adminScheduleState.scheduleCalendar = null;
+            }
+            
+            // Show step 1, hide step 2
+            document.getElementById('admin-schedule-step1').style.display = 'block';
+            document.getElementById('admin-schedule-step2').style.display = 'none';
+        }
+        
+        /**
+         * Initialize calendar for admin scheduling (step 2)
+         */
+        function initAdminScheduleCalendar() {
+            const calendarEl = document.getElementById('admin-schedule-calendar');
+            
+            // Destroy existing calendar if any
+            if (adminScheduleState.scheduleCalendar) {
+                adminScheduleState.scheduleCalendar.destroy();
+            }
+            
+            adminScheduleState.scheduleCalendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'timeGridWeek,timeGridDay'
+                },
+                slotMinTime: '06:00:00',
+                slotMaxTime: '20:00:00',
+                allDaySlot: false,
+                expandRows: true,
+                height: 'auto',
+                nowIndicator: true,
+                slotDuration: '01:00:00',
+                slotLabelInterval: '01:00',
+                selectable: true,
+                selectMirror: true,
+                buttonText: {
+                    today: 'Hoy',
+                    week: 'Semana',
+                    day: 'Día'
+                },
+                // Handle time slot selection
+                select: function(info) {
+                    handleAdminTimeSlotSelect(info);
+                },
+                // Load existing reservations to show occupied slots
+                events: allReservationsData || []
+            });
+            
+            adminScheduleState.scheduleCalendar.render();
+        }
+        
+        /**
+         * Handle time slot selection in admin schedule calendar
+         */
+        function handleAdminTimeSlotSelect(info) {
+            // Check if max classes reached
+            if (adminScheduleState.selectedDates.length >= adminScheduleState.packageSize) {
+                alert(`⚠️ Ya has seleccionado ${adminScheduleState.packageSize} clases`);
+                adminScheduleState.scheduleCalendar.unselect();
+                return;
+            }
+            
+            // Create datetime string in ISO format
+            const startDate = info.start;
+            const dateTimeStr = startDate.toISOString().slice(0, 19); // YYYY-MM-DDTHH:mm:ss
+            
+            // Check if this slot is already selected
+            const isAlreadySelected = adminScheduleState.selectedDates.some(d => d.datetime === dateTimeStr);
+            if (isAlreadySelected) {
+                alert('⚠️ Este horario ya está seleccionado');
+                adminScheduleState.scheduleCalendar.unselect();
+                return;
+            }
+            
+            // Add to selected dates
+            adminScheduleState.selectedDates.push({
+                datetime: dateTimeStr,
+                start: startDate,
+                displayText: startDate.toLocaleString('es-ES', {
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            });
+            
+            // Update UI
+            updateAdminSelectedTimesList();
+            
+            // Add visual indicator to calendar
+            adminScheduleState.scheduleCalendar.addEvent({
+                start: startDate,
+                end: new Date(startDate.getTime() + 60 * 60 * 1000),
+                display: 'background',
+                backgroundColor: 'rgba(239, 233, 225, 0.3)'
+            });
+            
+            adminScheduleState.scheduleCalendar.unselect();
+        }
+        
+        /**
+         * Update selected times list display
+         */
+        function updateAdminSelectedTimesList() {
+            const container = document.getElementById('admin-selected-times-container');
+            const listEl = document.getElementById('admin-selected-times-list');
+            const countEl = document.getElementById('admin-schedule-selected-count');
+            
+            if (adminScheduleState.selectedDates.length === 0) {
+                container.style.display = 'none';
+                countEl.textContent = '0';
+                return;
+            }
+            
+            container.style.display = 'block';
+            countEl.textContent = adminScheduleState.selectedDates.length;
+            
+            listEl.innerHTML = '';
+            adminScheduleState.selectedDates.forEach((dateInfo, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'admin-selected-time-item';
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = dateInfo.displayText;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.textContent = '✕ Quitar';
+                removeBtn.dataset.index = index;
+                removeBtn.addEventListener('click', function() {
+                    removeAdminSelectedTime(parseInt(this.dataset.index));
+                });
+                
+                itemEl.appendChild(textSpan);
+                itemEl.appendChild(removeBtn);
+                listEl.appendChild(itemEl);
+            });
+        }
+        
+        /**
+         * Remove a selected time slot
+         */
+        function removeAdminSelectedTime(index) {
+            adminScheduleState.selectedDates.splice(index, 1);
+            
+            // Refresh calendar to remove visual indicator
+            if (adminScheduleState.scheduleCalendar) {
+                // Reload calendar
+                initAdminScheduleCalendar();
+                
+                // Re-add selected dates as background events
+                adminScheduleState.selectedDates.forEach(dateInfo => {
+                    adminScheduleState.scheduleCalendar.addEvent({
+                        start: dateInfo.start,
+                        end: new Date(dateInfo.start.getTime() + 60 * 60 * 1000),
+                        display: 'background',
+                        backgroundColor: 'rgba(239, 233, 225, 0.3)'
+                    });
+                });
+            }
+            
+            updateAdminSelectedTimesList();
+        }
+        
+        /**
+         * Confirm and save all admin scheduled classes
+         */
+        async function confirmAdminSchedule() {
+            if (adminScheduleState.selectedDates.length === 0) {
+                alert('⚠️ Por favor selecciona al menos un horario');
+                return;
+            }
+            
+            if (adminScheduleState.selectedDates.length !== adminScheduleState.packageSize) {
+                const confirmed = confirm(`⚠️ Has seleccionado ${adminScheduleState.selectedDates.length} de ${adminScheduleState.packageSize} clases.\n\n¿Deseas continuar de todas formas?`);
+                if (!confirmed) return;
+            }
+            
+            // Disable confirm button to prevent double submission
+            const confirmBtn = document.getElementById('admin-schedule-confirm');
+            const originalText = confirmBtn.textContent;
+            confirmBtn.textContent = '⏳ Guardando...';
+            confirmBtn.disabled = true;
+            
+            try {
+                console.log(`📅 Guardando ${adminScheduleState.selectedDates.length} clases para ${adminScheduleState.clientName}...`);
+                
+                let successCount = 0;
+                let failCount = 0;
+                
+                // Save each reservation
+                for (const dateInfo of adminScheduleState.selectedDates) {
+                    try {
+                        await window.saveReservationToFirestore(
+                            adminScheduleState.clientName,
+                            adminScheduleState.clientPhone,
+                            dateInfo.datetime,
+                            '' // No notes for admin scheduling
+                        );
+                        successCount++;
+                    } catch (error) {
+                        console.error('❌ Error al guardar reserva:', error);
+                        failCount++;
+                    }
+                }
+                
+                // Show result
+                if (failCount === 0) {
+                    alert(`✅ ${successCount} clases agendadas exitosamente para ${adminScheduleState.clientName}`);
+                } else {
+                    alert(`⚠️ ${successCount} clases guardadas, ${failCount} fallaron.\n\nPor favor, revisa el calendario.`);
+                }
+                
+                // Close modal
+                closeAdminScheduleModal();
+                
+                // Reload admin calendar
+                if (typeof loadAdminCalendarReservations === 'function') {
+                    await loadAdminCalendarReservations();
+                }
+                
+            } catch (error) {
+                console.error('❌ Error al confirmar agendamiento:', error);
+                alert('❌ Error al agendar las clases. Por favor, intente nuevamente.');
+            } finally {
+                // Restore button
+                confirmBtn.textContent = originalText;
+                confirmBtn.disabled = false;
+            }
         }
         
         /**
@@ -6611,10 +7021,35 @@
          */
         function closeAdminScheduleModal() {
             const modal = document.getElementById('admin-schedule-modal');
-            const form = document.getElementById('admin-schedule-form');
+            
+            // Destroy calendar if it exists
+            if (adminScheduleState.scheduleCalendar) {
+                adminScheduleState.scheduleCalendar.destroy();
+                adminScheduleState.scheduleCalendar = null;
+            }
+            
+            // Reset state
+            adminScheduleState = {
+                clientName: '',
+                clientPhone: '',
+                packageSize: 0,
+                selectedDates: [],
+                scheduleCalendar: null
+            };
             
             // Reset form
-            form.reset();
+            document.getElementById('admin-schedule-name').value = '';
+            document.getElementById('admin-schedule-phone').value = '';
+            document.getElementById('admin-schedule-package').value = '';
+            document.querySelectorAll('.admin-package-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Hide selected times list
+            document.getElementById('admin-selected-times-container').style.display = 'none';
+            document.getElementById('admin-selected-times-list').innerHTML = '';
+            
+            // Show step 1, hide step 2
+            document.getElementById('admin-schedule-step1').style.display = 'block';
+            document.getElementById('admin-schedule-step2').style.display = 'none';
             
             // Hide modal
             modal.style.display = 'none';
@@ -6623,77 +7058,6 @@
         /**
          * Handle admin schedule form submission
          */
-        async function handleAdminScheduleSubmit(e) {
-            e.preventDefault();
-            
-            // Get form values
-            const name = document.getElementById('admin-schedule-name').value.trim();
-            const phone = document.getElementById('admin-schedule-phone').value.trim();
-            const date = document.getElementById('admin-schedule-date').value;
-            const time = document.getElementById('admin-schedule-time').value;
-            const notes = document.getElementById('admin-schedule-notes').value.trim();
-            
-            // Validate phone number (10 digits)
-            if (phone.length !== 10 || !/^\d+$/.test(phone)) {
-                alert('❌ El teléfono debe tener exactamente 10 dígitos.');
-                return;
-            }
-            
-            // Create fechaHora in ISO format (YYYY-MM-DDTHH:mm:ss)
-            const fechaHora = `${date}T${time}:00`;
-            
-            // Validate date
-            const selectedDate = new Date(fechaHora);
-            if (isNaN(selectedDate.getTime())) {
-                alert('❌ Fecha u hora inválida.');
-                return;
-            }
-            
-            try {
-                // Disable submit button
-                const submitBtn = document.getElementById('admin-schedule-submit');
-                submitBtn.disabled = true;
-                submitBtn.textContent = '⏳ Guardando...';
-                
-                // Add country code prefix (52) to phone
-                const phoneWithPrefix = '52' + phone;
-                
-                // Save reservation using the global function
-                if (typeof window.saveReservationToFirestore !== 'function') {
-                    throw new Error('Sistema de reservas no disponible');
-                }
-                
-                // Add note indicating it was created by admin (no payment required)
-                const adminNotes = notes ? `${notes} [Agendado por Admin - Sin pago]` : '[Agendado por Admin - Sin pago]';
-                
-                const reservaId = await window.saveReservationToFirestore(
-                    name,
-                    phoneWithPrefix,
-                    fechaHora,
-                    adminNotes
-                );
-                
-                console.log('✅ Clase agendada por admin con ID:', reservaId);
-                
-                // Close modal
-                closeAdminScheduleModal();
-                
-                // Show success message
-                alert(`✅ Clase agendada exitosamente para ${name}`);
-                
-                // Reload admin calendar
-                await loadAdminCalendarReservations();
-                
-            } catch (error) {
-                console.error('❌ Error al agendar clase:', error);
-                alert('❌ Error al agendar la clase: ' + (error.message || 'Error desconocido'));
-                
-                // Re-enable submit button
-                const submitBtn = document.getElementById('admin-schedule-submit');
-                submitBtn.disabled = false;
-                submitBtn.textContent = '✅ Guardar';
-            }
-        }
         
         /**
          * Apply filters to calendar
@@ -6776,28 +7140,46 @@
          * Export calendar data to PDF with calendar format
          */
         async function exportCalendarData() {
-            if (!allReservationsData || allReservationsData.length === 0) {
-                alert('⚠️ No hay datos para exportar');
+            console.log('🔍 Export button clicked');
+            
+            // Check if allReservationsData exists and has data
+            if (!allReservationsData) {
+                console.error('❌ allReservationsData is undefined');
+                alert('⚠️ Error: Sistema de reservas no inicializado.\n\nPor favor, recarga la página.');
                 return;
             }
+            
+            if (allReservationsData.length === 0) {
+                console.warn('⚠️ No hay datos para exportar');
+                alert('⚠️ No hay reservas para exportar.\n\nAgenda algunas clases primero.');
+                return;
+            }
+            
+            console.log(`📊 Exportando ${allReservationsData.length} eventos...`);
             
             try {
                 // Prepare data for PDF generation
                 const reservations = [];
                 
                 allReservationsData.forEach(event => {
+                    // Validate event has required data
+                    if (!event.start) {
+                        console.warn('⚠️ Evento sin fecha:', event);
+                        return;
+                    }
+                    
                     const date = event.start.toISOString().split('T')[0]; // YYYY-MM-DD format
                     const time = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
                     
                     // Check if grouped event
-                    if (event.extendedProps.isGrouped && event.extendedProps.participants) {
+                    if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
                         // Export each participant as a separate reservation
                         event.extendedProps.participants.forEach(participant => {
                             reservations.push({
                                 date: date,
                                 time: time,
-                                name: participant.fullName || '',
-                                phone: participant.telefono || '',
+                                name: participant.fullName || DEFAULT_NAME,
+                                phone: participant.telefono || DEFAULT_PHONE,
                                 notes: participant.notas || ''
                             });
                         });
@@ -6806,20 +7188,35 @@
                         reservations.push({
                             date: date,
                             time: time,
-                            name: event.extendedProps.fullName || '',
-                            phone: event.extendedProps.telefono || '',
-                            notes: event.extendedProps.notas || ''
+                            name: (event.extendedProps && event.extendedProps.fullName) || event.title || DEFAULT_NAME,
+                            phone: (event.extendedProps && event.extendedProps.telefono) || DEFAULT_PHONE,
+                            notes: (event.extendedProps && event.extendedProps.notas) || ''
                         });
                     }
                 });
                 
+                if (reservations.length === 0) {
+                    console.warn('⚠️ No se pudieron procesar las reservas');
+                    alert('⚠️ No hay datos válidos para exportar.\n\nVerifica que las reservas tengan fecha y hora.');
+                    return;
+                }
+                
+                console.log(`📋 ${reservations.length} reservas procesadas para exportación`);
+                
                 // Show loading indicator
                 const btnExport = document.getElementById('btn-export-calendar');
+                if (!btnExport) {
+                    console.error('❌ Botón de exportar no encontrado');
+                    alert('⚠️ Error: Botón de exportar no encontrado.\n\nPor favor, recarga la página.');
+                    return;
+                }
+                
                 const originalText = btnExport.textContent;
                 btnExport.textContent = '⏳ Generando PDF...';
                 btnExport.disabled = true;
                 
                 // Send data to PHP endpoint
+                console.log('🔗 Enviando datos al servidor...');
                 const response = await fetch('exportar_calendario.php', {
                     method: 'POST',
                     headers: {
@@ -6828,7 +7225,15 @@
                     body: JSON.stringify({ reservations: reservations })
                 });
                 
+                console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+                
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+                }
+                
                 const result = await response.json();
+                console.log('📄 Resultado:', result);
                 
                 if (result.success) {
                     // Download the generated PDF
@@ -6841,10 +7246,10 @@
                     document.body.removeChild(link);
                     
                     console.log(`✅ Calendario exportado: ${result.filename}`);
-                    alert('✅ Calendario exportado exitosamente en formato PDF');
+                    alert(`✅ Calendario exportado exitosamente\n\nArchivo: ${result.filename}`);
                 } else {
                     console.error('❌ Error al exportar:', result.error);
-                    alert('❌ Error al exportar el calendario: ' + result.error);
+                    alert(`❌ Error al exportar el calendario:\n\n${result.error}\n\nVerifica que el servidor tenga permisos de escritura.`);
                 }
                 
                 // Restore button
@@ -6853,12 +7258,28 @@
                 
             } catch (error) {
                 console.error('❌ Error al exportar calendario:', error);
-                alert('❌ Error al exportar el calendario. Por favor, intente nuevamente.');
+                console.error('Detalles:', error.message, error.stack);
+                
+                // Determine error type
+                let errorMessage = 'Error al exportar el calendario.';
+                let errorDetails = 'Por favor, intente nuevamente.';
+                
+                if (error.message.includes('fetch')) {
+                    errorDetails = 'Error de red. Verifica tu conexión a internet.';
+                } else if (error.message.includes('HTTP')) {
+                    errorDetails = 'Error del servidor. Contacta al administrador.';
+                } else if (error.message.includes('JSON')) {
+                    errorDetails = 'Error al procesar respuesta del servidor.';
+                }
+                
+                alert(`❌ ${errorMessage}\n\n${errorDetails}\n\nDetalles técnicos: ${error.message}`);
                 
                 // Restore button
                 const btnExport = document.getElementById('btn-export-calendar');
-                btnExport.textContent = '📥 Exportar';
-                btnExport.disabled = false;
+                if (btnExport) {
+                    btnExport.textContent = '📥 Exportar';
+                    btnExport.disabled = false;
+                }
             }
         }
         
@@ -7813,6 +8234,11 @@
             }
         }
 
+        // Constants for the application
+        const COUNTRY_CODE = '52'; // Mexico country code
+        const DEFAULT_NAME = 'Sin nombre';
+        const DEFAULT_PHONE = 'Sin teléfono';
+        
         // Constants for Firebase initialization
         const MAX_FIREBASE_INIT_ATTEMPTS = 20;
         const FIREBASE_POLLING_INTERVAL_MS = 500;
