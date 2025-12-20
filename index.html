@@ -4055,12 +4055,14 @@
                 hamburgerBtn.setAttribute('aria-expanded', 'false');
                 menuDropdown.setAttribute('aria-hidden', 'true');
                 adminLoginModal.style.display = 'flex';
+                document.body.classList.add('modal-open');
                 document.getElementById('admin-email').focus();
             });
             
             // Close admin login modal
             adminLoginCancel.addEventListener('click', () => {
                 adminLoginModal.style.display = 'none';
+                document.body.classList.remove('modal-open');
                 document.getElementById('admin-login-form').reset();
                 document.getElementById('login-error').style.display = 'none';
             });
@@ -4133,6 +4135,7 @@
                     }
                     userLoginModal.style.display = 'none';
                     adminLoginModal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
                     timeModal.style.display = 'none';
                     reservationModal.style.display = 'none';
                     menuDropdown.style.display = 'none';
@@ -4155,6 +4158,7 @@
             adminLoginModal.addEventListener('click', (e) => {
                 if (e.target === adminLoginModal) {
                     adminLoginModal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
                     document.getElementById('admin-login-form').reset();
                     document.getElementById('login-error').style.display = 'none';
                 }
@@ -6147,6 +6151,7 @@
                         isAdmin = true;
                         
                         adminLoginModal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
                         adminPanel.style.display = 'block';
                         
                         // Apply mobile-admin-view class on mobile devices
