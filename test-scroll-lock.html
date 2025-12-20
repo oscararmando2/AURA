@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Scroll Lock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+        
+        .content {
+            height: 2000px;
+            background: linear-gradient(to bottom, #f0f0f0, #fff);
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            background: #EFE9E1;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #D4C5B9;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+        }
+        
+        .close-btn {
+            background: #dc3545;
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.unlocked {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.locked {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test: Modal Scroll Lock</h1>
+    
+    <div class="test-section">
+        <h2>Estado del Body</h2>
+        <div id="status" class="status unlocked">✅ Body scroll: DESBLOQUEADO (puedes hacer scroll)</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Prueba el Modal</h2>
+        <p>1. Haz clic en "Abrir Modal"</p>
+        <p>2. Intenta hacer scroll mientras el modal está abierto</p>
+        <p>3. Verifica que el fondo NO se mueve</p>
+        <p>4. Cierra el modal y verifica que puedes hacer scroll nuevamente</p>
+        <button id="openBtn">Abrir Modal</button>
+    </div>
+    
+    <div class="content">
+        <h3>Contenido de Prueba (Scroll para ver más)</h3>
+        <p>Este es un contenido largo para probar el scroll...</p>
+        <p>Línea 1</p>
+        <p>Línea 2</p>
+        <p>Línea 3</p>
+        <p>Línea 4</p>
+        <p>Línea 5</p>
+        <p>Línea 6</p>
+        <p>Línea 7</p>
+        <p>Línea 8</p>
+        <p>Línea 9</p>
+        <p>Línea 10</p>
+        <p>Continúa haciendo scroll...</p>
+    </div>
+    
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2>📅 Modal de Prueba</h2>
+            <p>Este modal simula el comportamiento del modal de "Agendar Clase"</p>
+            <p><strong>Intenta hacer scroll:</strong> El fondo no debería moverse.</p>
+            <button class="close-btn" id="closeBtn">Cerrar Modal</button>
+        </div>
+    </div>
+    
+    <script>
+        const modal = document.getElementById('modal');
+        const openBtn = document.getElementById('openBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const status = document.getElementById('status');
+        
+        function updateStatus() {
+            if (document.body.classList.contains('modal-open')) {
+                status.textContent = '🔒 Body scroll: BLOQUEADO (no puedes hacer scroll)';
+                status.className = 'status locked';
+            } else {
+                status.textContent = '✅ Body scroll: DESBLOQUEADO (puedes hacer scroll)';
+                status.className = 'status unlocked';
+            }
+        }
+        
+        openBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            updateStatus();
+        });
+        
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            updateStatus();
+        });
+        
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                updateStatus();
+            }
+        });
+        
+        // Initial status
+        updateStatus();
+    </script>
+</body>
+</html>
