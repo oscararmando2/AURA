@@ -116,7 +116,7 @@ This fix resolves the issue where appointments scheduled manually in the admin p
 
 ---
 
-**Implemented by:** GitHub Copilot AI  
+**Implemented by:** GitHub Copilot  
 **Reviewed by:** oscararmando2  
 **Version:** 1.0.0  
 **Status:** ✅ Completed
