@@ -5382,7 +5382,6 @@
          * @param {number} currentCount - Número actual de reservas para este horario
          */
         function createTimeSlotButton(dateStr, time, currentCount = 0) {
-            const MAX_CAPACITY = 5;
             const button = document.createElement('button');
             const isFull = currentCount >= MAX_CAPACITY;
             const time12h = formatTimeTo12Hour(time);
@@ -5427,8 +5426,6 @@
          * Solo pedir datos al final cuando todas las clases estén seleccionadas
          */
         async function selectTimeSlot(dateStr, time) {
-            const MAX_CAPACITY = 5;
-            
             // Cerrar modal de selección de horario
             document.getElementById('time-selection-modal').style.display = 'none';
             document.body.style.overflow = '';
@@ -7315,7 +7312,6 @@
             }
             
             // Check capacity for this time slot (max 5 people per slot)
-            const MAX_CAPACITY = 5;
             let currentCount = 0;
             
             // Count existing reservations at this time slot
@@ -8879,6 +8875,7 @@
         const COUNTRY_CODE = '52'; // Mexico country code
         const DEFAULT_NAME = 'Sin nombre';
         const DEFAULT_PHONE = 'Sin teléfono';
+        const MAX_CAPACITY = 5; // Maximum number of people per time slot
         
         // Constants for Firebase initialization
         const MAX_FIREBASE_INIT_ATTEMPTS = 20;
