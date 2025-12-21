@@ -278,7 +278,7 @@ export default async function handler(req, res) {
 
       doc.fontSize(8)
          .font('Helvetica')
-         .text(`Página ${i + 1} de ${pages.count}`, 50, 760, { align: 'center', width: 512 });
+         .text(`Página ${i - pages.start + 1} de ${pages.count}`, 50, 760, { align: 'center', width: 512 });
     }
 
     // Finalize PDF and wait for completion
