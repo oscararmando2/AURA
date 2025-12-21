@@ -7274,6 +7274,7 @@
                 slotLabelInterval: '01:00',
                 selectable: true,
                 selectMirror: true,
+                selectOverlap: true, // Allow selecting slots with existing events (max 5 per slot)
                 buttonText: {
                     today: 'Hoy',
                     week: 'Semana',
@@ -7311,6 +7312,49 @@
                 alert('⚠️ Este horario ya está seleccionado');
                 adminScheduleState.scheduleCalendar.unselect();
                 return;
+            }
+            
+            // Check capacity for this time slot (max 5 people per slot)
+            const MAX_CAPACITY = 5;
+            let currentCount = 0;
+            
+            // Count existing reservations at this time slot
+            if (allReservationsData && allReservationsData.length > 0) {
+                allReservationsData.forEach(event => {
+                    if (event.start && event.start.getTime() === startDate.getTime()) {
+                        // Check if it's a grouped event with multiple participants
+                        if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
+                            currentCount += event.extendedProps.participants.length;
+                        } else {
+                            currentCount++;
+                        }
+                    }
+                });
+            }
+            
+            // Check if slot is full
+            if (currentCount >= MAX_CAPACITY) {
+                const timeStr = startDate.toLocaleString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                alert(`⚠️ Este horario ya está completo.\n\n${timeStr}\n\nCapacidad: ${currentCount}/${MAX_CAPACITY} personas\n\nPor favor, selecciona otro horario disponible.`);
+                adminScheduleState.scheduleCalendar.unselect();
+                return;
+            }
+            
+            // Warn if approaching capacity (4 out of 5)
+            if (currentCount >= MAX_CAPACITY - 1) {
+                const available = MAX_CAPACITY - currentCount;
+                const timeStr = startDate.toLocaleString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                console.log(`⚠️ Atención: Solo ${available} lugar${available !== 1 ? 'es' : ''} disponible${available !== 1 ? 's' : ''} en ${timeStr} (${currentCount}/${MAX_CAPACITY})`);
             }
             
             // Add to selected dates
