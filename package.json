@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "mercadopago": "^2.0.9"
+    "mercadopago": "^2.0.9",
+    "pdfkit": "^0.17.2"
   }
 }

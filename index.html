@@ -7670,9 +7670,9 @@
                 btnExport.textContent = '⏳ Generando PDF...';
                 btnExport.disabled = true;
                 
-                // Send data to PHP endpoint
+                // Send data to API endpoint
                 console.log('🔗 Enviando datos al servidor...');
-                const response = await fetch('exportar_calendario.php', {
+                const response = await fetch('/api/exportar-calendario', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -7684,28 +7684,47 @@
                 
                 // Check if response is ok
                 if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+                    // Try to parse error message
+                    let errorMsg = `HTTP ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) {
+                        // Response is not JSON
+                    }
+                    throw new Error(`Error HTTP: ${response.status} - ${errorMsg}`);
                 }
                 
-                const result = await response.json();
-                console.log('📄 Resultado:', result);
+                // For PDF response, create blob and download
+                const blob = await response.blob();
+                console.log('📄 PDF generado, tamaño:', blob.size);
                 
-                if (result.success) {
-                    // Download the generated PDF
-                    const link = document.createElement('a');
-                    link.href = result.filepath;
-                    link.download = result.filename;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    console.log(`✅ Calendario exportado: ${result.filename}`);
-                    alert(`✅ Calendario exportado exitosamente\n\nArchivo: ${result.filename}`);
-                } else {
-                    console.error('❌ Error al exportar:', result.error);
-                    alert(`❌ Error al exportar el calendario:\n\n${result.error}\n\nVerifica que el servidor tenga permisos de escritura.`);
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Get filename from response header or use default
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'calendario_reservas_aura.pdf';
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="?(.+)"?/i);
+                    if (filenameMatch && filenameMatch[1]) {
+                        filename = filenameMatch[1];
+                    }
                 }
+                
+                link.download = filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL
+                window.URL.revokeObjectURL(url);
+                
+                console.log(`✅ Calendario exportado: ${filename}`);
+                alert(`✅ Calendario exportado exitosamente\n\nArchivo: ${filename}`);
                 
                 // Restore button
                 btnExport.textContent = originalText;
