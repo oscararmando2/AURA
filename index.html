@@ -2244,7 +2244,7 @@
         .stat-card .stat-value {
             font-size: 2rem;
             font-weight: 700;
-            color: #EFE9E1;
+            color: #000000;
             margin-bottom: 5px;
         }
 
@@ -3881,9 +3881,7 @@
                     <input type="text" id="search-client" placeholder="🔍 Buscar por nombre o teléfono..." style="flex: 1; min-width: 200px;">
                     <input type="date" id="filter-date-start" placeholder="Desde">
                     <input type="date" id="filter-date-end" placeholder="Hasta">
-                    <button type="button" id="btn-filter-apply">🔍 Filtrar</button>
-                    <button type="button" id="btn-filter-clear">✖️ Limpiar</button>
-                    <button type="button" id="btn-refresh-calendar">🔄 Actualizar</button>
+
                     <button type="button" id="btn-export-calendar">📥 Exportar</button>
                     <button type="button" id="btn-schedule-admin">📅 Agendar</button>
                 </div>
@@ -6995,12 +6993,7 @@
                 }, 300);
             });
             
-            // Filter buttons
-            document.getElementById('btn-filter-apply').addEventListener('click', applyFilters);
-            document.getElementById('btn-filter-clear').addEventListener('click', clearFilters);
-            document.getElementById('btn-refresh-calendar').addEventListener('click', () => {
-                loadAdminCalendarReservations();
-            });
+            // Filter buttons (removed filter/clear/refresh buttons, keeping only export and schedule)
             document.getElementById('btn-export-calendar').addEventListener('click', exportCalendarData);
             document.getElementById('btn-schedule-admin').addEventListener('click', openAdminScheduleModal);
             
