@@ -50,16 +50,18 @@ export default async function handler(req, res) {
       margins: { top: 50, bottom: 50, left: 50, right: 50 }
     });
 
-    // Set response headers for PDF download
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
-    const filename = `calendario_reservas_aura_${timestamp}.pdf`;
+    // Collect PDF data in buffer
+    const buffers = [];
+    doc.on('data', buffers.push.bind(buffers));
     
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
-    // Pipe PDF to response
-    doc.pipe(res);
+    // Return promise that resolves when PDF is complete
+    const pdfPromise = new Promise((resolve, reject) => {
+      doc.on('end', () => {
+        const pdfBuffer = Buffer.concat(buffers);
+        resolve(pdfBuffer);
+      });
+      doc.on('error', reject);
+    });
 
     // Brand colors
     const brandBrown = '#8B6E55';
@@ -267,10 +269,25 @@ export default async function handler(req, res) {
          .text(`Página ${i + 1} de ${pages.count}`, 50, 760, { align: 'center', width: 512 });
     }
 
-    // Finalize PDF
+    // Finalize PDF and wait for completion
     doc.end();
+    
+    // Wait for PDF to be generated
+    const pdfBuffer = await pdfPromise;
 
-    console.log(`✅ PDF generado exitosamente: ${filename}`);
+    // Set response headers for PDF download
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    const filename = `calendario_reservas_aura_${timestamp}.pdf`;
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Length', pdfBuffer.length);
+
+    // Send PDF buffer
+    res.status(200).send(pdfBuffer);
+
+    console.log(`✅ PDF generado exitosamente: ${filename} (${pdfBuffer.length} bytes)`);
 
   } catch (error) {
     console.error('❌ Error al generar PDF:', error);
