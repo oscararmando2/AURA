@@ -3878,7 +3878,7 @@
             <!-- Calendar Controls -->
             <div id="admin-calendar-controls" style="display: none;">
                 <div class="admin-calendar-controls">
-                    <input type="text" id="search-client" placeholder="🔍 Buscar por cliente..." style="flex: 1; min-width: 200px;">
+                    <input type="text" id="search-client" placeholder="🔍 Buscar por nombre o teléfono..." style="flex: 1; min-width: 200px;">
                     <input type="date" id="filter-date-start" placeholder="Desde">
                     <input type="date" id="filter-date-end" placeholder="Hasta">
                     <button type="button" id="btn-filter-apply">🔍 Filtrar</button>
@@ -7517,12 +7517,25 @@
         /**
          * Apply filters to calendar
          */
+        /**
+         * Normalize phone number for search by removing formatting characters
+         * Removes: spaces, dashes (-), parentheses (()), plus signs (+), and dots (.)
+         */
+        function normalizePhoneNumber(phone) {
+            if (!phone) return '';
+            // Remove spaces, dashes, parentheses, plus signs, and dots
+            return phone.replace(/[\s\-\(\)\+\.]/g, '');
+        }
+        
         function applyFilters() {
             if (!adminCalendar || !allReservationsData) return;
             
-            const searchText = document.getElementById('search-client').value.toLowerCase();
+            const searchText = document.getElementById('search-client').value.toLowerCase().trim();
             const dateStart = document.getElementById('filter-date-start').value;
             const dateEnd = document.getElementById('filter-date-end').value;
+            
+            // Normalize search text if it looks like a phone number (contains only digits)
+            const normalizedSearchText = normalizePhoneNumber(searchText);
             
             // Clear current events
             adminCalendar.getEvents().forEach(event => event.remove());
@@ -7539,13 +7552,34 @@
                         matchFound = event.extendedProps.participants.some(participant => {
                             const fullName = (participant.fullName || '').toLowerCase();
                             const telefono = (participant.telefono || '').toLowerCase();
-                            return fullName.includes(searchText) || telefono.includes(searchText);
+                            const normalizedTelefono = normalizePhoneNumber(telefono);
+                            
+                            // Search in name
+                            if (fullName.includes(searchText)) return true;
+                            
+                            // Search in phone number (both formatted and normalized)
+                            if (telefono.includes(searchText)) return true;
+                            if (normalizedSearchText && normalizedTelefono.includes(normalizedSearchText)) return true;
+                            
+                            return false;
                         });
                     } else {
                         // Single event search
                         const fullName = (event.extendedProps.fullName || '').toLowerCase();
                         const telefono = (event.extendedProps.telefono || '').toLowerCase();
-                        matchFound = fullName.includes(searchText) || telefono.includes(searchText);
+                        const normalizedTelefono = normalizePhoneNumber(telefono);
+                        
+                        // Search in name
+                        if (fullName.includes(searchText)) {
+                            matchFound = true;
+                        }
+                        // Search in phone number (both formatted and normalized)
+                        else if (telefono.includes(searchText)) {
+                            matchFound = true;
+                        }
+                        else if (normalizedSearchText && normalizedTelefono.includes(normalizedSearchText)) {
+                            matchFound = true;
+                        }
                     }
                     
                     if (!matchFound) {
