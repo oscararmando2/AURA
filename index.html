@@ -7033,27 +7033,6 @@
          * Setup admin schedule modal event handlers
          */
         function setupAdminScheduleModalHandlers() {
-            // Close buttons for both steps (modal version - keep for backward compatibility)
-            const modalCloseBtn = document.getElementById('admin-schedule-close');
-            const modalCloseStep2Btn = document.getElementById('admin-schedule-close-step2');
-            const modalCancelBtn = document.getElementById('admin-schedule-cancel-step1');
-            
-            if (modalCloseBtn) modalCloseBtn.addEventListener('click', closeAdminScheduleModal);
-            if (modalCloseStep2Btn) modalCloseStep2Btn.addEventListener('click', closeAdminScheduleModal);
-            if (modalCancelBtn) modalCancelBtn.addEventListener('click', closeAdminScheduleModal);
-            
-            // Package selection buttons (modal version)
-            document.querySelectorAll('.admin-package-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remove selected class from all buttons
-                    document.querySelectorAll('.admin-package-btn').forEach(b => b.classList.remove('selected'));
-                    // Add selected class to clicked button
-                    this.classList.add('selected');
-                    // Store package size
-                    document.getElementById('admin-schedule-package').value = this.dataset.classes;
-                });
-            });
-            
             // Package selection buttons (fullpage version)
             document.querySelectorAll('.admin-package-btn-fullpage').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -7084,44 +7063,16 @@
                 nextBtnFullpage.addEventListener('click', goToScheduleStep2);
             }
             
-            // Modal version buttons
-            const nextBtn = document.getElementById('admin-schedule-next');
-            if (nextBtn) {
-                nextBtn.addEventListener('click', goToScheduleStep2);
-            }
-            
             // Back button (step 2 to step 1) - fullpage
             const backBtnFullpage = document.getElementById('admin-schedule-back-fullpage');
             if (backBtnFullpage) {
                 backBtnFullpage.addEventListener('click', goToScheduleStep1);
             }
             
-            // Modal version
-            const backBtnModal = document.getElementById('admin-schedule-back');
-            if (backBtnModal) {
-                backBtnModal.addEventListener('click', goToScheduleStep1);
-            }
-            
             // Confirm button (save all reservations) - fullpage
             const confirmBtnFullpage = document.getElementById('admin-schedule-confirm-fullpage');
             if (confirmBtnFullpage) {
                 confirmBtnFullpage.addEventListener('click', confirmAdminSchedule);
-            }
-            
-            // Modal version
-            const confirmBtn = document.getElementById('admin-schedule-confirm');
-            if (confirmBtn) {
-                confirmBtn.addEventListener('click', confirmAdminSchedule);
-            }
-            
-            // Close modal on background click (modal version)
-            const modal = document.getElementById('admin-schedule-modal');
-            if (modal) {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closeAdminScheduleModal();
-                    }
-                });
             }
         }
         
@@ -7449,8 +7400,8 @@
                 if (!confirmed) return;
             }
             
-            // Try to find confirm button (fullpage or modal)
-            const confirmBtn = document.getElementById('admin-schedule-confirm-fullpage') || document.getElementById('admin-schedule-confirm');
+            // Get the fullpage confirm button
+            const confirmBtn = document.getElementById('admin-schedule-confirm-fullpage');
             if (!confirmBtn) return;
             
             const originalText = confirmBtn.textContent;
@@ -7486,15 +7437,8 @@
                     alert(`⚠️ ${successCount} clases guardadas, ${failCount} fallaron.\n\nPor favor, revisa el calendario.`);
                 }
                 
-                // Close scheduling interface (modal or fullpage)
-                const schedulingSection = document.getElementById('admin-scheduling-section');
-                if (schedulingSection && schedulingSection.style.display !== 'none') {
-                    // We're in fullpage mode, go back to admin panel
-                    showAdminPanel();
-                } else {
-                    // We're in modal mode
-                    closeAdminScheduleModal();
-                }
+                // Return to admin panel
+                showAdminPanel();
                 
                 // Reload admin calendar
                 if (typeof loadAdminCalendarReservations === 'function') {
