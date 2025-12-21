@@ -8499,16 +8499,13 @@
                 hoursElement.style.color = '#C51162';
             } else {
                 // After evening closing - determine next opening day
-                let nextOpening;
+                let nextOpening = 'mañana'; // Default for Monday-Thursday
                 if (dayOfWeek === 6) {
                     // Saturday evening -> opens Monday
                     nextOpening = 'el Lunes';
                 } else if (dayOfWeek === 5) {
                     // Friday evening -> opens Saturday
                     nextOpening = 'mañana Sábado';
-                } else {
-                    // Monday-Thursday evening -> opens tomorrow
-                    nextOpening = 'mañana';
                 }
                 hoursElement.innerHTML = `🔴 <strong>Cerrado</strong><br>Abrimos ${nextOpening} a las 06:00 a.m.`;
                 hoursElement.style.color = '#C51162';
