@@ -7294,20 +7294,24 @@
                 },
                 // Load existing reservations to show occupied slots
                 events: function(_info, successCallback, _failureCallback) {
-                    console.log('📅 Loading events for schedule calendar:', allReservationsData.length);
+                    const eventsCount = allReservationsData?.length || 0;
+                    console.log('📅 Loading events for schedule calendar:', eventsCount);
                     successCallback(allReservationsData || []);
                 },
                 // Log when view is mounted
                 viewDidMount: function(_info) {
-                    const events = adminScheduleState.scheduleCalendar.getEvents();
-                    console.log('✅ Calendar view mounted with events:', events.length);
-                    if (events.length > 0) {
-                        console.log('📋 Sample events:', events.slice(0, 3).map(e => ({
-                            title: e.title,
-                            start: e.start,
-                            isGrouped: e.extendedProps?.isGrouped
-                        })));
-                    }
+                    // Use nextTick to ensure events are fully rendered
+                    setTimeout(() => {
+                        const events = adminScheduleState.scheduleCalendar?.getEvents() || [];
+                        console.log('✅ Calendar view mounted with events:', events.length);
+                        if (events.length > 0) {
+                            console.log('📋 Sample events:', events.slice(0, 3).map(e => ({
+                                title: e.title,
+                                start: e.start,
+                                isGrouped: e.extendedProps?.isGrouped
+                            })));
+                        }
+                    }, 0);
                 }
             });
             
