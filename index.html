@@ -2538,9 +2538,14 @@
             overflow-y: auto;
         }
 
+        /* Admin schedule modal default width */
+        #admin-schedule-modal-content {
+            max-width: 800px;
+        }
+
         /* Adjust modal width when step 2 is active */
         #admin-schedule-modal-content.step2-active {
-            max-width: 1400px !important;
+            max-width: 1400px;
         }
 
         /* Mobile responsive: stack vertically on smaller screens */
@@ -2556,8 +2561,9 @@
                 max-height: 500px;
             }
 
-            #admin-schedule-modal-content {
-                max-width: 95% !important;
+            #admin-schedule-modal-content,
+            #admin-schedule-modal-content.step2-active {
+                max-width: 95%;
             }
         }
 
@@ -3847,7 +3853,7 @@
         
         <!-- Admin Schedule Modal - Multi-Step Interface -->
         <div id="admin-schedule-modal" class="event-detail-modal">
-            <div class="event-detail-content" id="admin-schedule-modal-content" style="max-width: 800px;">
+            <div class="event-detail-content" id="admin-schedule-modal-content">
                 <!-- Step 1: Client Info & Package Selection -->
                 <div id="admin-schedule-step1">
                     <div class="event-detail-header">
@@ -6896,7 +6902,6 @@
             document.getElementById('admin-schedule-step1').style.display = 'block';
             document.getElementById('admin-schedule-step2').style.display = 'none';
             
-            // Reset modal width to default
             // Reset modal width to default by removing class
             const modalContent = document.getElementById('admin-schedule-modal-content');
             if (modalContent) {
