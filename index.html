@@ -7112,7 +7112,10 @@
          */
         function showAdminPanel() {
             // Hide scheduling section
-            document.getElementById('admin-scheduling-section').style.display = 'none';
+            const schedulingSection = document.getElementById('admin-scheduling-section');
+            if (schedulingSection) {
+                schedulingSection.style.display = 'none';
+            }
             
             // Show header and menu
             const header = document.querySelector('.site-header');
@@ -7122,10 +7125,12 @@
             if (hamburger) hamburger.style.display = 'flex';
             
             // Show admin panel
-            document.getElementById('admin-panel-section').style.display = 'block';
-            
-            // Scroll to admin panel
-            document.getElementById('admin-panel-section').scrollIntoView({ behavior: 'smooth' });
+            const adminPanel = document.getElementById('admin-panel-section');
+            if (adminPanel) {
+                adminPanel.style.display = 'block';
+                // Scroll to admin panel
+                adminPanel.scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
         /**
@@ -7402,7 +7407,11 @@
             
             // Get the fullpage confirm button
             const confirmBtn = document.getElementById('admin-schedule-confirm-fullpage');
-            if (!confirmBtn) return;
+            if (!confirmBtn) {
+                console.error('❌ Confirm button not found');
+                alert('❌ Error: No se encontró el botón de confirmación. Por favor recarga la página.');
+                return;
+            }
             
             const originalText = confirmBtn.textContent;
             confirmBtn.textContent = '⏳ Guardando...';
