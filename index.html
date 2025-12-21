@@ -7519,10 +7519,11 @@
          */
         /**
          * Normalize phone number for search by removing formatting characters
+         * Removes: spaces, dashes (-), parentheses (()), plus signs (+), and dots (.)
          */
         function normalizePhoneNumber(phone) {
             if (!phone) return '';
-            // Remove spaces, dashes, parentheses, and other common phone formatting
+            // Remove spaces, dashes, parentheses, plus signs, and dots
             return phone.replace(/[\s\-\(\)\+\.]/g, '');
         }
         
@@ -7569,11 +7570,16 @@
                         const normalizedTelefono = normalizePhoneNumber(telefono);
                         
                         // Search in name
-                        if (fullName.includes(searchText)) matchFound = true;
-                        
+                        if (fullName.includes(searchText)) {
+                            matchFound = true;
+                        }
                         // Search in phone number (both formatted and normalized)
-                        if (telefono.includes(searchText)) matchFound = true;
-                        if (normalizedSearchText && normalizedTelefono.includes(normalizedSearchText)) matchFound = true;
+                        else if (telefono.includes(searchText)) {
+                            matchFound = true;
+                        }
+                        else if (normalizedSearchText && normalizedTelefono.includes(normalizedSearchText)) {
+                            matchFound = true;
+                        }
                     }
                     
                     if (!matchFound) {
