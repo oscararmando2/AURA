@@ -7129,6 +7129,13 @@
          * Hide all main sections
          */
         function hideAllSections() {
+            // Hide header and menu
+            const header = document.querySelector('.site-header');
+            if (header) header.style.display = 'none';
+            
+            const hamburger = document.getElementById('hamburger-container');
+            if (hamburger) hamburger.style.display = 'none';
+            
             // Hide all main page sections
             const sections = [
                 'hero-section',
@@ -7155,6 +7162,13 @@
         function showAdminPanel() {
             // Hide scheduling section
             document.getElementById('admin-scheduling-section').style.display = 'none';
+            
+            // Show header and menu
+            const header = document.querySelector('.site-header');
+            if (header) header.style.display = 'block';
+            
+            const hamburger = document.getElementById('hamburger-container');
+            if (hamburger) hamburger.style.display = 'flex';
             
             // Show admin panel
             document.getElementById('admin-panel-section').style.display = 'block';
