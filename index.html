@@ -8472,7 +8472,7 @@
             
             // Check if it's Sunday (closed)
             if (dayOfWeek === 0) {
-                hoursElement.innerHTML = '🔴 <strong>Cerrado hoy</strong> (Domingo)<br>Abrimos mañana Lunes a las 06:00 a.m.';
+                hoursElement.innerHTML = '🔴 <strong>Cerrado hoy</strong> (Domingo)<br>Abrimos el Lunes a las 06:00 a.m.';
                 hoursElement.style.color = '#C51162';
                 return;
             }
@@ -8498,9 +8498,19 @@
                 hoursElement.innerHTML = '🔴 <strong>Cerrado</strong> (Hora de comida)<br>Abrimos a las 05:00 p.m.';
                 hoursElement.style.color = '#C51162';
             } else {
-                // After evening closing
-                const tomorrow = dayOfWeek === 6 ? 'Lunes' : 'mañana'; // If Saturday, next is Monday
-                hoursElement.innerHTML = `🔴 <strong>Cerrado</strong><br>Abrimos ${tomorrow} a las 06:00 a.m.`;
+                // After evening closing - determine next opening day
+                let nextOpening;
+                if (dayOfWeek === 6) {
+                    // Saturday evening -> opens Monday
+                    nextOpening = 'el Lunes';
+                } else if (dayOfWeek === 5) {
+                    // Friday evening -> opens Saturday
+                    nextOpening = 'mañana Sábado';
+                } else {
+                    // Monday-Thursday evening -> opens tomorrow
+                    nextOpening = 'mañana';
+                }
+                hoursElement.innerHTML = `🔴 <strong>Cerrado</strong><br>Abrimos ${nextOpening} a las 06:00 a.m.`;
                 hoursElement.style.color = '#C51162';
             }
         }
