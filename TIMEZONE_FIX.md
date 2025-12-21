@@ -120,3 +120,16 @@ This fix resolves the issue where appointments scheduled manually in the admin p
 **Reviewed by:** oscararmando2  
 **Version:** 1.0.0  
 **Status:** ✅ Completed
+
+---
+
+## 📌 Known Related Issues
+
+### Export Function Date Handling
+There is a similar timezone issue in the export function (line 7681) where `toISOString().split('T')[0]` is used to extract the date. This can cause date mismatches when exporting late-night bookings (e.g., 11:30 PM Dec 21 might show as Dec 22 in the PDF).
+
+**Example:**
+- Booking: 11:30 PM Dec 21 (Mexico City)
+- PDF shows: Dec 22 at 23:30 (date doesn't match time)
+
+This is a separate issue and was not addressed in this fix to keep changes minimal and focused on the scheduling bug. If needed, this can be fixed in a future PR using a similar approach.
