@@ -2,6 +2,15 @@ import PDFDocument from 'pdfkit';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+// Configuration constants
+const LOGO_FILENAME = 'auralogo2.png';
+const BRAND_COLORS = {
+  brown: '#8B6E55',
+  cream: '#EFE9E1',
+  darkText: '#503C2D',
+  lightGray: '#787878'
+};
+
 export default async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -64,14 +73,14 @@ export default async function handler(req, res) {
     });
 
     // Brand colors
-    const brandBrown = '#8B6E55';
-    const brandCream = '#EFE9E1';
-    const darkText = '#503C2D';
-    const lightGray = '#787878';
+    const brandBrown = BRAND_COLORS.brown;
+    const brandCream = BRAND_COLORS.cream;
+    const darkText = BRAND_COLORS.darkText;
+    const lightGray = BRAND_COLORS.lightGray;
 
     // Add logo (if available)
     try {
-      const logoPath = join(process.cwd(), 'auralogo2.png');
+      const logoPath = join(process.cwd(), LOGO_FILENAME);
       const logoBuffer = readFileSync(logoPath);
       doc.image(logoBuffer, 50, 40, { width: 80 });
     } catch (err) {
@@ -130,8 +139,10 @@ export default async function handler(req, res) {
         currentY = 50;
       }
 
-      // Format date
-      const dateObj = new Date(date + 'T12:00:00');
+      // Format date - parse in UTC to avoid timezone issues
+      // Date is in YYYY-MM-DD format, parse safely
+      const [yearNum, monthNum, dayNum] = date.split('-').map(Number);
+      const dateObj = new Date(yearNum, monthNum - 1, dayNum);
       const dayName = dias[dateObj.getDay()];
       const day = dateObj.getDate();
       const month = meses[dateObj.getMonth()];
@@ -276,7 +287,9 @@ export default async function handler(req, res) {
     const pdfBuffer = await pdfPromise;
 
     // Set response headers for PDF download
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+    // Generate timestamp for filename: YYYY-MM-DD_HHMMSS
+    const currentDate = new Date();
+    const timestamp = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}_${String(currentDate.getHours()).padStart(2, '0')}${String(currentDate.getMinutes()).padStart(2, '0')}${String(currentDate.getSeconds()).padStart(2, '0')}`;
     const filename = `calendario_reservas_aura_${timestamp}.pdf`;
     
     res.setHeader('Content-Type', 'application/pdf');
