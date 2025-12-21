@@ -7248,6 +7248,9 @@
         function initAdminScheduleCalendar() {
             const calendarEl = document.getElementById('admin-schedule-calendar-fullpage');
             
+            console.log('🎨 Initializing admin schedule calendar...');
+            console.log('📊 Reservations data available:', allReservationsData ? allReservationsData.length : 0);
+            
             // Destroy existing calendar if any
             if (adminScheduleState.scheduleCalendar) {
                 adminScheduleState.scheduleCalendar.destroy();
@@ -7284,6 +7287,7 @@
                 },
                 // Handle time slot selection
                 select: function(info) {
+                    console.log('🎯 Time slot selected:', info.start.toLocaleString('es-ES'));
                     handleAdminTimeSlotSelect(info);
                 },
                 // Load existing reservations to show occupied slots
@@ -7294,6 +7298,19 @@
             });
             
             adminScheduleState.scheduleCalendar.render();
+            
+            // Log the rendered events after calendar renders
+            setTimeout(() => {
+                const events = adminScheduleState.scheduleCalendar.getEvents();
+                console.log('✅ Calendar rendered with events:', events.length);
+                if (events.length > 0) {
+                    console.log('📋 Sample events:', events.slice(0, 3).map(e => ({
+                        title: e.title,
+                        start: e.start,
+                        isGrouped: e.extendedProps?.isGrouped
+                    })));
+                }
+            }, 100);
         }
         
         /**
