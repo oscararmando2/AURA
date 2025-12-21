@@ -2291,7 +2291,22 @@
         
         /* Asegurar que el contenedor del calendario permita el desbordamiento */
         #admin-calendar .fc-view-harness {
-            overflow: visible !important;
+            overflow: visible;
+        }
+        
+        /* Hint message for horizontal scrolling */
+        .calendar-scroll-hint {
+            text-align: center;
+            padding: 15px;
+            background: rgba(239, 233, 225, 0.3);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #666;
+        }
+        
+        .calendar-scroll-hint span {
+            font-weight: 600;
         }
 
         /* Admin calendar event styling - Mejorado para mejor visibilidad */
@@ -3721,8 +3736,8 @@
             
             <!-- Calendar View for Admin -->
             <div id="admin-calendar-view" style="display: none;">
-                <div style="text-align: center; padding: 15px; background: rgba(239, 233, 225, 0.3); border-radius: 10px; margin-bottom: 20px; font-size: 0.95rem; color: #666;">
-                    <span style="font-weight: 600;">💡 Consejo:</span> Desliza horizontalmente para ver todos los días de la semana →
+                <div class="calendar-scroll-hint">
+                    <span>💡 Consejo:</span> Desliza horizontalmente para ver todos los días de la semana →
                 </div>
                 <div id="admin-calendar"></div>
             </div>
