@@ -2257,8 +2257,41 @@
         #admin-calendar {
             min-height: 1000px; /* Aumentado de 900px a 1000px */
             border-radius: 15px;
-            overflow: hidden;
+            overflow-x: auto; /* Permitir scroll horizontal */
+            overflow-y: visible;
             width: 100%;
+            /* Asegurar que el calendario tenga suficiente espacio horizontal */
+            min-width: 100%;
+        }
+        
+        /* Estilo para la barra de scroll horizontal del calendario admin */
+        #admin-calendar::-webkit-scrollbar {
+            height: 12px;
+        }
+        
+        #admin-calendar::-webkit-scrollbar-track {
+            background: rgba(239, 233, 225, 0.1);
+            border-radius: 10px;
+        }
+        
+        #admin-calendar::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #EFE9E1, #D4C5B9);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        #admin-calendar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(90deg, #D4C5B9, #C4B5A9);
+        }
+        
+        /* Asegurar que las columnas de días tengan ancho mínimo adecuado */
+        #admin-calendar .fc-timegrid-col {
+            min-width: 150px; /* Ancho mínimo para cada columna de día */
+        }
+        
+        /* Asegurar que el contenedor del calendario permita el desbordamiento */
+        #admin-calendar .fc-view-harness {
+            overflow: visible !important;
         }
 
         /* Admin calendar event styling - Mejorado para mejor visibilidad */
@@ -2867,6 +2900,13 @@
             #admin-calendar {
                 min-height: 850px; /* Aumentado de 750px a 850px para mejor visibilidad en móvil */
                 width: 100%;
+                overflow-x: auto; /* Permitir scroll horizontal en móvil */
+                -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
+            }
+            
+            /* Asegurar que las columnas tengan ancho mínimo en móvil */
+            #admin-calendar .fc-timegrid-col {
+                min-width: 120px; /* Ancho mínimo en móvil */
             }
 
             #admin-calendar .fc-timegrid-slot {
@@ -3681,6 +3721,9 @@
             
             <!-- Calendar View for Admin -->
             <div id="admin-calendar-view" style="display: none;">
+                <div style="text-align: center; padding: 15px; background: rgba(239, 233, 225, 0.3); border-radius: 10px; margin-bottom: 20px; font-size: 0.95rem; color: #666;">
+                    <span style="font-weight: 600;">💡 Consejo:</span> Desliza horizontalmente para ver todos los días de la semana →
+                </div>
                 <div id="admin-calendar"></div>
             </div>
             
