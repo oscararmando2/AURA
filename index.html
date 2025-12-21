@@ -7271,7 +7271,12 @@
                 slotLabelInterval: '01:00',
                 selectable: true,
                 selectMirror: true,
-                selectOverlap: true, // Allow selecting slots with existing events (max 5 per slot)
+                selectOverlap: function(event) {
+                    // Always allow selection over existing events
+                    // Capacity will be checked in handleAdminTimeSlotSelect
+                    return true;
+                },
+                eventOverlap: true, // Also allow events to overlap each other
                 buttonText: {
                     today: 'Hoy',
                     week: 'Semana',
@@ -7282,7 +7287,10 @@
                     handleAdminTimeSlotSelect(info);
                 },
                 // Load existing reservations to show occupied slots
-                events: allReservationsData || []
+                events: function(info, successCallback, failureCallback) {
+                    console.log('📅 Loading events for schedule calendar:', allReservationsData.length);
+                    successCallback(allReservationsData || []);
+                }
             });
             
             adminScheduleState.scheduleCalendar.render();
@@ -7314,10 +7322,20 @@
             // Check capacity for this time slot (max 5 people per slot)
             let currentCount = 0;
             
+            // Debug logging
+            console.log('🔍 Checking capacity for time slot:', startDate.toLocaleString('es-ES'));
+            console.log('📊 Total reservations in system:', allReservationsData ? allReservationsData.length : 0);
+            
             // Count existing reservations at this time slot
             if (allReservationsData && allReservationsData.length > 0) {
                 allReservationsData.forEach(event => {
                     if (event.start && event.start.getTime() === startDate.getTime()) {
+                        console.log('✅ Found matching reservation:', {
+                            title: event.title,
+                            isGrouped: event.extendedProps?.isGrouped,
+                            participants: event.extendedProps?.participants?.length || 1
+                        });
+                        
                         // Check if it's a grouped event with multiple participants
                         if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
                             currentCount += event.extendedProps.participants.length;
@@ -7327,6 +7345,8 @@
                     }
                 });
             }
+            
+            console.log(`📈 Current capacity: ${currentCount}/${MAX_CAPACITY}`);
             
             // Check if slot is full
             if (currentCount >= MAX_CAPACITY) {
