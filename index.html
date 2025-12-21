@@ -2523,7 +2523,7 @@
 
         .admin-schedule-calendar-wrapper {
             flex: 1;
-            min-width: 0; /* Important for flex items to shrink properly */
+            min-width: 0; /* important for flex items to shrink properly */
         }
 
         .admin-selected-times-wrapper {
@@ -2539,12 +2539,7 @@
         }
 
         /* Adjust modal width when step 2 is active */
-        #admin-schedule-step2:not([style*="display: none"]) ~ #admin-schedule-modal-content,
-        #admin-schedule-step2 {
-            max-width: 1400px !important;
-        }
-
-        #admin-schedule-modal-content:has(#admin-schedule-step2:not([style*="display: none"])) {
+        #admin-schedule-modal-content.step2-active {
             max-width: 1400px !important;
         }
 
@@ -6902,9 +6897,10 @@
             document.getElementById('admin-schedule-step2').style.display = 'none';
             
             // Reset modal width to default
+            // Reset modal width to default by removing class
             const modalContent = document.getElementById('admin-schedule-modal-content');
             if (modalContent) {
-                modalContent.style.maxWidth = '800px';
+                modalContent.classList.remove('step2-active');
             }
             
             // Show modal and lock body scroll
@@ -6951,10 +6947,10 @@
             document.getElementById('admin-schedule-step1').style.display = 'none';
             document.getElementById('admin-schedule-step2').style.display = 'block';
             
-            // Expand modal width for step 2 (desktop only)
+            // Expand modal width for step 2 by adding CSS class
             const modalContent = document.getElementById('admin-schedule-modal-content');
-            if (modalContent && window.innerWidth > 1024) {
-                modalContent.style.maxWidth = '1400px';
+            if (modalContent) {
+                modalContent.classList.add('step2-active');
             }
             
             // Initialize calendar for date/time selection
@@ -6975,10 +6971,10 @@
             document.getElementById('admin-schedule-step1').style.display = 'block';
             document.getElementById('admin-schedule-step2').style.display = 'none';
             
-            // Restore original modal width
+            // Restore original modal width by removing class
             const modalContent = document.getElementById('admin-schedule-modal-content');
             if (modalContent) {
-                modalContent.style.maxWidth = '800px';
+                modalContent.classList.remove('step2-active');
             }
         }
         
@@ -7244,10 +7240,10 @@
             document.getElementById('admin-schedule-step1').style.display = 'block';
             document.getElementById('admin-schedule-step2').style.display = 'none';
             
-            // Reset modal width to default
+            // Reset modal width to default by removing class
             const modalContent = document.getElementById('admin-schedule-modal-content');
             if (modalContent) {
-                modalContent.style.maxWidth = '800px';
+                modalContent.classList.remove('step2-active');
             }
             
             // Hide modal and unlock body scroll
