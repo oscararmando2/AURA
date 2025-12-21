@@ -2567,6 +2567,108 @@
             }
         }
 
+        /* Admin Scheduling Section - Full Page */
+        .admin-scheduling-section {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%);
+            padding: 40px 20px;
+        }
+
+        .admin-scheduling-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .admin-schedule-content {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(239, 233, 225, 0.3);
+        }
+
+        .admin-schedule-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #B8A99A;
+            padding-bottom: 20px;
+        }
+
+        .admin-schedule-header h2 {
+            color: #1a1a1a;
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .admin-schedule-body {
+            margin-bottom: 30px;
+        }
+
+        .admin-schedule-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid rgba(239, 233, 225, 0.3);
+        }
+
+        .admin-schedule-icon {
+            font-size: 1.8rem;
+            min-width: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-schedule-info {
+            flex: 1;
+        }
+
+        .admin-schedule-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .admin-schedule-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(239, 233, 225, 0.3);
+        }
+
+        .admin-package-btn-fullpage {
+            padding: 12px 16px;
+            border: 2px solid rgba(239, 233, 225, 0.5);
+            border-radius: 8px;
+            background: #fff;
+            color: #333;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .admin-package-btn-fullpage:hover {
+            border-color: #EFE9E1;
+            background: rgba(239, 233, 225, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .admin-package-btn-fullpage.selected {
+            border-color: #EFE9E1;
+            background: #EFE9E1;
+            color: #000;
+            font-weight: 600;
+        }
+
         /* Selected times list */
         .admin-selected-time-item {
             display: flex;
@@ -3927,6 +4029,94 @@
                     <div class="event-detail-actions">
                         <button type="button" class="btn-secondary" id="admin-schedule-back">← Atrás</button>
                         <button type="button" class="btn-primary" id="admin-schedule-confirm">✅ Confirmar Reservas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== 6.5. Admin Scheduling Section (Full Page) ========== -->
+    <section id="admin-scheduling-section" class="admin-scheduling-section" style="display: none;">
+        <div class="admin-scheduling-container">
+            <!-- Back Button -->
+            <div style="max-width: 1400px; margin: 0 auto; padding: 20px 20px 0 20px;">
+                <button type="button" id="back-to-admin-panel" class="btn-secondary" style="margin-bottom: 20px;">← Volver al Panel</button>
+            </div>
+            
+            <!-- Step 1: Client Info & Package Selection -->
+            <div id="admin-schedule-step1-fullpage">
+                <div class="admin-schedule-content">
+                    <div class="admin-schedule-header">
+                        <h2>📅 Agendar Nueva Clase - Paso 1/2</h2>
+                    </div>
+                    <div class="admin-schedule-body">
+                        <div class="admin-schedule-row">
+                            <div class="admin-schedule-icon">👤</div>
+                            <div class="admin-schedule-info" style="width: 100%;">
+                                <div class="admin-schedule-label">Nombre del Cliente *</div>
+                                <input type="text" id="admin-schedule-name-fullpage" required style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            </div>
+                        </div>
+                        <div class="admin-schedule-row">
+                            <div class="admin-schedule-icon">📱</div>
+                            <div class="admin-schedule-info" style="width: 100%;">
+                                <div class="admin-schedule-label">Teléfono * (10 dígitos)</div>
+                                <input type="tel" id="admin-schedule-phone-fullpage" required pattern="[0-9]{10}" placeholder="10 dígitos sin guiones" style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            </div>
+                        </div>
+                        <div class="admin-schedule-row">
+                            <div class="admin-schedule-icon">📦</div>
+                            <div class="admin-schedule-info" style="width: 100%;">
+                                <div class="admin-schedule-label">Número de Clases *</div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 10px;">
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="1">1 Clase</button>
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="4">4 Clases</button>
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="8">8 Clases</button>
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="12">12 Clases</button>
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="15">15 Clases</button>
+                                </div>
+                                <input type="hidden" id="admin-schedule-package-fullpage" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-schedule-actions">
+                        <button type="button" class="btn-secondary" id="admin-schedule-cancel-step1-fullpage">Cancelar</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-next-fullpage">Siguiente →</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Calendar Selection -->
+            <div id="admin-schedule-step2-fullpage" style="display: none;">
+                <div class="admin-schedule-content">
+                    <div class="admin-schedule-header">
+                        <h2>📅 Seleccionar Horarios - Paso 2/2</h2>
+                    </div>
+                    <div class="admin-schedule-body">
+                        <div style="background: linear-gradient(135deg, #B8A99A 0%, #D4C5B9 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                            <p style="margin: 0; color: #1a1a1a; font-size: 1.1rem; font-weight: 600;">
+                                <strong id="admin-schedule-client-name-display-fullpage" style="color: #1a1a1a;"></strong> - 
+                                <span id="admin-schedule-selected-count-fullpage" style="color: #1a1a1a; font-size: 1.3rem; font-weight: 700;">0</span> de 
+                                <span id="admin-schedule-total-classes-fullpage" style="color: #1a1a1a; font-size: 1.3rem; font-weight: 700;">0</span> clases seleccionadas
+                            </p>
+                        </div>
+                        <!-- Horizontal container for calendar and selected times on desktop -->
+                        <div class="admin-schedule-horizontal-container">
+                            <!-- Calendar for admin scheduling -->
+                            <div class="admin-schedule-calendar-wrapper">
+                                <div id="admin-schedule-calendar-fullpage"></div>
+                            </div>
+                            
+                            <!-- Selected times list -->
+                            <div id="admin-selected-times-container-fullpage" class="admin-selected-times-wrapper" style="display: none;">
+                                <h4 style="color: #1a1a1a; margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; border-bottom: 3px solid #B8A99A; padding-bottom: 15px; text-align: center;">✅ Horarios seleccionados:</h4>
+                                <div id="admin-selected-times-list-fullpage" style="max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-schedule-actions">
+                        <button type="button" class="btn-secondary" id="admin-schedule-back-fullpage">← Atrás</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-confirm-fullpage">✅ Confirmar Reservas</button>
                     </div>
                 </div>
             </div>
@@ -6843,45 +7033,116 @@
          * Setup admin schedule modal event handlers
          */
         function setupAdminScheduleModalHandlers() {
-            // Close buttons for both steps
-            document.getElementById('admin-schedule-close').addEventListener('click', closeAdminScheduleModal);
-            document.getElementById('admin-schedule-close-step2').addEventListener('click', closeAdminScheduleModal);
-            document.getElementById('admin-schedule-cancel-step1').addEventListener('click', closeAdminScheduleModal);
-            
-            // Package selection buttons
-            document.querySelectorAll('.admin-package-btn').forEach(btn => {
+            // Package selection buttons (fullpage version)
+            document.querySelectorAll('.admin-package-btn-fullpage').forEach(btn => {
                 btn.addEventListener('click', function() {
                     // Remove selected class from all buttons
-                    document.querySelectorAll('.admin-package-btn').forEach(b => b.classList.remove('selected'));
+                    document.querySelectorAll('.admin-package-btn-fullpage').forEach(b => b.classList.remove('selected'));
                     // Add selected class to clicked button
                     this.classList.add('selected');
                     // Store package size
-                    document.getElementById('admin-schedule-package').value = this.dataset.classes;
+                    document.getElementById('admin-schedule-package-fullpage').value = this.dataset.classes;
                 });
             });
             
-            // Next button (step 1 to step 2)
-            document.getElementById('admin-schedule-next').addEventListener('click', goToScheduleStep2);
+            // Back to admin panel button (fullpage version)
+            const backBtn = document.getElementById('back-to-admin-panel');
+            if (backBtn) {
+                backBtn.addEventListener('click', showAdminPanel);
+            }
             
-            // Back button (step 2 to step 1)
-            document.getElementById('admin-schedule-back').addEventListener('click', goToScheduleStep1);
+            // Cancel button (fullpage step 1)
+            const cancelStep1Fullpage = document.getElementById('admin-schedule-cancel-step1-fullpage');
+            if (cancelStep1Fullpage) {
+                cancelStep1Fullpage.addEventListener('click', showAdminPanel);
+            }
             
-            // Confirm button (save all reservations)
-            document.getElementById('admin-schedule-confirm').addEventListener('click', confirmAdminSchedule);
+            // Next button (step 1 to step 2) - fullpage
+            const nextBtnFullpage = document.getElementById('admin-schedule-next-fullpage');
+            if (nextBtnFullpage) {
+                nextBtnFullpage.addEventListener('click', goToScheduleStep2);
+            }
             
-            // Close modal on background click
-            document.getElementById('admin-schedule-modal').addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeAdminScheduleModal();
-                }
-            });
+            // Back button (step 2 to step 1) - fullpage
+            const backBtnFullpage = document.getElementById('admin-schedule-back-fullpage');
+            if (backBtnFullpage) {
+                backBtnFullpage.addEventListener('click', goToScheduleStep1);
+            }
+            
+            // Confirm button (save all reservations) - fullpage
+            const confirmBtnFullpage = document.getElementById('admin-schedule-confirm-fullpage');
+            if (confirmBtnFullpage) {
+                confirmBtnFullpage.addEventListener('click', confirmAdminSchedule);
+            }
         }
         
         /**
-         * Open admin schedule modal (Step 1)
+         * Hide all main sections
+         */
+        function hideAllSections() {
+            // Hide header and menu
+            const header = document.querySelector('.site-header');
+            if (header) header.style.display = 'none';
+            
+            const hamburger = document.getElementById('hamburger-container');
+            if (hamburger) hamburger.style.display = 'none';
+            
+            // Hide all main page sections
+            const sections = [
+                'hero-section',
+                'about-section', 
+                'booking-section',
+                'my-classes-section',
+                'image-scroll-section',
+                'admin-panel-section',
+                'contact-section',
+                'reglamento-link'
+            ];
+            
+            sections.forEach(id => {
+                const section = document.querySelector(`.${id}`) || document.getElementById(id);
+                if (section) {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        /**
+         * Show admin panel and hide scheduling section
+         */
+        function showAdminPanel() {
+            // Hide scheduling section
+            const schedulingSection = document.getElementById('admin-scheduling-section');
+            if (schedulingSection) {
+                schedulingSection.style.display = 'none';
+            }
+            
+            // Show header and menu
+            const header = document.querySelector('.site-header');
+            if (header) header.style.display = 'block';
+            
+            const hamburger = document.getElementById('hamburger-container');
+            if (hamburger) hamburger.style.display = 'flex';
+            
+            // Show admin panel
+            const adminPanel = document.getElementById('admin-panel-section');
+            if (adminPanel) {
+                adminPanel.style.display = 'block';
+                // Scroll to admin panel
+                adminPanel.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        /**
+         * Open admin schedule modal (Step 1) - Now redirects to full-page section
          */
         function openAdminScheduleModal() {
-            const modal = document.getElementById('admin-schedule-modal');
+            // Hide all other sections
+            hideAllSections();
+            
+            // Show only the admin scheduling section
+            const schedulingSection = document.getElementById('admin-scheduling-section');
+            schedulingSection.style.display = 'block';
             
             // Reset state
             adminScheduleState = {
@@ -6893,33 +7154,26 @@
             };
             
             // Clear form
-            document.getElementById('admin-schedule-name').value = '';
-            document.getElementById('admin-schedule-phone').value = '';
-            document.getElementById('admin-schedule-package').value = '';
-            document.querySelectorAll('.admin-package-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('admin-schedule-name-fullpage').value = '';
+            document.getElementById('admin-schedule-phone-fullpage').value = '';
+            document.getElementById('admin-schedule-package-fullpage').value = '';
+            document.querySelectorAll('.admin-package-btn-fullpage').forEach(btn => btn.classList.remove('selected'));
             
             // Show step 1, hide step 2
-            document.getElementById('admin-schedule-step1').style.display = 'block';
-            document.getElementById('admin-schedule-step2').style.display = 'none';
+            document.getElementById('admin-schedule-step1-fullpage').style.display = 'block';
+            document.getElementById('admin-schedule-step2-fullpage').style.display = 'none';
             
-            // Reset modal width to default by removing class
-            const modalContent = document.getElementById('admin-schedule-modal-content');
-            if (modalContent) {
-                modalContent.classList.remove('step2-active');
-            }
-            
-            // Show modal and lock body scroll
-            modal.style.display = 'flex';
-            document.body.classList.add('modal-open');
+            // Scroll to top
+            window.scrollTo(0, 0);
         }
         
         /**
-         * Go to step 2 (calendar selection)
+         * Go to step 2 (calendar selection) - Fullpage version
          */
         function goToScheduleStep2() {
-            const name = document.getElementById('admin-schedule-name').value.trim();
-            const phone = document.getElementById('admin-schedule-phone').value.trim();
-            const packageSize = parseInt(document.getElementById('admin-schedule-package').value);
+            const name = document.getElementById('admin-schedule-name-fullpage').value.trim();
+            const phone = document.getElementById('admin-schedule-phone-fullpage').value.trim();
+            const packageSize = parseInt(document.getElementById('admin-schedule-package-fullpage').value);
             
             // Validate inputs
             if (!name) {
@@ -6944,26 +7198,23 @@
             adminScheduleState.selectedDates = [];
             
             // Update display
-            document.getElementById('admin-schedule-client-name-display').textContent = name;
-            document.getElementById('admin-schedule-total-classes').textContent = packageSize;
-            document.getElementById('admin-schedule-selected-count').textContent = '0';
+            document.getElementById('admin-schedule-client-name-display-fullpage').textContent = name;
+            document.getElementById('admin-schedule-total-classes-fullpage').textContent = packageSize;
+            document.getElementById('admin-schedule-selected-count-fullpage').textContent = '0';
             
             // Show step 2, hide step 1
-            document.getElementById('admin-schedule-step1').style.display = 'none';
-            document.getElementById('admin-schedule-step2').style.display = 'block';
+            document.getElementById('admin-schedule-step1-fullpage').style.display = 'none';
+            document.getElementById('admin-schedule-step2-fullpage').style.display = 'block';
             
-            // Expand modal width for step 2 by adding CSS class
-            const modalContent = document.getElementById('admin-schedule-modal-content');
-            if (modalContent) {
-                modalContent.classList.add('step2-active');
-            }
+            // Scroll to top
+            window.scrollTo(0, 0);
             
             // Initialize calendar for date/time selection
             initAdminScheduleCalendar();
         }
         
         /**
-         * Go back to step 1
+         * Go back to step 1 - Fullpage version
          */
         function goToScheduleStep1() {
             // Destroy calendar if it exists
@@ -6973,21 +7224,18 @@
             }
             
             // Show step 1, hide step 2
-            document.getElementById('admin-schedule-step1').style.display = 'block';
-            document.getElementById('admin-schedule-step2').style.display = 'none';
+            document.getElementById('admin-schedule-step1-fullpage').style.display = 'block';
+            document.getElementById('admin-schedule-step2-fullpage').style.display = 'none';
             
-            // Restore original modal width by removing class
-            const modalContent = document.getElementById('admin-schedule-modal-content');
-            if (modalContent) {
-                modalContent.classList.remove('step2-active');
-            }
+            // Scroll to top
+            window.scrollTo(0, 0);
         }
         
         /**
-         * Initialize calendar for admin scheduling (step 2)
+         * Initialize calendar for admin scheduling (step 2) - Fullpage version
          */
         function initAdminScheduleCalendar() {
-            const calendarEl = document.getElementById('admin-schedule-calendar');
+            const calendarEl = document.getElementById('admin-schedule-calendar-fullpage');
             
             // Destroy existing calendar if any
             if (adminScheduleState.scheduleCalendar) {
@@ -7080,12 +7328,12 @@
         }
         
         /**
-         * Update selected times list display
+         * Update selected times list display - Fullpage version
          */
         function updateAdminSelectedTimesList() {
-            const container = document.getElementById('admin-selected-times-container');
-            const listEl = document.getElementById('admin-selected-times-list');
-            const countEl = document.getElementById('admin-schedule-selected-count');
+            const container = document.getElementById('admin-selected-times-container-fullpage');
+            const listEl = document.getElementById('admin-selected-times-list-fullpage');
+            const countEl = document.getElementById('admin-schedule-selected-count-fullpage');
             
             if (adminScheduleState.selectedDates.length === 0) {
                 container.style.display = 'none';
@@ -7157,8 +7405,14 @@
                 if (!confirmed) return;
             }
             
-            // Disable confirm button to prevent double submission
-            const confirmBtn = document.getElementById('admin-schedule-confirm');
+            // Get the fullpage confirm button
+            const confirmBtn = document.getElementById('admin-schedule-confirm-fullpage');
+            if (!confirmBtn) {
+                console.error('❌ Confirm button not found');
+                alert('❌ Error: No se encontró el botón de confirmación. Por favor recarga la página.');
+                return;
+            }
+            
             const originalText = confirmBtn.textContent;
             confirmBtn.textContent = '⏳ Guardando...';
             confirmBtn.disabled = true;
@@ -7192,8 +7446,8 @@
                     alert(`⚠️ ${successCount} clases guardadas, ${failCount} fallaron.\n\nPor favor, revisa el calendario.`);
                 }
                 
-                // Close modal
-                closeAdminScheduleModal();
+                // Return to admin panel
+                showAdminPanel();
                 
                 // Reload admin calendar
                 if (typeof loadAdminCalendarReservations === 'function') {
