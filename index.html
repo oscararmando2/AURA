@@ -2514,6 +2514,59 @@
             font-weight: 600;
         }
 
+        /* Horizontal layout for admin schedule step 2 */
+        .admin-schedule-horizontal-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .admin-schedule-calendar-wrapper {
+            flex: 1;
+            min-width: 0; /* important for flex items to shrink properly */
+        }
+
+        .admin-selected-times-wrapper {
+            flex: 0 0 350px; /* Fixed width for the selected times panel */
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #B8A99A;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+
+        /* Admin schedule modal default width */
+        #admin-schedule-modal-content {
+            max-width: 800px;
+        }
+
+        /* Adjust modal width when step 2 is active */
+        #admin-schedule-modal-content.step2-active {
+            max-width: 1400px;
+        }
+
+        /* Mobile responsive: stack vertically on smaller screens */
+        @media (max-width: 1024px) {
+            .admin-schedule-horizontal-container {
+                flex-direction: column;
+            }
+
+            .admin-selected-times-wrapper {
+                flex: 1;
+                width: 100%;
+                position: static;
+                max-height: 500px;
+            }
+
+            #admin-schedule-modal-content,
+            #admin-schedule-modal-content.step2-active {
+                max-width: 95%;
+            }
+        }
+
         /* Selected times list */
         .admin-selected-time-item {
             display: flex;
@@ -3800,7 +3853,7 @@
         
         <!-- Admin Schedule Modal - Multi-Step Interface -->
         <div id="admin-schedule-modal" class="event-detail-modal">
-            <div class="event-detail-content" style="max-width: 800px;">
+            <div class="event-detail-content" id="admin-schedule-modal-content">
                 <!-- Step 1: Client Info & Package Selection -->
                 <div id="admin-schedule-step1">
                     <div class="event-detail-header">
@@ -3857,13 +3910,18 @@
                                 <span id="admin-schedule-total-classes" style="color: #1a1a1a; font-size: 1.3rem; font-weight: 700;">0</span> clases seleccionadas
                             </p>
                         </div>
-                        <!-- Calendar for admin scheduling -->
-                        <div id="admin-schedule-calendar" style="margin-bottom: 20px;"></div>
-                        
-                        <!-- Selected times list -->
-                        <div id="admin-selected-times-container" style="display: none; margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 2px solid #B8A99A;">
-                            <h4 style="color: #1a1a1a; margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; border-bottom: 3px solid #B8A99A; padding-bottom: 15px; text-align: center;">✅ Horarios seleccionados:</h4>
-                            <div id="admin-selected-times-list" style="max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
+                        <!-- Horizontal container for calendar and selected times on desktop -->
+                        <div class="admin-schedule-horizontal-container">
+                            <!-- Calendar for admin scheduling -->
+                            <div class="admin-schedule-calendar-wrapper">
+                                <div id="admin-schedule-calendar"></div>
+                            </div>
+                            
+                            <!-- Selected times list -->
+                            <div id="admin-selected-times-container" class="admin-selected-times-wrapper" style="display: none;">
+                                <h4 style="color: #1a1a1a; margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; border-bottom: 3px solid #B8A99A; padding-bottom: 15px; text-align: center;">✅ Horarios seleccionados:</h4>
+                                <div id="admin-selected-times-list" style="max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="event-detail-actions">
@@ -6844,6 +6902,12 @@
             document.getElementById('admin-schedule-step1').style.display = 'block';
             document.getElementById('admin-schedule-step2').style.display = 'none';
             
+            // Reset modal width to default by removing class
+            const modalContent = document.getElementById('admin-schedule-modal-content');
+            if (modalContent) {
+                modalContent.classList.remove('step2-active');
+            }
+            
             // Show modal and lock body scroll
             modal.style.display = 'flex';
             document.body.classList.add('modal-open');
@@ -6888,6 +6952,12 @@
             document.getElementById('admin-schedule-step1').style.display = 'none';
             document.getElementById('admin-schedule-step2').style.display = 'block';
             
+            // Expand modal width for step 2 by adding CSS class
+            const modalContent = document.getElementById('admin-schedule-modal-content');
+            if (modalContent) {
+                modalContent.classList.add('step2-active');
+            }
+            
             // Initialize calendar for date/time selection
             initAdminScheduleCalendar();
         }
@@ -6905,6 +6975,12 @@
             // Show step 1, hide step 2
             document.getElementById('admin-schedule-step1').style.display = 'block';
             document.getElementById('admin-schedule-step2').style.display = 'none';
+            
+            // Restore original modal width by removing class
+            const modalContent = document.getElementById('admin-schedule-modal-content');
+            if (modalContent) {
+                modalContent.classList.remove('step2-active');
+            }
         }
         
         /**
@@ -7168,6 +7244,12 @@
             // Show step 1, hide step 2
             document.getElementById('admin-schedule-step1').style.display = 'block';
             document.getElementById('admin-schedule-step2').style.display = 'none';
+            
+            // Reset modal width to default by removing class
+            const modalContent = document.getElementById('admin-schedule-modal-content');
+            if (modalContent) {
+                modalContent.classList.remove('step2-active');
+            }
             
             // Hide modal and unlock body scroll
             modal.style.display = 'none';
