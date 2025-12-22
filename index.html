@@ -7343,18 +7343,19 @@
                 return;
             }
             
-            // Check capacity for this time slot (max 5 people per slot)
+            // ADMIN MODE: No capacity limit for administrators
+            // Count existing reservations for informational purposes only
             let currentCount = 0;
             
             // Debug logging
-            console.log('🔍 Checking capacity for time slot:', startDate.toLocaleString('es-ES'));
+            console.log('🔍 Admin scheduling - time slot:', startDate.toLocaleString('es-ES'));
             console.log('📊 Total reservations in system:', allReservationsData ? allReservationsData.length : 0);
             
-            // Count existing reservations at this time slot
+            // Count existing reservations at this time slot (for logging only)
             if (allReservationsData && allReservationsData.length > 0) {
                 allReservationsData.forEach(event => {
                     if (event.start && event.start.getTime() === startDate.getTime()) {
-                        console.log('✅ Found matching reservation:', {
+                        console.log('✅ Found existing reservation:', {
                             title: event.title,
                             isGrouped: event.extendedProps?.isGrouped,
                             participants: event.extendedProps?.participants?.length || 1
@@ -7370,32 +7371,8 @@
                 });
             }
             
-            console.log(`📈 Current capacity: ${currentCount}/${MAX_CAPACITY}`);
-            
-            // Check if slot is full
-            if (currentCount >= MAX_CAPACITY) {
-                const timeStr = startDate.toLocaleString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                alert(`⚠️ Este horario ya está completo.\n\n${timeStr}\n\nCapacidad: ${currentCount}/${MAX_CAPACITY} personas\n\nPor favor, selecciona otro horario disponible.`);
-                adminScheduleState.scheduleCalendar.unselect();
-                return;
-            }
-            
-            // Warn if approaching capacity (4 out of 5)
-            if (currentCount >= MAX_CAPACITY - 1) {
-                const available = MAX_CAPACITY - currentCount;
-                const timeStr = startDate.toLocaleString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                console.log(`⚠️ Atención: Solo ${available} lugar${available !== 1 ? 'es' : ''} disponible${available !== 1 ? 's' : ''} en ${timeStr} (${currentCount}/${MAX_CAPACITY})`);
-            }
+            console.log(`📊 Current occupancy: ${currentCount} person(s) at this time slot`);
+            // NOTE: Admin can schedule unlimited people - no capacity check applied
             
             // Add to selected dates
             adminScheduleState.selectedDates.push({
