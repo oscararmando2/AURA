@@ -7343,7 +7343,7 @@
                 return;
             }
             
-            // ADMIN MODE: No capacity limit for administrators
+            // ADMIN MODE: No capacity limit for administrators (public users still have 5-person limit)
             // Count existing reservations for informational purposes only
             let currentCount = 0;
             
@@ -7372,7 +7372,7 @@
             }
             
             console.log(`📊 Current occupancy: ${currentCount} person(s) at this time slot`);
-            // NOTE: Admin can schedule unlimited people - no capacity check applied
+            // NOTE: Admin can schedule unlimited people - capacity blocking logic removed (previously blocked at MAX_CAPACITY)
             
             // Add to selected dates
             adminScheduleState.selectedDates.push({
