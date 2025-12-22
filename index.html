@@ -7348,8 +7348,8 @@
                 return;
             }
             
-            // CAPACITY CHECK: Maximum 5 people per time slot (admin and public users)
-            // Count existing reservations at this time slot
+            // INFORMATIONAL: Count existing reservations at this time slot
+            // Note: Admins have unlimited capacity - this is for logging purposes only
             let currentCount = 0;
             
             // Debug logging
@@ -7376,33 +7376,11 @@
                 });
             }
             
-            console.log(`📊 Current occupancy: ${currentCount}/${MAX_CAPACITY} person(s) at this time slot`);
+            console.log(`📊 Current occupancy: ${currentCount} person(s) at this time slot (admin mode - no limit)`);
             
-            // Check if time slot is full (5 people maximum)
-            if (currentCount >= MAX_CAPACITY) {
-                const timeStr = startDate.toLocaleString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                alert(`⚠️ Este horario ya está completo.\n\n${timeStr}\n\nCapacidad: ${currentCount}/${MAX_CAPACITY} personas\n\nPor favor, selecciona otro horario disponible.`);
-                adminScheduleState.scheduleCalendar.unselect();
-                return;
-            }
-            
-            // Warn if approaching capacity (4 out of 5)
-            if (currentCount >= MAX_CAPACITY - 1) {
-                const available = MAX_CAPACITY - currentCount;
-                const isPlural = available !== 1;
-                const timeStr = startDate.toLocaleString('es-ES', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                console.log(`⚠️ Atención: Solo ${available} lugar${isPlural ? 'es' : ''} disponible${isPlural ? 's' : ''} en ${timeStr} (${currentCount}/${MAX_CAPACITY})`);
-            }
+            // ADMIN MODE: No capacity limit for administrators
+            // Admins can schedule unlimited people at the same time slot
+            // Note: Public user bookings still have capacity limits in their separate flow
             
             // Add to selected dates
             adminScheduleState.selectedDates.push({
