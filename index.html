@@ -5388,8 +5388,8 @@
             
             // Mostrar hora y disponibilidad en líneas separadas
             if (isFull) {
-                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem; white-space: nowrap;">(Lleno)</span>`;
-                // Estilo gris cuando está lleno
+                button.innerHTML = `<span style="display: block; font-weight: bold;">${time12h}</span><span style="display: block; font-size: 0.85rem; white-space: nowrap;">(Completo)</span>`;
+                // Estilo gris cuando está completo
                 button.style.cssText = 'padding: 15px; background: #cccccc; color: #666; border: 1px solid #999; font-size: 1rem; cursor: not-allowed; opacity: 0.6; text-align: center;';
                 button.disabled = true;
                 
@@ -6869,9 +6869,11 @@
                         };
                     } else {
                         // Multiple reservations at same time - create grouped event
+                        // Show all names in admin calendar (e.g., "Rosa, Ketzy, Carolina")
+                        const names = group.map(r => extractFirstName(r.fullName)).join(', ');
                         eventData = {
                             id: key,
-                            title: `${group.length} Personas`,
+                            title: names, // Show all participant names
                             start: firstReservation.start,
                             end: firstReservation.end,
                             backgroundColor: '#EFE9E1',
@@ -7343,15 +7345,15 @@
                 return;
             }
             
-            // ADMIN MODE: No capacity limit for administrators (public users still have 5-person limit)
-            // Count existing reservations for informational purposes only
+            // CAPACITY CHECK: Maximum 5 people per time slot (admin and public users)
+            // Count existing reservations at this time slot
             let currentCount = 0;
             
             // Debug logging
             console.log('🔍 Admin scheduling - time slot:', startDate.toLocaleString('es-ES'));
             console.log('📊 Total reservations in system:', allReservationsData ? allReservationsData.length : 0);
             
-            // Count existing reservations at this time slot (for logging only)
+            // Count existing reservations at this time slot
             if (allReservationsData && allReservationsData.length > 0) {
                 allReservationsData.forEach(event => {
                     if (event.start && event.start.getTime() === startDate.getTime()) {
@@ -7371,8 +7373,32 @@
                 });
             }
             
-            console.log(`📊 Current occupancy: ${currentCount} person(s) at this time slot`);
-            // NOTE: Admin can schedule unlimited people - capacity blocking logic removed (previously blocked at MAX_CAPACITY)
+            console.log(`📊 Current occupancy: ${currentCount}/${MAX_CAPACITY} person(s) at this time slot`);
+            
+            // Check if time slot is full (5 people maximum)
+            if (currentCount >= MAX_CAPACITY) {
+                const timeStr = startDate.toLocaleString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                alert(`⚠️ Este horario ya está completo.\n\n${timeStr}\n\nCapacidad: ${currentCount}/${MAX_CAPACITY} personas\n\nPor favor, selecciona otro horario disponible.`);
+                adminScheduleState.scheduleCalendar.unselect();
+                return;
+            }
+            
+            // Warn if approaching capacity (4 out of 5)
+            if (currentCount >= MAX_CAPACITY - 1) {
+                const available = MAX_CAPACITY - currentCount;
+                const timeStr = startDate.toLocaleString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                console.log(`⚠️ Atención: Solo ${available} lugar${available !== 1 ? 'es' : ''} disponible${available !== 1 ? 's' : ''} en ${timeStr} (${currentCount}/${MAX_CAPACITY})`);
+            }
             
             // Add to selected dates
             adminScheduleState.selectedDates.push({
