@@ -6870,10 +6870,13 @@
                     } else {
                         // Multiple reservations at same time - create grouped event
                         // Show all names in admin calendar (e.g., "Rosa, Ketzy, Carolina")
-                        const names = group.map(r => extractFirstName(r.fullName)).join(', ');
+                        const names = group
+                            .map(r => extractFirstName(r.fullName))
+                            .filter(name => name.length > 0) // Filter out empty names
+                            .join(', ');
                         eventData = {
                             id: key,
-                            title: names, // Show all participant names
+                            title: names || `${group.length} Personas`, // Fallback if no valid names
                             start: firstReservation.start,
                             end: firstReservation.end,
                             backgroundColor: '#EFE9E1',
@@ -7393,11 +7396,12 @@
             // Warn if approaching capacity (4 out of 5)
             if (currentCount >= MAX_CAPACITY - 1) {
                 const available = MAX_CAPACITY - currentCount;
+                const isPlural = available !== 1;
                 const timeStr = startDate.toLocaleString('es-ES', {
                     hour: '2-digit',
                     minute: '2-digit'
                 });
-                console.log(`⚠️ Atención: Solo ${available} lugar${available !== 1 ? 'es' : ''} disponible${available !== 1 ? 's' : ''} en ${timeStr} (${currentCount}/${MAX_CAPACITY})`);
+                console.log(`⚠️ Atención: Solo ${available} lugar${isPlural ? 'es' : ''} disponible${isPlural ? 's' : ''} en ${timeStr} (${currentCount}/${MAX_CAPACITY})`);
             }
             
             // Add to selected dates
