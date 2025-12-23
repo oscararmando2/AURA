@@ -7306,7 +7306,27 @@
                 events: function(_info, successCallback, _failureCallback) {
                     const eventsCount = allReservationsData?.length || 0;
                     console.log('📅 Loading events for schedule calendar:', eventsCount);
-                    successCallback(allReservationsData || []);
+                    
+                    // Transform events to hide names and show capacity instead
+                    const transformedEvents = (allReservationsData || []).map(event => {
+                        let count = 1;
+                        
+                        // Calculate the number of people in this time slot
+                        if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
+                            count = event.extendedProps.participants.length;
+                        }
+                        
+                        // Create a new event with capacity display instead of names
+                        return {
+                            ...event,
+                            title: `${count}/5`, // Show capacity (e.g., "3/5")
+                            textColor: count >= 5 ? '#d32f2f' : '#333', // Red text if full
+                            backgroundColor: count >= 5 ? '#ffebee' : '#EFE9E1', // Light red if full
+                            borderColor: count >= 5 ? '#d32f2f' : '#EFE9E1'
+                        };
+                    });
+                    
+                    successCallback(transformedEvents);
                 },
                 // Log when view is mounted
                 viewDidMount: function(_info) {
@@ -7353,8 +7373,7 @@
                 return;
             }
             
-            // INFORMATIONAL: Count existing reservations at this time slot
-            // Note: Admins have unlimited capacity - this is for logging purposes only
+            // Count existing reservations at this time slot
             let currentCount = 0;
             
             // Debug logging
@@ -7381,11 +7400,14 @@
                 });
             }
             
-            console.log(`📊 Current occupancy: ${currentCount} person(s) at this time slot (admin mode - no limit)`);
+            console.log(`📊 Current occupancy: ${currentCount} person(s) at this time slot`);
             
-            // ADMIN MODE: No capacity limit for administrators
-            // Admins can schedule unlimited people at the same time slot
-            // Note: Public user bookings still have capacity limits in their separate flow
+            // Check capacity limit (5 people max per class)
+            if (currentCount >= MAX_CAPACITY) {
+                alert(`⚠️ Lo sentimos, este horario ya está completo.\n\nCapacidad máxima: ${MAX_CAPACITY} personas\nOcupación actual: ${currentCount}/${MAX_CAPACITY}\n\nPor favor, selecciona otro horario disponible.`);
+                adminScheduleState.scheduleCalendar.unselect();
+                return;
+            }
             
             // Add to selected dates
             adminScheduleState.selectedDates.push({
