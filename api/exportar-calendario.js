@@ -60,9 +60,6 @@ export default async function handler(req, res) {
       bufferPages: false  // Disable page buffering - we'll add footers as we go
     });
 
-    // Track actual page count
-    let actualPageCount = 1; // Start with 1 page
-
     // Collect PDF data in buffer
     const buffers = [];
     doc.on('data', buffers.push.bind(buffers));
@@ -83,10 +80,10 @@ export default async function handler(req, res) {
     const lightGray = BRAND_COLORS.lightGray;
 
     // Helper function to add footer to current page
-    // NOTE: PDFKit has a bug where calling doc.text() after pages are created
-    // causes extra blank pages to be generated. To avoid this, we only draw
-    // the decorative line and skip the footer text.
-    // See: https://github.com/foliojs/pdfkit/issues/
+    // NOTE: PDFKit has a known limitation where calling doc.text() when adding 
+    // footers to multiple pages causes extra blank pages to be generated. 
+    // To work around this, we only draw the decorative line and skip text.
+    // Related: https://github.com/foliojs/pdfkit/issues/1041
     function addFooter() {
       doc.save();
       
@@ -159,7 +156,6 @@ export default async function handler(req, res) {
       if (currentY > 680) {
         addFooter(); // Add footer to current page before creating new one
         doc.addPage();
-        actualPageCount++; // Track actual page count
         currentY = 50;
       }
 
@@ -212,7 +208,6 @@ export default async function handler(req, res) {
         if (currentY > 720) {
           addFooter(); // Add footer before new page
           doc.addPage();
-          actualPageCount++; // Track actual page count
           currentY = 50;
           
           // Redraw header on new page
@@ -262,7 +257,6 @@ export default async function handler(req, res) {
     if (currentY > 680) {
       addFooter(); // Add footer before new page
       doc.addPage();
-      actualPageCount++; // Track actual page count
       currentY = 50;
     }
 
