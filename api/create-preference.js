@@ -50,8 +50,8 @@ export default async function handler(req, res) {
   // Extraer los últimos 10 dígitos (sin código de país)
   const phoneNumber = cleanPhone.slice(-10);
 
-  // Use environment variable for base URL, fallback to Vercel deployment
-  const baseUrl = process.env.BASE_URL || "https://aura-eta-five.vercel.app";
+  // Use environment variable for base URL, fallback to production domain
+  const baseUrl = process.env.BASE_URL || "https://aurapilates.app";
   
   console.log(`📋 Creando preferencia: ${title} - $${numericPrice} para ${payer_name}`);
 
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
         email: `${phoneNumber}@cliente.aura.mx`
       },
       back_urls: {
-        success: `${baseUrl}/?success=1&status=approved`,
+        success: `${baseUrl}/?success=1&status=approved#my-classes-section`,
         failure: `${baseUrl}/?error=1&status=rejected`,
         pending: `${baseUrl}/?pending=1&status=pending`,
       },
