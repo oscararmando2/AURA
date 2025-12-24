@@ -81,7 +81,7 @@ export default async function handler(req, res) {
         email: `${phoneNumber}@cliente.aura.mx`
       },
       back_urls: {
-        success: `${baseUrl}/#my-classes-section?success=1&status=approved`,
+        success: `${baseUrl}/?success=1&status=approved#my-classes-section`,
         failure: `${baseUrl}/?error=1&status=rejected`,
         pending: `${baseUrl}/?pending=1&status=pending`,
       },
