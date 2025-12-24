@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     const doc = new PDFDocument({ 
       size: 'LETTER',
       margins: { top: 50, bottom: 50, left: 50, right: 50 },
-      bufferPages: true  // Enable page buffering to allow switchToPage
+      bufferPages: false  // Disable page buffering - we'll add footers as we go
     });
 
     // Collect PDF data in buffer
@@ -78,6 +78,24 @@ export default async function handler(req, res) {
     const brandCream = BRAND_COLORS.cream;
     const darkText = BRAND_COLORS.darkText;
     const lightGray = BRAND_COLORS.lightGray;
+
+    // Helper function to add footer to current page
+    // NOTE: PDFKit has a known limitation where calling doc.text() when adding 
+    // footers to multiple pages causes extra blank pages to be generated. 
+    // To work around this, we only draw the decorative line and skip text.
+    // Related: https://github.com/foliojs/pdfkit/issues/1041
+    function addFooter() {
+      doc.save();
+      
+      // Footer decorative line
+      doc.moveTo(50, 742)
+         .lineTo(562, 742)
+         .lineWidth(1.5)
+         .strokeColor(brandBrown)
+         .stroke();
+      
+      doc.restore();
+    }
 
     // Add logo (if available)
     try {
@@ -136,6 +154,7 @@ export default async function handler(req, res) {
 
       // Check if we need a new page
       if (currentY > 680) {
+        addFooter(); // Add footer to current page before creating new one
         doc.addPage();
         currentY = 50;
       }
@@ -187,6 +206,7 @@ export default async function handler(req, res) {
       dateReservations.forEach((res, idx) => {
         // Check if we need a new page
         if (currentY > 720) {
+          addFooter(); // Add footer before new page
           doc.addPage();
           currentY = 50;
           
@@ -235,6 +255,7 @@ export default async function handler(req, res) {
 
     // Summary section
     if (currentY > 680) {
+      addFooter(); // Add footer before new page
       doc.addPage();
       currentY = 50;
     }
@@ -258,34 +279,14 @@ export default async function handler(req, res) {
        .text(`Total de Reservaciones: ${reservations.length}`, 50, currentY + 28, { align: 'center', width: 512 })
        .text(`Total de Días con Reservaciones: ${sortedDates.length}`, 50, currentY + 43, { align: 'center', width: 512 });
 
-    // Footer on each page
-    const pages = doc.bufferedPageRange();
-    for (let i = pages.start; i < pages.start + pages.count; i++) {
-      doc.switchToPage(i);
-      
-      // Footer line
-      doc.moveTo(50, 742)
-         .lineTo(562, 742)
-         .lineWidth(1.5)
-         .strokeColor(brandBrown)
-         .stroke();
+    // Add footer to the last page
+    addFooter();
 
-      // Footer text
-      doc.fontSize(8)
-         .fillColor(lightGray)
-         .font('Helvetica-Oblique')
-         .text('AURA Studio - Sistema de Gestión de Reservaciones', 50, 750, { align: 'center', width: 512 });
-
-      doc.fontSize(8)
-         .font('Helvetica')
-         .text(`Página ${i - pages.start + 1} de ${pages.count}`, 50, 760, { align: 'center', width: 512 });
-    }
-
-    // Finalize PDF and wait for completion
+    // Finalize PDF
     doc.end();
     
     // Wait for PDF to be generated
-    const pdfBuffer = await pdfPromise;
+    const finalBuffer = await pdfPromise;
 
     // Set response headers for PDF download
     // Generate timestamp for filename: YYYY-MM-DD_HHMMSS
@@ -296,12 +297,12 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Length', pdfBuffer.length);
+    res.setHeader('Content-Length', finalBuffer.length);
 
     // Send PDF buffer
-    res.status(200).send(pdfBuffer);
+    res.status(200).send(finalBuffer);
 
-    console.log(`✅ PDF generado exitosamente: ${filename} (${pdfBuffer.length} bytes)`);
+    console.log(`✅ PDF generado exitosamente: ${filename} (${finalBuffer.length} bytes)`);
 
   } catch (error) {
     console.error('❌ Error al generar PDF:', error);
