@@ -5645,8 +5645,13 @@
             document.getElementById('reservation-modal').style.display = 'none';
             document.body.style.overflow = '';
             
-            // Guardar estado en localStorage
-            saveTempReservations();
+            // Guardar estado en localStorage y verificar
+            const guardadoExitoso = saveTempReservations();
+            
+            if (!guardadoExitoso) {
+                alert('❌ Error al guardar las reservas.\n\nPor favor, intenta nuevamente.');
+                return;
+            }
             
             // Proceder al pago
             alert(`✅ Perfecto ${nombre}!\n\nAhora serás redirigido a MercadoPago para completar tu pago de $${selectedPlan.price} por ${selectedPlan.classes} clases.`);
@@ -5991,8 +5996,27 @@
                 userInfo: selectedPlan.userInfo,
                 firstClassDate: selectedPlan.firstClassDate ? selectedPlan.firstClassDate.toISOString() : null
             };
-            localStorage.setItem('tempReservations', JSON.stringify(tempData));
-            console.log('💾 Reservas temporales guardadas en localStorage');
+            
+            try {
+                localStorage.setItem('tempReservations', JSON.stringify(tempData));
+                console.log('💾 Reservas temporales guardadas en localStorage');
+                console.log('📋 Datos guardados:', {
+                    reservas: tempData.reservations.length,
+                    usuario: tempData.userInfo?.nombre || 'Sin nombre',
+                    telefono: tempData.userInfo?.telefono || 'Sin teléfono'
+                });
+                
+                // Verificar que se guardó correctamente
+                const verificacion = localStorage.getItem('tempReservations');
+                if (!verificacion) {
+                    console.error('❌ Error: No se pudo guardar en localStorage');
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('❌ Error al guardar en localStorage:', error);
+                return false;
+            }
         }
 
         /**
@@ -8918,6 +8942,15 @@
                 console.log('✅ Preferencia creada:', data.preference_id || 'OK');
                 console.log('🔗 Redirigiendo a MercadoPago...');
                 
+                // Verificar una última vez que las reservas están guardadas
+                const verificacionFinal = localStorage.getItem('tempReservations');
+                if (!verificacionFinal) {
+                    console.error('⚠️ ADVERTENCIA: tempReservations no está en localStorage antes de redirigir');
+                    alert('⚠️ Error al guardar las reservas.\n\nPor favor, intenta nuevamente.');
+                    return;
+                }
+                console.log('✅ Verificación final: tempReservations presente en localStorage');
+                
                 // Redirigir a MercadoPago
                 location.href = data.init_point;
             } catch (e) {
@@ -9011,12 +9044,25 @@
             console.log('🧹 URL limpiada');
             
             // 2. Recuperar reservas temporales de localStorage
+            console.log('🔍 Verificando localStorage...');
+            console.log('📦 Claves en localStorage:', Object.keys(localStorage));
+            
             const tempReservationsStr = localStorage.getItem('tempReservations');
+            
             if (!tempReservationsStr) {
                 console.error('❌ No hay reservas temporales en localStorage');
-                alert('⚠️ No se encontraron reservas pendientes.\n\nPor favor, selecciona un plan nuevamente.');
+                console.log('📋 Estado de localStorage:', {
+                    tempReservations: localStorage.getItem('tempReservations'),
+                    tempPlanClasses: localStorage.getItem('tempPlanClasses'),
+                    tempPlanPrice: localStorage.getItem('tempPlanPrice'),
+                    userNombre: localStorage.getItem('userNombre'),
+                    userTelefono: localStorage.getItem('userTelefono')
+                });
+                alert('⚠️ No se encontraron reservas pendientes.\n\nEsto puede suceder si:\n- El navegador bloqueó el almacenamiento\n- Se limpió el caché\n- Se usó modo incógnito\n\nPor favor, selecciona un plan nuevamente o contacta con soporte si ya pagaste.');
                 return;
             }
+            
+            console.log('✅ Reservas encontradas en localStorage:', tempReservationsStr.substring(0, 100) + '...');
             
             let tempData;
             try {
@@ -9038,7 +9084,13 @@
             const nombre = userInfo?.nombre || localStorage.getItem('userNombre') || 'Cliente';
             const telefono = userInfo?.telefono || localStorage.getItem('userTelefono') || '';
             
-            console.log(`📋 Reservas recuperadas: ${reservations.length} clases para ${nombre}`);
+            if (!telefono) {
+                console.error('❌ Falta el teléfono del usuario');
+                alert('❌ Error: Información del usuario incompleta.\n\nPor favor, contacta con soporte con tu comprobante de pago.');
+                return;
+            }
+            
+            console.log(`📋 Reservas recuperadas: ${reservations.length} clases para ${nombre} (${telefono})`);
             
             // 3. Mostrar mensaje de éxito inicial
             alert(`¡Pago recibido, ${nombre}!\n\nGuardando tus ${reservations.length} clases...`);
