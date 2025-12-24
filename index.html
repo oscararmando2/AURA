@@ -7307,24 +7307,31 @@
                     const eventsCount = allReservationsData?.length || 0;
                     console.log('📅 Loading events for schedule calendar:', eventsCount);
                     
-                    // Transform events to hide names and show capacity instead
-                    const transformedEvents = (allReservationsData || []).map(event => {
-                        let count = 1;
-                        
-                        // Calculate the number of people in this time slot
-                        if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
-                            count = event.extendedProps.participants.length;
-                        }
-                        
-                        // Create a new event with capacity display instead of names
-                        return {
-                            ...event,
-                            title: `${count}/5`, // Show capacity (e.g., "3/5")
-                            textColor: count >= 5 ? '#d32f2f' : '#333', // Red text if full
-                            backgroundColor: count >= 5 ? '#ffebee' : '#EFE9E1', // Light red if full
-                            borderColor: count >= 5 ? '#d32f2f' : '#EFE9E1'
-                        };
-                    });
+                    // Transform events to show only full capacity slots
+                    const transformedEvents = (allReservationsData || [])
+                        .map(event => {
+                            let count = 1;
+                            
+                            // Calculate the number of people in this time slot
+                            if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
+                                count = event.extendedProps.participants.length;
+                            }
+                            
+                            // Only show events when capacity is full (5/5)
+                            if (count >= 5) {
+                                return {
+                                    ...event,
+                                    title: 'cupo lleno', // Show "cupo lleno" when full
+                                    textColor: '#d32f2f', // Red text for full capacity
+                                    backgroundColor: '#ffebee', // Light red background
+                                    borderColor: '#d32f2f'
+                                };
+                            }
+                            
+                            // Don't show events with availability (< 5 people)
+                            return null;
+                        })
+                        .filter(event => event !== null); // Remove null events
                     
                     successCallback(transformedEvents);
                 },
