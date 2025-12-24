@@ -60,6 +60,9 @@ export default async function handler(req, res) {
       bufferPages: true  // Enable page buffering to allow switchToPage
     });
 
+    // Track actual page count
+    let actualPageCount = 1; // Start with 1 page
+
     // Collect PDF data in buffer
     const buffers = [];
     doc.on('data', buffers.push.bind(buffers));
@@ -137,6 +140,7 @@ export default async function handler(req, res) {
       // Check if we need a new page
       if (currentY > 680) {
         doc.addPage();
+        actualPageCount++; // Track actual page count
         currentY = 50;
       }
 
@@ -188,6 +192,7 @@ export default async function handler(req, res) {
         // Check if we need a new page
         if (currentY > 720) {
           doc.addPage();
+          actualPageCount++; // Track actual page count
           currentY = 50;
           
           // Redraw header on new page
@@ -236,6 +241,7 @@ export default async function handler(req, res) {
     // Summary section
     if (currentY > 680) {
       doc.addPage();
+      actualPageCount++; // Track actual page count
       currentY = 50;
     }
 
@@ -259,8 +265,8 @@ export default async function handler(req, res) {
        .text(`Total de Días con Reservaciones: ${sortedDates.length}`, 50, currentY + 43, { align: 'center', width: 512 });
 
     // Footer on each page
-    const pages = doc.bufferedPageRange();
-    for (let i = pages.start; i < pages.start + pages.count; i++) {
+    // Use actualPageCount instead of bufferedPageRange to avoid extra blank pages
+    for (let i = 0; i < actualPageCount; i++) {
       doc.switchToPage(i);
       
       // Footer line
@@ -278,7 +284,7 @@ export default async function handler(req, res) {
 
       doc.fontSize(8)
          .font('Helvetica')
-         .text(`Página ${i - pages.start + 1} de ${pages.count}`, 50, 760, { align: 'center', width: 512 });
+         .text(`Página ${i + 1} de ${actualPageCount}`, 50, 760, { align: 'center', width: 512 });
     }
 
     // Finalize PDF and wait for completion
