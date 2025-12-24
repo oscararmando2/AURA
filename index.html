@@ -5991,6 +5991,13 @@
          * Guardar reservas temporales en localStorage
          */
         function saveTempReservations() {
+            // Check if localStorage is available
+            if (!window.localStorage) {
+                console.error('❌ localStorage no está disponible en este navegador');
+                alert('⚠️ Tu navegador no soporta almacenamiento local.\n\nPor favor, usa un navegador moderno o desactiva el modo incógnito.');
+                return false;
+            }
+            
             const tempData = {
                 reservations: selectedPlan.bookedEvents,
                 userInfo: selectedPlan.userInfo,
@@ -6015,6 +6022,12 @@
                 return true;
             } catch (error) {
                 console.error('❌ Error al guardar en localStorage:', error);
+                // Check for QuotaExceededError (localStorage full)
+                if (error.name === 'QuotaExceededError') {
+                    alert('⚠️ El almacenamiento local está lleno.\n\nPor favor, limpia el caché de tu navegador e intenta nuevamente.');
+                } else {
+                    alert('⚠️ Error al guardar las reservas.\n\nVerifica que tu navegador permita almacenamiento local.');
+                }
                 return false;
             }
         }
@@ -8984,6 +8997,13 @@
             // Evitar doble procesamiento (DOMContentLoaded + load)
             if (paymentReturnProcessed) {
                 console.log('⏭️ Retorno ya procesado, saltando...');
+                return;
+            }
+            
+            // Check if localStorage is available
+            if (!window.localStorage) {
+                console.error('❌ localStorage no está disponible en este navegador');
+                alert('⚠️ Tu navegador no soporta almacenamiento local.\n\nNo se pueden recuperar tus reservas.\n\nPor favor, contacta con soporte con tu comprobante de pago.');
                 return;
             }
             
