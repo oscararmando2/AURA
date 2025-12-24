@@ -2459,6 +2459,7 @@
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .event-detail-actions button {
@@ -2485,6 +2486,30 @@
 
         .event-detail-actions .btn-secondary:hover {
             background: #d0d0d0;
+        }
+
+        .event-detail-actions .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        .event-detail-actions .btn-whatsapp:hover {
+            background: linear-gradient(135deg, #20BA5A 0%, #0E7A6A 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .event-detail-actions .btn-whatsapp:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
         }
 
         /* Admin package selection buttons */
@@ -3947,6 +3972,7 @@
                 <div class="event-detail-actions">
                     <button type="button" class="btn-secondary" id="detail-close-btn">Cerrar</button>
                     <button type="button" class="btn-primary" id="detail-contact-btn">📧 Contactar</button>
+                    <button type="button" class="btn-whatsapp" id="detail-whatsapp-btn">📱 Mandar clases por WhatsApp</button>
                 </div>
             </div>
         </div>
@@ -7042,6 +7068,7 @@
             document.getElementById('event-detail-close').addEventListener('click', closeEventDetailModal);
             document.getElementById('detail-close-btn').addEventListener('click', closeEventDetailModal);
             document.getElementById('detail-contact-btn').addEventListener('click', contactClient);
+            document.getElementById('detail-whatsapp-btn').addEventListener('click', sendClassScheduleToClient);
             
             // Close modal on background click
             document.getElementById('event-detail-modal').addEventListener('click', function(e) {
@@ -8004,7 +8031,10 @@
                 
                 // Hide contact button for grouped events (multiple emails)
                 document.getElementById('detail-contact-btn').style.display = 'none';
+                document.getElementById('detail-whatsapp-btn').style.display = 'none';
                 window.currentEventEmail = null;
+                window.currentEventTelefono = null;
+                window.currentEventNombre = null;
             } else {
                 // Handle single event - show one client
                 const modalHeader = document.querySelector('.event-detail-header h3');
@@ -8032,7 +8062,9 @@
                 
                 // Show contact button and store telefono
                 document.getElementById('detail-contact-btn').style.display = 'inline-block';
+                document.getElementById('detail-whatsapp-btn').style.display = 'inline-block';
                 window.currentEventTelefono = props.telefono;
+                window.currentEventNombre = props.fullName || event.title;
             }
             
             // Show modal and lock body scroll
@@ -8058,6 +8090,34 @@
                 window.open(`https://wa.me/52${telefono}?text=${mensaje}`, '_blank');
             } else {
                 alert('⚠️ No hay teléfono disponible para este cliente');
+            }
+        }
+
+        /**
+         * Send class schedule to client via WhatsApp from admin panel
+         * This function fetches all the client's reservations and sends them via WhatsApp
+         */
+        async function sendClassScheduleToClient() {
+            const telefono = window.currentEventTelefono;
+            const nombre = window.currentEventNombre;
+            
+            if (!telefono || !nombre) {
+                showCustomAlert('⚠️ No hay información del cliente disponible', 'warning', 'Atención');
+                return;
+            }
+            
+            console.log('📱 Enviando clases al cliente desde admin panel:', nombre, telefono);
+            
+            try {
+                // Use the existing sendWhatsAppMessage function which already handles everything
+                const success = await sendWhatsAppMessage(telefono, nombre);
+                
+                if (success) {
+                    console.log('✅ Mensaje de WhatsApp enviado exitosamente');
+                }
+            } catch (error) {
+                console.error('❌ Error al enviar clases por WhatsApp:', error);
+                showCustomAlert('Error al enviar clases por WhatsApp. Por favor, intenta nuevamente.', 'error', 'Error');
             }
         }
 
