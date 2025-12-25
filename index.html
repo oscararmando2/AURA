@@ -2512,6 +2512,33 @@
             box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
         }
 
+        /* Participant contact button */
+        .btn-participant-contact {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .btn-participant-contact:hover {
+            background: linear-gradient(135deg, #20BA5A 0%, #0E7A6A 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .btn-participant-contact:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
+        }
+
         /* Admin package selection buttons */
         .admin-package-btn {
             padding: 12px 16px;
@@ -7070,6 +7097,38 @@
             document.getElementById('detail-contact-btn').addEventListener('click', contactClient);
             document.getElementById('detail-whatsapp-btn').addEventListener('click', sendClassScheduleToClient);
             
+            // Event delegation for participant contact buttons
+            document.getElementById('event-detail-modal').addEventListener('click', async function(e) {
+                if (e.target.classList.contains('btn-participant-contact')) {
+                    const telefono = e.target.getAttribute('data-telefono');
+                    const nombre = e.target.getAttribute('data-nombre');
+                    
+                    if (!telefono) {
+                        alert('⚠️ No hay teléfono disponible para este participante');
+                        return;
+                    }
+                    
+                    const normalizedPhone = normalizePhoneForWhatsApp(telefono);
+                    if (!normalizedPhone) {
+                        alert('⚠️ Número de teléfono inválido.\n\nSe requiere un número mexicano de 10 dígitos.');
+                        return;
+                    }
+                    
+                    // Generate personalized message with client's schedule
+                    const mensajePersonalizado = await generateAdminToClientMessage(telefono, nombre || 'Cliente');
+                    
+                    if (!mensajePersonalizado) {
+                        // Fallback to generic message if generation fails
+                        const mensaje = encodeURIComponent(`¡Hola ${nombre || 'Cliente'}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`);
+                        window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                        return;
+                    }
+                    
+                    const mensaje = encodeURIComponent(mensajePersonalizado);
+                    window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                }
+            });
+            
             // Close modal on background click
             document.getElementById('event-detail-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -8011,6 +8070,9 @@
                                     <span style="color: #EFE9E1; margin-right: 5px;">📝</span>${participant.notas}
                                 </div>
                             ` : ''}
+                            <button type="button" class="btn-participant-contact" data-telefono="${participant.telefono || ''}" data-nombre="${participant.fullName || ''}">
+                                📱 Contactar
+                            </button>
                         </div>
                     `;
                 });
