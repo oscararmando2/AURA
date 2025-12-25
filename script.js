@@ -84,6 +84,15 @@ async function crearPreferenciaYpagar(title, price) {
   const nombre = localStorage.getItem("userName");
   const telefono = localStorage.getItem("userTelefono");
 
+  // Validate user data before making the API call
+  if (!nombre || !telefono) {
+    console.error('❌ Datos de usuario no encontrados en localStorage');
+    alert("⚠️ Error: No se encontraron los datos de registro. Por favor, registrate nuevamente.");
+    return;
+  }
+
+  console.log('📋 Creando preferencia de pago:', { title, price, nombre, telefono });
+
   try {
     const res = await fetch(BACKEND_URL, {
       method: "POST",
@@ -97,12 +106,24 @@ async function crearPreferenciaYpagar(title, price) {
     });
 
     const data = await res.json();
+    
+    // Check if the response was successful
+    if (!res.ok) {
+      console.error('❌ Error del servidor:', res.status, data);
+      const errorMessage = data.error || data.details || 'Error desconocido';
+      alert(`✕\nError\n${errorMessage}\n\nIntenta de nuevo o contacta a soporte.`);
+      return;
+    }
+
     if (data.init_point) {
+      console.log('✅ Preferencia creada exitosamente, redirigiendo a Mercado Pago');
       window.location.href = data.init_point;
     } else {
-      alert("Error al crear el pago. Intenta de nuevo.");
+      console.error('❌ Respuesta sin init_point:', data);
+      alert("✕\nError\nNo se pudo obtener el enlace de pago. Intenta de nuevo.");
     }
   } catch (e) {
-    alert("Error de conexión. Revisa tu internet.");
+    console.error('❌ Error de conexión:', e);
+    alert("✕\nError\nError de conexión. Verifica tu internet e intenta de nuevo.");
   }
 }
