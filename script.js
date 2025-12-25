@@ -81,20 +81,27 @@ async function guardarRegistroLocalYPagar() {
   // Store hashed password associated with phone number for login verification
   localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
   localStorage.setItem('registered', 'true');
-  document.getElementById('register-modal').style.display = 'none';
   
-  // Clear form fields
-  document.getElementById('quick-name').value = '';
-  document.getElementById('quick-phone-digits').value = '';
-  document.getElementById('quick-password').value = '';
+  // Close modal
+  document.getElementById('register-modal').style.display = 'none';
   
   // If registration is for payment, proceed to payment
   if (registrationContext === 'payment') {
+    // Clear form fields
+    document.getElementById('quick-name').value = '';
+    document.getElementById('quick-phone-digits').value = '';
+    document.getElementById('quick-password').value = '';
+    
     crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
   } else {
     // Standalone registration - show success message and scroll to "Mis Clases"
     console.log('✅ Usuario registrado exitosamente:', name);
     alert('✅ ¡Registro exitoso!\n\nAhora puedes ver tus clases reservadas.');
+    
+    // Clear form fields after showing success message
+    document.getElementById('quick-name').value = '';
+    document.getElementById('quick-phone-digits').value = '';
+    document.getElementById('quick-password').value = '';
     
     // Scroll to "Mis Clases" section if it exists
     const myClassesSection = document.getElementById('my-classes-section');
