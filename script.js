@@ -6,6 +6,9 @@ const PHONE_PATTERN = /^\d{10}$/;
 // Global variable to store the selected package
 let selectedPackage = { title: '', price: 0 };
 
+// Track registration context: 'payment' or 'standalone'
+let registrationContext = 'standalone';
+
 /**
  * Hash a password using SHA-256 for secure storage
  * @param {string} password - The plain text password
@@ -20,12 +23,14 @@ async function hashPassword(password) {
   return hashHex;
 }
 
-function showRegisterModal() {
+function showRegisterModal(context = 'standalone') {
+  registrationContext = context;
   document.getElementById("register-modal").style.display = "flex";
 }
 
 function closeRegisterModal() {
   document.getElementById("register-modal").style.display = "none";
+  registrationContext = 'standalone'; // Reset to default
 }
 
 function iniciarPago(button) {
@@ -38,7 +43,7 @@ function iniciarPago(button) {
   if (localStorage.getItem("registered") === "true") {
     crearPreferenciaYpagar(title, price);
   } else {
-    showRegisterModal(); // tu función ya existente
+    showRegisterModal('payment'); // Show modal for payment registration
   }
 }
 
@@ -77,7 +82,29 @@ async function guardarRegistroLocalYPagar() {
   localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
   localStorage.setItem('registered', 'true');
   document.getElementById('register-modal').style.display = 'none';
-  crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
+  
+  // Clear form fields
+  document.getElementById('quick-name').value = '';
+  document.getElementById('quick-phone-digits').value = '';
+  document.getElementById('quick-password').value = '';
+  
+  // If registration is for payment, proceed to payment
+  if (registrationContext === 'payment') {
+    crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
+  } else {
+    // Standalone registration - show success message and scroll to "Mis Clases"
+    console.log('✅ Usuario registrado exitosamente:', name);
+    alert('✅ ¡Registro exitoso!\n\nAhora puedes ver tus clases reservadas.');
+    
+    // Scroll to "Mis Clases" section if it exists
+    const myClassesSection = document.getElementById('my-classes-section');
+    if (myClassesSection) {
+      myClassesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+  
+  // Reset context
+  registrationContext = 'standalone';
 }
 
 async function crearPreferenciaYpagar(title, price) {
