@@ -3118,17 +3118,17 @@
             .calendar-scroll-hint {
                 font-size: 0.95rem;
                 padding: 16px 18px;
-                background: linear-gradient(135deg, #25D366 10%, rgba(37, 211, 102, 0.15) 100%);
-                border: 2px solid rgba(37, 211, 102, 0.3);
+                background: linear-gradient(135deg, rgba(239, 233, 225, 0.8) 10%, rgba(239, 233, 225, 0.3) 100%);
+                border: 2px solid rgba(239, 233, 225, 0.5);
                 animation: pulse-hint 2s ease-in-out infinite;
             }
             
             @keyframes pulse-hint {
                 0%, 100% {
-                    box-shadow: 0 2px 8px rgba(37, 211, 102, 0.2);
+                    box-shadow: 0 2px 8px rgba(239, 233, 225, 0.3);
                 }
                 50% {
-                    box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
+                    box-shadow: 0 4px 16px rgba(239, 233, 225, 0.5);
                 }
             }
             
@@ -3253,8 +3253,8 @@
             }
             
             .stat-card:active {
-                transform: translateY(-3px);
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                transform: translateY(1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             }
 
             .stat-card .stat-icon {
@@ -3299,11 +3299,6 @@
                 background: linear-gradient(135deg, #ffffff 0%, #F5F3F0 100%);
                 border: 2px solid rgba(239, 233, 225, 0.25);
                 transition: all 0.3s ease;
-            }
-            
-            .event-detail-row:active {
-                transform: scale(0.98);
-                background: linear-gradient(135deg, #F5F3F0 0%, #EFE9E1 100%);
             }
 
             .event-detail-icon {
