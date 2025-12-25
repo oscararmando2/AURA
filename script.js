@@ -1,5 +1,5 @@
 // script.js - Flujo de pago AURA Studio (registro único con localStorage)
-const BACKEND_URL = "https://aura-eta-five.vercel.app/api/create-preference";
+// Note: BACKEND_URL is already defined in index.html, don't redefine it here
 const REQUIRED_PHONE_DIGITS = 10;
 const PHONE_PATTERN = /^\d{10}$/;
 
