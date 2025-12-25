@@ -8197,8 +8197,8 @@
                         resultItem.className = 'search-result-item';
                         
                         // Escape HTML to prevent XSS
-                        const escapedNombre = participant.nombre.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-                        const escapedTelefono = participant.telefono.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+                        const escapedNombre = escapeHtml(participant.nombre);
+                        const escapedTelefono = escapeHtml(participant.telefono);
                         
                         resultItem.innerHTML = `
                             <div class="participant-name">
@@ -8217,7 +8217,7 @@
                             </button>
                         `;
                         
-                        // Add event listener safely instead of using onclick
+                        // Add event listener for contact button
                         const contactButton = resultItem.querySelector('.contact-button');
                         contactButton.addEventListener('click', () => {
                             contactParticipant(participant.telefono, participant.nombre);
@@ -8232,6 +8232,21 @@
             }
             
             console.log(`🔍 Filtro aplicado: ${filteredEvents.length} de ${allReservationsData.length} eventos`);
+        }
+        
+        /**
+         * Escape HTML special characters to prevent XSS
+         * @param {string} text - Text to escape
+         * @returns {string} Escaped text safe for HTML insertion
+         */
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
         
         /**
@@ -8275,7 +8290,7 @@
             window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
         }
         
-        // Expose contactParticipant globally for onclick handler
+        // Expose contactParticipant globally for event handlers
         window.contactParticipant = contactParticipant;
         
         /**
@@ -10010,7 +10025,7 @@
     </script>
 
     <!-- External JavaScript for Registration and Payment Flow -->
-    <script src="script.js"></script>
+    <script src="script.js" onerror="console.error('Error loading script.js - Registration functionality may not work')"></script>
 
 </body>
 </html>
