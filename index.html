@@ -8057,6 +8057,10 @@
                 // Create participant list HTML
                 let participantsHTML = '<div class="participants-list">';
                 props.participants.forEach((participant, index) => {
+                    // Escape data for HTML attributes
+                    const escapedTelefono = (participant.telefono || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    const escapedNombre = (participant.fullName || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    
                     participantsHTML += `
                         <div class="participant-item" style="padding: 10px; margin-bottom: 10px; border-left: 3px solid #EFE9E1; background-color: #EFE9E1; border-radius: 5px;">
                             <div style="font-weight: 600; color: #333; margin-bottom: 5px;">
@@ -8070,7 +8074,7 @@
                                     <span style="color: #EFE9E1; margin-right: 5px;">📝</span>${participant.notas}
                                 </div>
                             ` : ''}
-                            <button type="button" class="btn-participant-contact" data-telefono="${participant.telefono || ''}" data-nombre="${participant.fullName || ''}">
+                            <button type="button" class="btn-participant-contact" data-telefono="${escapedTelefono}" data-nombre="${escapedNombre}">
                                 📱 Contactar
                             </button>
                         </div>
