@@ -8117,7 +8117,7 @@
          * Generate personalized admin-to-client message with their reservations
          * @param {string} userTelefono - User's phone number
          * @param {string} userName - User's name
-         * @returns {Promise<string|null>} Personalized message or null if no reservations
+         * @returns {Promise<string|null>} Personalized message with reservations, generic greeting if no reservations, or null on error
          */
         async function generateAdminToClientMessage(userTelefono, userName) {
             try {
