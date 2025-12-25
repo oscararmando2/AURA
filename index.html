@@ -8175,11 +8175,11 @@
                 adminCalendar.addEvent(event);
             });
             
-            // Display search results on mobile (width <= 768px) when there's a search query
+            // Display search results on mobile (width <= MOBILE_BREAKPOINT) when there's a search query
             const searchResultsContainer = document.getElementById('search-results-container');
             const searchResultsList = document.getElementById('search-results-list');
             
-            if (searchText && window.innerWidth <= 768) {
+            if (searchText && window.innerWidth <= MOBILE_BREAKPOINT) {
                 // Show search results container
                 searchResultsContainer.style.display = 'block';
                 
@@ -8240,8 +8240,8 @@
          * @returns {string} Escaped text safe for HTML insertion
          */
         function escapeHtml(text) {
-            if (!text) return '';
-            return text.toString()
+            if (text === null || text === undefined) return '';
+            return String(text)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
