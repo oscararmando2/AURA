@@ -8114,10 +8114,80 @@
         }
         
         /**
+         * Generate personalized admin-to-client message with their reservations
+         * @param {string} userTelefono - User's phone number
+         * @param {string} userName - User's name
+         * @returns {Promise<string|null>} Personalized message with reservations, generic greeting if no reservations, or null on error
+         */
+        async function generateAdminToClientMessage(userTelefono, userName) {
+            try {
+                console.log(`📱 Generando mensaje personalizado para: ${userName} (${userTelefono})`);
+                
+                // Wait for Firebase to be ready
+                if (!window.firebaseReady || !window.db || !window.firestoreExports) {
+                    console.error('❌ Firebase no está listo');
+                    return null;
+                }
+                
+                // Get Firestore functions from global exports
+                const { query, collection, where, getDocs } = window.firestoreExports;
+                const db = window.db;
+                
+                // Normalize telefono
+                const userTelefonoTrimmed = userTelefono.trim();
+                
+                // Query reservations filtered by telefono
+                const q = query(collection(db, 'reservas'), where('telefono', '==', userTelefonoTrimmed));
+                const querySnapshot = await getDocs(q);
+                
+                // Collect reservations
+                const userReservations = [];
+                querySnapshot.forEach((doc) => {
+                    userReservations.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log(`📚 Encontradas ${userReservations.length} reservas para el usuario`);
+                
+                if (userReservations.length === 0) {
+                    // If no reservations, return a generic greeting
+                    return `¡Hola ${userName}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`;
+                }
+                
+                // Sort by date (upcoming first)
+                userReservations.sort((a, b) => {
+                    const dateA = parseFechaHora(a.fechaHora);
+                    const dateB = parseFechaHora(b.fechaHora);
+                    return dateA - dateB;
+                });
+                
+                // Build the personalized message
+                let mensaje = `¡Hola ${userName}!\n\n`;
+                mensaje += `Somos AURA Studio. Gracias por agendar con nosotros.\n\n`;
+                mensaje += `Aquí está tu rol de clases:\n\n`;
+                
+                // Add each class with formatted date
+                userReservations.forEach((reserva) => {
+                    const fechaFormateada = formatDateToSpanish(reserva.fechaHora);
+                    mensaje += `• ${fechaFormateada}\n`;
+                });
+                
+                mensaje += `\n¿Hay algo en lo que podamos ayudarte? 😊`;
+                
+                return mensaje;
+            } catch (error) {
+                console.error('❌ Error al generar mensaje personalizado:', error);
+                console.error('Error details:', error.message, error.stack);
+                return null;
+            }
+        }
+        
+        /**
          * Contact client via WhatsApp
          */
-        function contactClient() {
+        async function contactClient() {
             const telefono = window.currentEventTelefono;
+            const nombre = window.currentEventNombre;
+            
             if (!telefono) {
                 alert('⚠️ No hay teléfono disponible para este cliente');
                 return;
@@ -8129,7 +8199,17 @@
                 return;
             }
             
-            const mensaje = encodeURIComponent('Hola! Te contactamos desde AURA Studio respecto a tu reserva. ¿En qué podemos ayudarte?');
+            // Generate personalized message with client's schedule
+            const mensajePersonalizado = await generateAdminToClientMessage(telefono, nombre || 'Cliente');
+            
+            if (!mensajePersonalizado) {
+                // Fallback to generic message if generation fails
+                const mensaje = encodeURIComponent(`¡Hola ${nombre || 'Cliente'}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`);
+                window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                return;
+            }
+            
+            const mensaje = encodeURIComponent(mensajePersonalizado);
             window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
         }
 
