@@ -4719,7 +4719,8 @@
                 try {
                     // Store user info in localStorage for session
                     // Store with country code prefix for consistency with registration
-                    localStorage.setItem('userTelefono', '52' + phoneNumber);
+                    const phoneWithCountryCode = '52' + phoneNumber;
+                    localStorage.setItem('userTelefono', phoneWithCountryCode);
                     localStorage.setItem('userLoggedIn', 'true');
                     
                     // Hide modal
@@ -4728,8 +4729,9 @@
                     errorDiv.style.display = 'none';
                     
                     // Load and show user's classes
+                    // Pass phone with country code to match stored reservations
                     if (typeof window.loadUserClasses === 'function') {
-                        await window.loadUserClasses(phoneNumber);
+                        await window.loadUserClasses(phoneWithCountryCode);
                         
                         // Scroll to My Classes section
                         const myClassesSection = document.getElementById('my-classes-section');
