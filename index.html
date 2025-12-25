@@ -2297,16 +2297,19 @@
         /* Hint message for horizontal scrolling */
         .calendar-scroll-hint {
             text-align: center;
-            padding: 15px;
-            background: rgba(239, 233, 225, 0.3);
-            border-radius: 10px;
+            padding: 18px 20px;
+            background: linear-gradient(135deg, rgba(239, 233, 225, 0.4) 0%, rgba(239, 233, 225, 0.2) 100%);
+            border-radius: 12px;
             margin-bottom: 20px;
-            font-size: 0.95rem;
-            color: #666;
+            font-size: 1rem;
+            color: #333;
+            border: 2px solid rgba(239, 233, 225, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         
         .calendar-scroll-hint span {
-            font-weight: 600;
+            font-weight: 700;
+            color: #1a1a1a;
         }
 
         /* Admin calendar event styling - Mejorado para mejor visibilidad */
@@ -2976,10 +2979,19 @@
             
             /* Admin panel container en móvil - ajustar para permitir que el calendario salga */
             #admin-panel-container {
-                padding: 30px 20px !important;
-                margin: 0 10px !important;
-                border-radius: 20px !important;
+                padding: 25px 15px !important;
+                margin: 0 8px !important;
+                border-radius: 16px !important;
                 overflow: visible !important; /* Permitir que el calendario salga del contenedor */
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15) !important;
+            }
+            
+            /* Admin panel title - better sizing for mobile */
+            #admin-panel-container h3 {
+                font-size: 1.6rem !important;
+                margin-bottom: 25px !important;
+                padding-bottom: 12px;
+                border-bottom: 2px solid rgba(239, 233, 225, 0.4);
             }
 
             .calendar-info {
@@ -3102,6 +3114,24 @@
 
             /* Admin calendar mobile adjustments - SEPARADO DE LA TARJETA para mejor visibilidad */
             
+            /* Calendar scroll hint - more prominent on mobile */
+            .calendar-scroll-hint {
+                font-size: 0.95rem;
+                padding: 16px 18px;
+                background: linear-gradient(135deg, rgba(239, 233, 225, 0.8) 10%, rgba(239, 233, 225, 0.3) 100%);
+                border: 2px solid rgba(239, 233, 225, 0.5);
+                animation: pulse-hint 2s ease-in-out infinite;
+            }
+            
+            @keyframes pulse-hint {
+                0%, 100% {
+                    box-shadow: 0 2px 8px rgba(239, 233, 225, 0.3);
+                }
+                50% {
+                    box-shadow: 0 4px 16px rgba(239, 233, 225, 0.5);
+                }
+            }
+            
             /* Romper el calendario fuera del contenedor en móvil */
             #admin-calendar-view {
                 /* Salir del contenedor padre y ocupar todo el ancho */
@@ -3167,135 +3197,273 @@
             /* Mobile controls - Mantener dentro de la tarjeta principal */
             .admin-calendar-controls {
                 flex-direction: column;
-                gap: 12px;
-                padding: 20px 15px;
+                gap: 14px;
+                padding: 20px 10px;
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 12px;
+                margin-bottom: 25px;
             }
             
             .admin-stats-summary {
-                gap: 15px;
-                margin-bottom: 30px;
+                gap: 12px;
+                margin-bottom: 25px;
                 grid-template-columns: repeat(2, 1fr); /* 2 columnas en móvil para mejor uso del espacio */
+                padding: 0 5px;
             }
 
             .admin-calendar-controls input,
             .admin-calendar-controls select,
             .admin-calendar-controls button {
                 width: 100%;
-                font-size: 1rem;
+                font-size: 1.05rem;
+                padding: 14px 16px;
+                border-radius: 10px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+            
+            .admin-calendar-controls input:focus,
+            .admin-calendar-controls select:focus {
+                outline: none;
+                border-color: #EFE9E1;
+                box-shadow: 0 0 0 3px rgba(239, 233, 225, 0.3);
+                transform: translateY(-2px);
+            }
+            
+            .admin-calendar-controls button {
+                background: linear-gradient(135deg, #EFE9E1 0%, #D4C5B9 100%);
+                border: none;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                cursor: pointer;
+                color: #1a1a1a;
+            }
+            
+            .admin-calendar-controls button:active {
+                transform: translateY(1px);
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
             }
 
             .stat-card {
-                padding: 18px 15px; /* Aumentado padding */
+                padding: 20px 15px; /* Aumentado padding */
+                border-radius: 14px;
+                background: linear-gradient(135deg, #ffffff 0%, #F5F3F0 100%);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+                border: 2px solid rgba(239, 233, 225, 0.3);
+                transition: all 0.3s ease;
+            }
+            
+            .stat-card:active {
+                transform: translateY(1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
             }
 
             .stat-card .stat-icon {
-                font-size: 2.2rem; /* Aumentado de 2rem */
+                font-size: 2.4rem; /* Aumentado de 2.2rem */
+                margin-bottom: 8px;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
             }
 
             .stat-card .stat-value {
-                font-size: 1.7rem; /* Aumentado de 1.5rem */
+                font-size: 1.9rem; /* Aumentado de 1.7rem */
+                font-weight: 800;
+                color: #1a1a1a;
+                margin: 8px 0;
             }
             
             .stat-card .stat-label {
-                font-size: 0.9rem;
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: #666;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .event-detail-content {
-                padding: 25px 20px;
+                padding: 30px 20px;
                 max-width: 95%;
+                border-radius: 20px;
+                max-height: 85vh;
+                overflow-y: auto;
             }
 
             .event-detail-header h3 {
-                font-size: 1.4rem;
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 12px;
             }
 
             .event-detail-row {
-                padding: 10px;
+                padding: 14px 12px;
+                margin-bottom: 12px;
+                border-radius: 12px;
+                background: linear-gradient(135deg, #ffffff 0%, #F5F3F0 100%);
+                border: 2px solid rgba(239, 233, 225, 0.25);
+                transition: all 0.3s ease;
             }
 
             .event-detail-icon {
-                font-size: 1.2rem;
+                font-size: 1.4rem;
+                margin-right: 12px;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
             }
 
             .event-detail-value {
-                font-size: 1rem;
+                font-size: 1.05rem;
+                font-weight: 600;
+                color: #1a1a1a;
+            }
+            
+            .event-detail-label {
+                font-size: 0.85rem;
+                font-weight: 600;
+                color: #666;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 4px;
+            }
+            
+            .event-detail-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: 25px;
+            }
+            
+            .event-detail-actions button {
+                padding: 16px 20px;
+                font-size: 1.05rem;
+                font-weight: 600;
+                border-radius: 12px;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+            
+            .event-detail-actions button:active {
+                transform: translateY(1px);
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            }
+            
+            .btn-primary {
+                background: linear-gradient(135deg, #EFE9E1 0%, #D4C5B9 100%);
+                color: #1a1a1a;
+            }
+            
+            .btn-secondary {
+                background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+                color: #333;
+            }
+            
+            .btn-whatsapp {
+                background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+                color: #fff;
             }
 
             /* Mobile responsive styles for reservation modals */
             #time-selection-modal > div {
-                padding: 25px 20px !important;
+                padding: 30px 20px !important;
                 width: 95% !important;
-                border-radius: 15px !important;
+                border-radius: 20px !important;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
             }
 
             #time-selection-modal h2 {
-                font-size: 1.3rem !important;
-                margin-bottom: 8px !important;
+                font-size: 1.4rem !important;
+                margin-bottom: 10px !important;
+                font-weight: 700 !important;
             }
 
             #time-selection-modal p {
-                font-size: 0.9rem !important;
-                margin-bottom: 15px !important;
+                font-size: 0.95rem !important;
+                margin-bottom: 18px !important;
+                color: #666 !important;
             }
 
             #time-slots-container {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 8px !important;
-                max-height: 300px !important;
-                padding: 8px !important;
+                gap: 10px !important;
+                max-height: 320px !important;
+                padding: 10px !important;
             }
 
             #time-selection-modal button {
-                padding: 10px 15px !important;
-                font-size: 0.9rem !important;
+                padding: 14px 18px !important;
+                font-size: 1rem !important;
+                font-weight: 600 !important;
+                border-radius: 10px !important;
+                transition: all 0.3s ease !important;
+            }
+            
+            #time-selection-modal button:active {
+                transform: scale(0.95) !important;
             }
 
             #reservation-modal > div {
-                padding: 25px 20px !important;
+                padding: 30px 20px !important;
                 width: 95% !important;
-                border-radius: 15px !important;
+                border-radius: 20px !important;
                 max-height: 90vh !important;
                 overflow-y: auto !important;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
             }
 
             #reservation-modal h2 {
-                font-size: 1.3rem !important;
-                margin-bottom: 15px !important;
+                font-size: 1.4rem !important;
+                margin-bottom: 18px !important;
+                font-weight: 700 !important;
             }
 
             #reservation-modal label {
-                font-size: 0.85rem !important;
-                margin-bottom: 6px !important;
+                font-size: 0.9rem !important;
+                margin-bottom: 8px !important;
+                font-weight: 600 !important;
+                color: #333 !important;
             }
 
             #reservation-modal input {
-                padding: 12px !important;
-                font-size: 0.9rem !important;
+                padding: 14px !important;
+                font-size: 1rem !important;
+                border-radius: 10px !important;
+                border: 2px solid rgba(239, 233, 225, 0.3) !important;
+            }
+            
+            #reservation-modal input:focus {
+                outline: none !important;
+                border-color: #EFE9E1 !important;
+                box-shadow: 0 0 0 3px rgba(239, 233, 225, 0.3) !important;
             }
 
             #reservation-modal .reservation-info-box {
-                padding: 15px !important;
-                margin-bottom: 20px !important;
+                padding: 18px !important;
+                margin-bottom: 22px !important;
+                border-radius: 12px !important;
+                background: linear-gradient(135deg, #F5F3F0 0%, #EFE9E1 100%) !important;
             }
 
             #reservation-date-display,
             #reservation-time-display {
-                font-size: 0.95rem !important;
+                font-size: 1rem !important;
+                font-weight: 600 !important;
             }
 
             #reservation-progress {
-                font-size: 1.1rem !important;
+                font-size: 1.2rem !important;
+                font-weight: 700 !important;
             }
 
             #reservation-modal button {
-                padding: 12px !important;
-                font-size: 0.95rem !important;
+                padding: 14px !important;
+                font-size: 1rem !important;
+                font-weight: 600 !important;
+                border-radius: 10px !important;
             }
 
             #reservation-cancel,
             #reservation-confirm {
-                padding: 14px !important;
-                font-size: 0.9rem !important;
+                padding: 16px !important;
+                font-size: 1.05rem !important;
+                font-weight: 600 !important;
             }
 
             /* Hide all sections except admin panel on mobile when admin is logged in */
@@ -3348,6 +3516,74 @@
             #calendar-container {
                 padding: 10px 5px;
                 margin: 20px 5px 0;
+            }
+            
+            /* Admin panel extra small mobile improvements */
+            #admin-panel-container {
+                padding: 20px 12px !important;
+                margin: 0 5px !important;
+            }
+            
+            #admin-panel-container h3 {
+                font-size: 1.4rem !important;
+            }
+            
+            .admin-stats-summary {
+                gap: 10px;
+                padding: 0;
+            }
+            
+            .stat-card {
+                padding: 16px 12px;
+            }
+            
+            .stat-card .stat-icon {
+                font-size: 2rem;
+            }
+            
+            .stat-card .stat-value {
+                font-size: 1.6rem;
+            }
+            
+            .stat-card .stat-label {
+                font-size: 0.85rem;
+            }
+            
+            .admin-calendar-controls {
+                padding: 15px 8px;
+                gap: 12px;
+            }
+            
+            .admin-calendar-controls input,
+            .admin-calendar-controls button {
+                font-size: 1rem;
+                padding: 13px 14px;
+            }
+            
+            .event-detail-content {
+                padding: 25px 16px;
+            }
+            
+            .event-detail-header h3 {
+                font-size: 1.3rem;
+            }
+            
+            .event-detail-row {
+                padding: 12px 10px;
+            }
+            
+            .event-detail-icon {
+                font-size: 1.3rem;
+            }
+            
+            .event-detail-value {
+                font-size: 1rem;
+            }
+            
+            .calendar-scroll-hint {
+                font-size: 0.9rem;
+                padding: 14px 16px;
+            }
             }
 
             .calendar-info {
@@ -3887,9 +4123,9 @@
 
     <!-- ========== 6. Admin Panel Section ========== -->
     <section id="admin-panel-section" class="contact-section" style="display: none;">
-        <h2>Panel de Administrador</h2>
-        <p style="margin-bottom: 10px;">Hola <span id="admin-email-display">Michel</span></p>
-        <button type="button" id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px;">Cerrar Sesión</button>
+        <h2 style="font-size: 2rem; margin-bottom: 15px; font-weight: 700;">Panel de Administrador</h2>
+        <p style="margin-bottom: 12px; font-size: 1.1rem; color: #666;">Hola <span id="admin-email-display" style="color: #1a1a1a; font-weight: 600;">Michel</span></p>
+        <button type="button" id="admin-logout-btn" class="contact-btn" style="margin-bottom: 30px; padding: 14px 32px; font-size: 1.05rem; font-weight: 600; border-radius: 10px; background: linear-gradient(135deg, #f44336 0%, #c62828 100%); border: none; box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3); transition: all 0.3s ease;">Cerrar Sesión</button>
         
         <!-- Contenedor principal: en móvil, el calendario se separa para ocupar todo el ancho -->
         <div id="admin-panel-container" style="max-width: 1400px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%); padding: 50px; border-radius: 25px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); border: 2px solid rgba(239, 233, 225, 0.3);">
