@@ -87,7 +87,7 @@ async function crearPreferenciaYpagar(title, price) {
   // Validate user data before making the API call
   if (!nombre || !telefono) {
     console.error('❌ Datos de usuario no encontrados en localStorage');
-    alert("⚠️ Error: No se encontraron los datos de registro. Por favor, registrate nuevamente.");
+    alert("⚠️ Error: No se encontraron los datos de registro. Por favor, regístrate nuevamente.");
     return;
   }
 
@@ -111,7 +111,7 @@ async function crearPreferenciaYpagar(title, price) {
     if (!res.ok) {
       console.error('❌ Error del servidor:', res.status, data);
       const errorMessage = data.error || data.details || 'Error desconocido';
-      alert(`✕\nError\n${errorMessage}\n\nIntenta de nuevo o contacta a soporte.`);
+      alert(`Error: ${errorMessage}\n\nIntenta de nuevo o contacta a soporte.`);
       return;
     }
 
@@ -120,10 +120,10 @@ async function crearPreferenciaYpagar(title, price) {
       window.location.href = data.init_point;
     } else {
       console.error('❌ Respuesta sin init_point:', data);
-      alert("✕\nError\nNo se pudo obtener el enlace de pago. Intenta de nuevo.");
+      alert("Error: No se pudo obtener el enlace de pago.\n\nIntenta de nuevo o contacta a soporte.");
     }
   } catch (e) {
     console.error('❌ Error de conexión:', e);
-    alert("✕\nError\nError de conexión. Verifica tu internet e intenta de nuevo.");
+    alert("Error de conexión. Verifica tu internet.\n\nIntenta de nuevo o contacta a soporte.");
   }
 }
