@@ -8082,7 +8082,7 @@
         
         /**
          * Normalize phone number for WhatsApp (always 12 digits: 52 + 10 digits)
-         * @param {string} telefono - Phone number to normalize
+         * @param {string} telefono - Phone number to normalize (expected: Mexican 10-digit number)
          * @returns {string} Normalized phone number with exactly 12 digits, or empty string if invalid
          */
         function normalizePhoneForWhatsApp(telefono) {
@@ -8091,14 +8091,21 @@
             // Remove all non-numeric characters
             let cleaned = telefono.replace(/\D/g, '');
             
-            // If already starts with 52, remove it
+            // If the number has 12 digits and starts with 52, assume it's already formatted
+            // Otherwise, if it starts with 52 but doesn't have 12 digits, remove the 52
             if (cleaned.startsWith('52')) {
-                cleaned = cleaned.substring(2);
+                if (cleaned.length === 12) {
+                    // Already properly formatted (52 + 10 digits)
+                    return cleaned;
+                } else {
+                    // Remove the 52 prefix to extract the base number
+                    cleaned = cleaned.substring(2);
+                }
             }
             
-            // Validate that we have exactly 10 digits
+            // Validate that we have exactly 10 digits (Mexican phone number)
             if (cleaned.length !== 10) {
-                console.warn('⚠️ Invalid phone number length (expected 10 digits)');
+                console.warn('⚠️ Invalid phone number: expected 10-digit Mexican phone number');
                 return '';
             }
             
@@ -8118,7 +8125,7 @@
             
             const normalizedPhone = normalizePhoneForWhatsApp(telefono);
             if (!normalizedPhone) {
-                alert('⚠️ Número de teléfono inválido. Debe tener 10 dígitos.');
+                alert('⚠️ Número de teléfono inválido.\n\nSe requiere un número mexicano de 10 dígitos.');
                 return;
             }
             
