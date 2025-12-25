@@ -8081,16 +8081,56 @@
         }
         
         /**
+         * Normalize phone number for WhatsApp (always 12 digits: 52 + 10 digits)
+         * @param {string} telefono - Phone number to normalize (expected: Mexican 10-digit number)
+         * @returns {string} Normalized phone number with exactly 12 digits, or empty string if invalid
+         */
+        function normalizePhoneForWhatsApp(telefono) {
+            if (!telefono) return '';
+            
+            // Remove all non-numeric characters
+            let cleaned = telefono.replace(/\D/g, '');
+            
+            // If the number has 12 digits and starts with 52, assume it's already formatted
+            // Otherwise, if it starts with 52 but doesn't have 12 digits, remove the 52
+            if (cleaned.startsWith('52')) {
+                if (cleaned.length === 12) {
+                    // Already properly formatted (52 + 10 digits)
+                    return cleaned;
+                } else {
+                    // Remove the 52 prefix to extract the base number
+                    cleaned = cleaned.substring(2);
+                }
+            }
+            
+            // Validate that we have exactly 10 digits (Mexican phone number)
+            if (cleaned.length !== 10) {
+                console.warn('⚠️ Invalid phone number: expected 10-digit Mexican phone number');
+                return '';
+            }
+            
+            // Add 52 at the beginning
+            return '52' + cleaned;
+        }
+        
+        /**
          * Contact client via WhatsApp
          */
         function contactClient() {
             const telefono = window.currentEventTelefono;
-            if (telefono) {
-                const mensaje = encodeURIComponent('Hola! Te contactamos desde AURA Studio respecto a tu reserva. ¿En qué podemos ayudarte?');
-                window.open(`https://wa.me/52${telefono}?text=${mensaje}`, '_blank');
-            } else {
+            if (!telefono) {
                 alert('⚠️ No hay teléfono disponible para este cliente');
+                return;
             }
+            
+            const normalizedPhone = normalizePhoneForWhatsApp(telefono);
+            if (!normalizedPhone) {
+                alert('⚠️ Número de teléfono inválido.\n\nSe requiere un número mexicano de 10 dígitos.');
+                return;
+            }
+            
+            const mensaje = encodeURIComponent('Hola! Te contactamos desde AURA Studio respecto a tu reserva. ¿En qué podemos ayudarte?');
+            window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
         }
 
         /**
@@ -8106,7 +8146,7 @@
                 return;
             }
             
-            console.log('📱 Enviando clases al cliente desde admin panel:', nombre, telefono);
+            console.log('📱 Enviando clases al cliente desde admin panel:', nombre);
             
             try {
                 // Use the existing sendWhatsAppMessage function which already handles everything
@@ -8408,7 +8448,7 @@
          */
         async function sendWhatsAppMessage(userTelefono, userName) {
             try {
-                console.log('📱 Iniciando envío de WhatsApp para:', userName, userTelefono);
+                console.log('📱 Iniciando envío de WhatsApp para:', userName);
                 
                 // Generate message with real data from Firebase
                 const mensaje = await generateWhatsAppMessage(userTelefono, userName);
