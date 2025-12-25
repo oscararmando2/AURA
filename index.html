@@ -8098,7 +8098,7 @@
             
             // Validate that we have exactly 10 digits
             if (cleaned.length !== 10) {
-                console.warn(`⚠️ Invalid phone number length: ${cleaned.length} digits (expected 10)`);
+                console.warn('⚠️ Invalid phone number length (expected 10 digits)');
                 return '';
             }
             
@@ -8139,7 +8139,7 @@
                 return;
             }
             
-            console.log('📱 Enviando clases al cliente desde admin panel:', nombre, telefono);
+            console.log('📱 Enviando clases al cliente desde admin panel:', nombre);
             
             try {
                 // Use the existing sendWhatsAppMessage function which already handles everything
@@ -8441,7 +8441,7 @@
          */
         async function sendWhatsAppMessage(userTelefono, userName) {
             try {
-                console.log('📱 Iniciando envío de WhatsApp para:', userName, userTelefono);
+                console.log('📱 Iniciando envío de WhatsApp para:', userName);
                 
                 // Generate message with real data from Firebase
                 const mensaje = await generateWhatsAppMessage(userTelefono, userName);
