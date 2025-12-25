@@ -8150,7 +8150,7 @@
                 
                 if (userReservations.length === 0) {
                     // If no reservations, return a generic greeting
-                    return `¡Hola ${userName}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte?`;
+                    return `¡Hola ${userName}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`;
                 }
                 
                 // Sort by date (upcoming first)
@@ -8204,7 +8204,7 @@
             
             if (!mensajePersonalizado) {
                 // Fallback to generic message if generation fails
-                const mensaje = encodeURIComponent('¡Hola! Te contactamos desde AURA Studio respecto a tu reserva. ¿En qué podemos ayudarte?');
+                const mensaje = encodeURIComponent(`¡Hola ${nombre || 'Cliente'}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`);
                 window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
                 return;
             }
