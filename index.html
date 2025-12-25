@@ -8083,7 +8083,7 @@
         /**
          * Normalize phone number for WhatsApp (always 12 digits: 52 + 10 digits)
          * @param {string} telefono - Phone number to normalize
-         * @returns {string} Normalized phone number with exactly 12 digits
+         * @returns {string} Normalized phone number with exactly 12 digits, or empty string if invalid
          */
         function normalizePhoneForWhatsApp(telefono) {
             if (!telefono) return '';
@@ -8096,6 +8096,12 @@
                 cleaned = cleaned.substring(2);
             }
             
+            // Validate that we have exactly 10 digits
+            if (cleaned.length !== 10) {
+                console.warn(`⚠️ Invalid phone number length: ${cleaned.length} digits (expected 10). Number: ${telefono}`);
+                return '';
+            }
+            
             // Add 52 at the beginning
             return '52' + cleaned;
         }
@@ -8105,13 +8111,19 @@
          */
         function contactClient() {
             const telefono = window.currentEventTelefono;
-            if (telefono) {
-                const normalizedPhone = normalizePhoneForWhatsApp(telefono);
-                const mensaje = encodeURIComponent('Hola! Te contactamos desde AURA Studio respecto a tu reserva. ¿En qué podemos ayudarte?');
-                window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
-            } else {
+            if (!telefono) {
                 alert('⚠️ No hay teléfono disponible para este cliente');
+                return;
             }
+            
+            const normalizedPhone = normalizePhoneForWhatsApp(telefono);
+            if (!normalizedPhone) {
+                alert('⚠️ Número de teléfono inválido. Debe tener 10 dígitos.');
+                return;
+            }
+            
+            const mensaje = encodeURIComponent('Hola! Te contactamos desde AURA Studio respecto a tu reserva. ¿En qué podemos ayudarte?');
+            window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
         }
 
         /**
