@@ -8820,6 +8820,10 @@
          * Save edited reservation
          */
         async function saveEditedReservation() {
+            // Store original button text for restoration
+            const saveBtn = document.getElementById('edit-reservation-save');
+            const originalText = saveBtn.textContent;
+            
             try {
                 // Get form values
                 const newDate = document.getElementById('edit-reservation-date').value;
@@ -8851,8 +8855,6 @@
                 }
                 
                 // Show loading state
-                const saveBtn = document.getElementById('edit-reservation-save');
-                const originalText = saveBtn.textContent;
                 saveBtn.textContent = '⏳ Guardando...';
                 saveBtn.disabled = true;
                 
@@ -8884,7 +8886,6 @@
                 alert('❌ Error al actualizar la reserva. Por favor, intenta nuevamente.');
                 
                 // Reset button state using stored original text
-                const saveBtn = document.getElementById('edit-reservation-save');
                 saveBtn.textContent = originalText;
                 saveBtn.disabled = false;
             }
