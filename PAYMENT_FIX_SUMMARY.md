@@ -62,7 +62,6 @@ Algunas personas no podían completar el proceso de pago en el sistema.
 | 4 Clases | $600 | $135.00 | $60 | **$540** |
 | 8 Clases | $1200 | $125.00 | $200 | **$1000** |
 | 12 Clases | $1800 | $116.67 | $400 | **$1400** |
-| 15 Clases | $2250 | $106.67 | $650 | **$1600** |
 
 **Precio base por clase:** $150 MXN  
 **Descuentos:** Aumentan con paquetes más grandes para incentivar compras mayores
