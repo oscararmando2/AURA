@@ -6882,8 +6882,8 @@
                 'contact-section'
             ];
             
-            sections.forEach(sectionId => {
-                const section = document.getElementById(sectionId);
+            sections.forEach(className => {
+                const section = document.querySelector('.' + className);
                 if (section) section.style.display = 'none';
             });
             
@@ -6898,14 +6898,14 @@
          */
         function showAllSectionsExceptAdmin() {
             const sections = [
-                { id: 'hero-section', display: 'flex' },
-                { id: 'about-section', display: 'block' },
-                { id: 'booking-section', display: 'block' },
-                { id: 'contact-section', display: 'block' }
+                { className: 'hero-section', display: 'flex' },
+                { className: 'about-section', display: 'block' },
+                { className: 'booking-section', display: 'block' },
+                { className: 'contact-section', display: 'block' }
             ];
             
-            sections.forEach(({ id, display }) => {
-                const section = document.getElementById(id);
+            sections.forEach(({ className, display }) => {
+                const section = document.querySelector('.' + className);
                 if (section) section.style.display = display;
             });
             
