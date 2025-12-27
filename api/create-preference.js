@@ -1,11 +1,13 @@
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
 export default async function handler(req, res) {
+  // Set CORS headers for all requests
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(200).end();
   }
   
@@ -38,6 +40,16 @@ export default async function handler(req, res) {
   if (isNaN(numericPrice) || numericPrice <= 0) {
     console.error("❌ Precio inválido:", price);
     return res.status(400).json({ error: "Precio inválido" });
+  }
+  
+  // MercadoPago minimum amount validation (MXN)
+  // MercadoPago requires a minimum of 4 pesos for MXN transactions
+  if (numericPrice < 4) {
+    console.error("❌ Precio menor al mínimo permitido:", price);
+    return res.status(400).json({ 
+      error: "Precio inválido",
+      details: "El precio mínimo es de $4 MXN" 
+    });
   }
   
   // Validar y limpiar teléfono (extraer solo dígitos)
@@ -107,10 +119,26 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("❌ Error al crear preferencia:", error.message);
-    console.error("Detalles:", error);
+    console.error("Detalles completos:", error);
+    
+    // Provide more specific error messages
+    let userMessage = "Error al crear preferencia de pago";
+    let details = error.message;
+    
+    if (error.message && error.message.includes("credentials")) {
+      userMessage = "Error de configuración del servidor";
+      details = "Credenciales de MercadoPago inválidas";
+    } else if (error.message && error.message.includes("network")) {
+      userMessage = "Error de conexión con MercadoPago";
+      details = "No se pudo conectar al servidor de pagos";
+    } else if (error.message && error.message.includes("timeout")) {
+      userMessage = "Tiempo de espera agotado";
+      details = "El servidor de pagos tardó demasiado en responder";
+    }
+    
     res.status(500).json({ 
-      error: "Error al crear preferencia de pago",
-      details: error.message 
+      error: userMessage,
+      details: details
     });
   }
 }

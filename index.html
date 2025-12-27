@@ -3997,17 +3997,17 @@
                     <div class="bg"></div>
                     <div class="blob"></div>
                     <h3>1 Clase</h3>
-                    <div class="price">$50</div>
-                    <button type="button" class="plan-btn" data-title="1 Clases" data-price="50">Agendar Clase</button>
+                    <div class="price">$150</div>
+                    <button type="button" class="plan-btn" data-title="1 Clases" data-price="150">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
                     <div class="bg"></div>
                     <div class="blob"></div>
                     <h3>4 Clases</h3>
-                    <div class="price">$5</div>
+                    <div class="price">$540</div>
                     <div class="savings">Ahorras $60</div>
-                    <button type="button" class="plan-btn" data-title="4 Clases" data-price="5">Agendar Clase</button>
+                    <button type="button" class="plan-btn" data-title="4 Clases" data-price="540">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -9616,7 +9616,8 @@
                     if (res.status === 400) {
                         alert(`❌ Datos inválidos: ${errorData.details || errorData.error || 'Verifica tus datos'}`);
                     } else if (res.status === 500) {
-                        alert('❌ Error del servidor. Por favor, intenta nuevamente en unos minutos.');
+                        const errorMsg = errorData.details || errorData.error || 'Error del servidor';
+                        alert(`❌ ${errorMsg}\n\nPor favor, intenta nuevamente en unos minutos o contacta con soporte.`);
                     } else {
                         alert(`❌ Error al procesar pago (${res.status}). Por favor, intenta nuevamente.`);
                     }
