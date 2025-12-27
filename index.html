@@ -7147,20 +7147,19 @@
                 const q = query(collection(db, 'reservas'), orderBy('timestamp', 'desc'));
                 const querySnapshot = await getDocs(q);
                 
-                if (querySnapshot.empty) {
-                    // No hay reservas
-                    loadingDiv.style.display = 'none';
-                    noReservationsDiv.style.display = 'block';
+                // Always initialize calendar and show controls, regardless of whether there are reservations
+                if (!window.adminCalendar) {
+                    initAdminCalendar();
                 } else {
-                    // Hay reservas, cargar en el calendario
-                    loadingDiv.style.display = 'none';
-                    
-                    // Inicializar y cargar el calendario de admin
-                    if (!window.adminCalendar) {
-                        initAdminCalendar();
-                    } else {
-                        await loadAdminCalendarReservations();
-                    }
+                    await loadAdminCalendarReservations();
+                }
+                
+                // Hide loading
+                loadingDiv.style.display = 'none';
+                
+                // Show "no reservations" message if empty, but calendar controls remain visible
+                if (querySnapshot.empty) {
+                    noReservationsDiv.style.display = 'block';
                 }
                 
             } catch (error) {
