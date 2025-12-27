@@ -5137,17 +5137,22 @@
          * @returns {Date} Fecha de expiración
          */
         function calculateExpirationDate(firstClassDate, classes) {
-            // Para paquetes de 4 y 8 clases: 15 días hábiles
+            const expirationDate = new Date(firstClassDate);
+            
+            // Para paquetes de 4 y 8 clases: 14 días calendario (2 semanas)
             if (classes === 4 || classes === 8) {
-                return addBusinessDays(firstClassDate, 15);
+                expirationDate.setDate(expirationDate.getDate() + 14);
             }
-            // Para paquetes de 12 o cualquier otro tamaño: 30 días calendario
-            // Nota: Los paquetes estándar son 4, 8, y 12 clases
+            // Para paquetes de 12 clases: 24 días calendario
+            else if (classes === 12) {
+                expirationDate.setDate(expirationDate.getDate() + 24);
+            }
+            // Para cualquier otro tamaño de paquete: 30 días calendario
             else {
-                const expirationDate = new Date(firstClassDate);
                 expirationDate.setDate(expirationDate.getDate() + 30);
-                return expirationDate;
             }
+            
+            return expirationDate;
         }
 
         /**
@@ -5157,7 +5162,9 @@
          */
         function getExpirationInfo(classes) {
             if (classes === 4 || classes === 8) {
-                return { daysType: 'días hábiles', daysCount: 15 };
+                return { daysType: 'días', daysCount: 14 };
+            } else if (classes === 12) {
+                return { daysType: 'días', daysCount: 24 };
             } else {
                 return { daysType: 'días', daysCount: 30 };
             }
