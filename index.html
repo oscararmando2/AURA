@@ -3997,17 +3997,17 @@
                     <div class="bg"></div>
                     <div class="blob"></div>
                     <h3>1 Clase</h3>
-                    <div class="price">$50</div>
-                    <button type="button" class="plan-btn" data-title="1 Clases" data-price="50">Agendar Clase</button>
+                    <div class="price">$150</div>
+                    <button type="button" class="plan-btn" data-title="1 Clases" data-price="150">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
                     <div class="bg"></div>
                     <div class="blob"></div>
                     <h3>4 Clases</h3>
-                    <div class="price">$5</div>
+                    <div class="price">$540</div>
                     <div class="savings">Ahorras $60</div>
-                    <button type="button" class="plan-btn" data-title="4 Clases" data-price="5">Agendar Clase</button>
+                    <button type="button" class="plan-btn" data-title="4 Clases" data-price="540">Agendar Clase</button>
                 </div>
 
                 <div class="plan-card">
@@ -4026,15 +4026,6 @@
                     <div class="price">$1400</div>
                     <div class="savings">Ahorras $400</div>
                     <button type="button" class="plan-btn" data-title="12 Clases" data-price="1400">Agendar Clase</button>
-                </div>
-
-                <div class="plan-card">
-                    <div class="bg"></div>
-                    <div class="blob"></div>
-                    <h3>15 Clases</h3>
-                    <div class="price">$1600</div>
-                    <div class="savings">Ahorras $650</div>
-                    <button type="button" class="plan-btn" data-title="15 Clases" data-price="1600">Agendar Clase</button>
                 </div>
             </div>
 
@@ -4350,7 +4341,6 @@
                                     <button type="button" class="admin-package-btn" data-classes="4">4 Clases</button>
                                     <button type="button" class="admin-package-btn" data-classes="8">8 Clases</button>
                                     <button type="button" class="admin-package-btn" data-classes="12">12 Clases</button>
-                                    <button type="button" class="admin-package-btn" data-classes="15">15 Clases</button>
                                 </div>
                                 <input type="hidden" id="admin-schedule-package" required>
                             </div>
@@ -4437,7 +4427,6 @@
                                     <button type="button" class="admin-package-btn-fullpage" data-classes="4">4 Clases</button>
                                     <button type="button" class="admin-package-btn-fullpage" data-classes="8">8 Clases</button>
                                     <button type="button" class="admin-package-btn-fullpage" data-classes="12">12 Clases</button>
-                                    <button type="button" class="admin-package-btn-fullpage" data-classes="15">15 Clases</button>
                                 </div>
                                 <input type="hidden" id="admin-schedule-package-fullpage" required>
                             </div>
@@ -5122,8 +5111,8 @@
             if (classes === 4 || classes === 8) {
                 return addBusinessDays(firstClassDate, 15);
             }
-            // Para paquetes de 12, 15, o cualquier otro tamaño: 30 días calendario
-            // Nota: Los paquetes estándar son 4, 8, 12, y 15 clases
+            // Para paquetes de 12 o cualquier otro tamaño: 30 días calendario
+            // Nota: Los paquetes estándar son 4, 8, y 12 clases
             else {
                 const expirationDate = new Date(firstClassDate);
                 expirationDate.setDate(expirationDate.getDate() + 30);
@@ -9616,7 +9605,8 @@
                     if (res.status === 400) {
                         alert(`❌ Datos inválidos: ${errorData.details || errorData.error || 'Verifica tus datos'}`);
                     } else if (res.status === 500) {
-                        alert('❌ Error del servidor. Por favor, intenta nuevamente en unos minutos.');
+                        const errorMsg = errorData.details || errorData.error || 'Error del servidor';
+                        alert(`❌ ${errorMsg}\n\nPor favor, intenta nuevamente en unos minutos o contacta con soporte.`);
                     } else {
                         alert(`❌ Error al procesar pago (${res.status}). Por favor, intenta nuevamente.`);
                     }
