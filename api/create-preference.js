@@ -126,18 +126,20 @@ export default async function handler(req, res) {
     
     // Provide more specific error messages based on error properties
     let userMessage = "Error al crear preferencia de pago";
-    let details = error.message;
+    let details = error.message || "Error desconocido";
     
     // Check for specific error types/codes from MercadoPago SDK
-    if (error.status === 401 || (error.message && error.message.toLowerCase().includes("credential"))) {
+    // Priority: error.status > error.cause.code > error.message content
+    if (error.status === 401 || error.message?.toLowerCase().includes("credential")) {
       userMessage = "Error de configuración del servidor";
       details = "Credenciales de MercadoPago inválidas";
-    } else if (error.cause?.code === 'ECONNREFUSED' || error.cause?.code === 'ETIMEDOUT' || 
-               (error.message && error.message.toLowerCase().includes("network"))) {
+    } else if (error.cause?.code === 'ETIMEDOUT') {
+      userMessage = "Tiempo de espera agotado";
+      details = "El servidor de pagos tardó demasiado en responder";
+    } else if (error.cause?.code === 'ECONNREFUSED' || error.message?.toLowerCase().includes("network")) {
       userMessage = "Error de conexión con MercadoPago";
       details = "No se pudo conectar al servidor de pagos";
-    } else if (error.cause?.code === 'ETIMEDOUT' || 
-               (error.message && error.message.toLowerCase().includes("timeout"))) {
+    } else if (error.message?.toLowerCase().includes("timeout")) {
       userMessage = "Tiempo de espera agotado";
       details = "El servidor de pagos tardó demasiado en responder";
     }
