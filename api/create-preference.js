@@ -43,12 +43,15 @@ export default async function handler(req, res) {
   }
   
   // MercadoPago minimum amount validation (MXN)
-  // MercadoPago requires a minimum of 4 pesos for MXN transactions
-  if (numericPrice < 4) {
+  // MercadoPago's minimum transaction amount is typically 4 MXN for most payment methods
+  // Reference: https://www.mercadopago.com.mx/developers/es/docs/checkout-pro/payment-methods
+  // This can be configured via MIN_PAYMENT_AMOUNT environment variable if needed
+  const minAmount = parseFloat(process.env.MIN_PAYMENT_AMOUNT || '4');
+  if (numericPrice < minAmount) {
     console.error("❌ Precio menor al mínimo permitido:", price);
     return res.status(400).json({ 
       error: "Precio inválido",
-      details: "El precio mínimo es de $4 MXN" 
+      details: `El precio mínimo es de $${minAmount} MXN` 
     });
   }
   
@@ -121,17 +124,20 @@ export default async function handler(req, res) {
     console.error("❌ Error al crear preferencia:", error.message);
     console.error("Detalles completos:", error);
     
-    // Provide more specific error messages
+    // Provide more specific error messages based on error properties
     let userMessage = "Error al crear preferencia de pago";
     let details = error.message;
     
-    if (error.message && error.message.includes("credentials")) {
+    // Check for specific error types/codes from MercadoPago SDK
+    if (error.status === 401 || (error.message && error.message.toLowerCase().includes("credential"))) {
       userMessage = "Error de configuración del servidor";
       details = "Credenciales de MercadoPago inválidas";
-    } else if (error.message && error.message.includes("network")) {
+    } else if (error.cause?.code === 'ECONNREFUSED' || error.cause?.code === 'ETIMEDOUT' || 
+               (error.message && error.message.toLowerCase().includes("network"))) {
       userMessage = "Error de conexión con MercadoPago";
       details = "No se pudo conectar al servidor de pagos";
-    } else if (error.message && error.message.includes("timeout")) {
+    } else if (error.cause?.code === 'ETIMEDOUT' || 
+               (error.message && error.message.toLowerCase().includes("timeout"))) {
       userMessage = "Tiempo de espera agotado";
       details = "El servidor de pagos tardó demasiado en responder";
     }
