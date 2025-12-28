@@ -7685,11 +7685,37 @@
                         return;
                     }
                     
-                    // Find the participant's event from allReservationsData
-                    const participantEvent = allReservationsData.find(event => 
+                    // Find the participant's individual event from allReservationsData
+                    // Since grouped events still have individual reservations, search for the single event by firebaseId
+                    let participantEvent = allReservationsData.find(event => 
                         event.extendedProps && 
                         event.extendedProps.firebaseId === firebaseId
                     );
+                    
+                    // If not found in single events, it might be stored in a grouped event's participants
+                    if (!participantEvent) {
+                        // Search through grouped events
+                        for (const event of allReservationsData) {
+                            if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
+                                const participant = event.extendedProps.participants.find(p => p.firebaseId === firebaseId);
+                                if (participant) {
+                                    // Create a pseudo-event for this participant with the same time slot
+                                    participantEvent = {
+                                        start: event.start,
+                                        end: event.end,
+                                        title: participant.fullName,
+                                        extendedProps: {
+                                            fullName: participant.fullName,
+                                            telefono: participant.telefono,
+                                            notas: participant.notas,
+                                            firebaseId: participant.firebaseId
+                                        }
+                                    };
+                                    break;
+                                }
+                            }
+                        }
+                    }
                     
                     if (!participantEvent) {
                         alert('❌ No se encontró información del evento para editar');
