@@ -6429,7 +6429,7 @@
         // Constants for phone number handling
         const MEXICO_COUNTRY_CODE = '52';
         const PHONE_DIGITS_LENGTH = 10;
-        const PHONE_WITH_COUNTRY_CODE_LENGTH = 12; // 52 + 10 digits
+        const PHONE_WITH_COUNTRY_CODE_LENGTH = MEXICO_COUNTRY_CODE.length + PHONE_DIGITS_LENGTH; // 52 + 10 digits = 12
         
         /**
          * Show modal for legacy users to create a password
@@ -10078,14 +10078,14 @@
                 if (phone2WithoutCode === normalized1) return true;
             }
             
-            // If phone1 doesn't have country code, try adding it
-            if (normalized1.length === PHONE_DIGITS_LENGTH && !normalized1.startsWith(MEXICO_COUNTRY_CODE)) {
+            // If phone1 doesn't have country code (exactly 10 digits), try adding it
+            if (normalized1.length === PHONE_DIGITS_LENGTH) {
                 const phone1WithCode = MEXICO_COUNTRY_CODE + normalized1;
                 if (phone1WithCode === normalized2) return true;
             }
             
-            // If phone2 doesn't have country code, try adding it
-            if (normalized2.length === PHONE_DIGITS_LENGTH && !normalized2.startsWith(MEXICO_COUNTRY_CODE)) {
+            // If phone2 doesn't have country code (exactly 10 digits), try adding it
+            if (normalized2.length === PHONE_DIGITS_LENGTH) {
                 const phone2WithCode = MEXICO_COUNTRY_CODE + normalized2;
                 if (phone2WithCode === normalized1) return true;
             }
