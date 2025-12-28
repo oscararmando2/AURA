@@ -6221,10 +6221,6 @@
             errorDiv.style.display = 'none';
             errorDiv.textContent = '';
             
-            // Store phone digits for later use
-            window.legacyUserPhone = phoneDigits;
-            window.legacyUserName = storedName;
-            
             // Setup confirm handler
             const handleConfirm = async () => {
                 const newPassword = passwordInput.value;
@@ -6267,8 +6263,9 @@
                     // Clean up
                     passwordInput.value = '';
                     errorDiv.style.display = 'none';
-                    delete window.legacyUserPhone;
-                    delete window.legacyUserName;
+                    
+                    // Remove event listeners to prevent memory leaks
+                    passwordInput.removeEventListener('keypress', handleEnterKey);
                 } catch (error) {
                     console.error('Error creating password:', error);
                     errorDiv.textContent = '❌ Error al crear contraseña. Por favor, intenta nuevamente.';
@@ -6276,22 +6273,27 @@
                 }
             };
             
-            // Remove old event listener and add new one
+            // Handle Enter key submission
+            const handleEnterKey = (e) => {
+                if (e.key === 'Enter') {
+                    handleConfirm();
+                }
+            };
+            
+            // Remove old event listeners before adding new ones
             const newConfirmBtn = confirmBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
             newConfirmBtn.addEventListener('click', handleConfirm);
             
-            // Allow Enter key to submit
-            passwordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleConfirm();
-                }
-            });
+            // Remove existing keypress listener if any
+            const newPasswordInput = passwordInput.cloneNode(true);
+            passwordInput.parentNode.replaceChild(newPasswordInput, passwordInput);
+            newPasswordInput.addEventListener('keypress', handleEnterKey);
             
             // Show modal
             modal.style.display = 'flex';
             document.body.classList.add('modal-open');
-            passwordInput.focus();
+            newPasswordInput.focus();
         }
         
         /**
@@ -6372,7 +6374,8 @@
             
             // Also check phone input changes to toggle password field visibility
             // Only check when phone number reaches exactly 10 digits to avoid excessive localStorage lookups
-            phoneInput.addEventListener('input', () => {
+            // Use named function to avoid duplicate listeners
+            const handlePhoneInput = () => {
                 const phoneDigits = phoneInput.value.trim().replace(/\D/g, '');
                 // Only perform check when we have exactly 10 digits
                 if (phoneDigits.length === PHONE_DIGITS_LENGTH) {
@@ -6387,7 +6390,11 @@
                     // Show password field for incomplete phone numbers (new users)
                     passwordContainer.style.display = 'block';
                 }
-            });
+            };
+            
+            // Remove existing listener if any and add new one
+            phoneInput.removeEventListener('input', handlePhoneInput);
+            phoneInput.addEventListener('input', handlePhoneInput);
             
             // Event handlers
             confirmBtn.onclick = () => {
@@ -6453,7 +6460,6 @@
                 localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
                 // Store user name associated with phone number
                 localStorage.setItem('userName_' + phoneDigits, nombre);
-                console.log('✅ Nueva cuenta creada para', phoneDigits);
             }
             
             const telefono = MEXICO_COUNTRY_CODE + phoneDigits;
