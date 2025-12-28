@@ -8143,7 +8143,7 @@
                         if (p.telefono) {
                             if (!clientsMap.has(p.telefono)) {
                                 clientsMap.set(p.telefono, {
-                                    nombre: p.nombre || 'Sin nombre',
+                                    nombre: p.fullName || 'Sin nombre',
                                     telefono: p.telefono,
                                     totalClasses: 0,
                                     upcomingClasses: 0,
@@ -8243,22 +8243,32 @@
         }
         
         /**
+         * Helper function to validate and get client from index attribute
+         */
+        function getClientFromIndexAttribute(element, clientsArray) {
+            const indexStr = element.getAttribute('data-client-index');
+            if (!indexStr) {
+                console.error('Missing data-client-index attribute');
+                return null;
+            }
+            
+            const index = parseInt(indexStr, 10);
+            if (isNaN(index) || index < 0 || index >= clientsArray.length) {
+                console.error('Invalid client index:', indexStr);
+                return null;
+            }
+            
+            return clientsArray[index];
+        }
+        
+        /**
          * Attach event listeners to client action buttons
          */
         function attachClientButtonListeners(clientsArray) {
             // WhatsApp buttons
             document.querySelectorAll('.unique-client-btn-whatsapp').forEach(btn => {
                 btn.addEventListener('click', async function() {
-                    const indexStr = this.getAttribute('data-client-index');
-                    if (!indexStr) return;
-                    
-                    const index = parseInt(indexStr, 10);
-                    if (isNaN(index) || index < 0 || index >= clientsArray.length) {
-                        console.error('Invalid client index:', indexStr);
-                        return;
-                    }
-                    
-                    const client = clientsArray[index];
+                    const client = getClientFromIndexAttribute(this, clientsArray);
                     if (client) {
                         await contactClientFromList(client.telefono, client.nombre);
                     }
@@ -8268,16 +8278,7 @@
             // View Classes buttons
             document.querySelectorAll('.unique-client-btn-classes').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const indexStr = this.getAttribute('data-client-index');
-                    if (!indexStr) return;
-                    
-                    const index = parseInt(indexStr, 10);
-                    if (isNaN(index) || index < 0 || index >= clientsArray.length) {
-                        console.error('Invalid client index:', indexStr);
-                        return;
-                    }
-                    
-                    const client = clientsArray[index];
+                    const client = getClientFromIndexAttribute(this, clientsArray);
                     if (client) {
                         searchClientReservations(client.telefono);
                     }
@@ -8346,6 +8347,24 @@
         }
         
         /**
+         * Setup unique clients stat card click handler
+         */
+        function setupUniqueClientsStatCard() {
+            const uniqueClientsStatValue = document.getElementById('stat-unique-clients');
+            if (uniqueClientsStatValue) {
+                const uniqueClientsCard = uniqueClientsStatValue.closest('.stat-card');
+                if (uniqueClientsCard) {
+                    uniqueClientsCard.style.cursor = 'pointer';
+                    uniqueClientsCard.addEventListener('click', showUniqueClientsModal);
+                } else {
+                    console.warn('Could not find parent .stat-card element for unique clients stat');
+                }
+            } else {
+                console.warn('Could not find #stat-unique-clients element');
+            }
+        }
+        
+        /**
          * Setup admin calendar controls
          */
         function setupAdminCalendarControls() {
@@ -8363,19 +8382,8 @@
             document.getElementById('btn-export-calendar').addEventListener('click', exportCalendarData);
             document.getElementById('btn-schedule-admin').addEventListener('click', openAdminScheduleModal);
             
-            // Click handler for unique clients stat card
-            const uniqueClientsStatValue = document.getElementById('stat-unique-clients');
-            if (uniqueClientsStatValue) {
-                const uniqueClientsCard = uniqueClientsStatValue.closest('.stat-card');
-                if (uniqueClientsCard) {
-                    uniqueClientsCard.style.cursor = 'pointer';
-                    uniqueClientsCard.addEventListener('click', showUniqueClientsModal);
-                } else {
-                    console.warn('Could not find parent .stat-card element for unique clients stat');
-                }
-            } else {
-                console.warn('Could not find #stat-unique-clients element');
-            }
+            // Setup unique clients stat card
+            setupUniqueClientsStatCard();
             
             // Unique clients modal controls
             document.getElementById('unique-clients-close').addEventListener('click', closeUniqueClientsModal);
