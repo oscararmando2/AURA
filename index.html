@@ -9099,20 +9099,24 @@
                 }
                 
                 // Get Firestore functions from global exports
-                const { query, collection, where, getDocs } = window.firestoreExports;
+                const { query, collection, getDocs } = window.firestoreExports;
                 const db = window.db;
                 
                 // Normalize telefono
                 const userTelefonoTrimmed = userTelefono.trim();
                 
-                // Query reservations filtered by telefono
-                const q = query(collection(db, 'reservas'), where('telefono', '==', userTelefonoTrimmed));
+                // Query all reservations without filtering (consistent approach)
+                // Then filter client-side by telefono
+                const q = query(collection(db, 'reservas'));
                 const querySnapshot = await getDocs(q);
                 
-                // Collect reservations
+                // Collect reservations and filter by telefono client-side
                 const userReservations = [];
                 querySnapshot.forEach((doc) => {
-                    userReservations.push({ id: doc.id, ...doc.data() });
+                    const data = doc.data();
+                    if (data.telefono && data.telefono.trim() === userTelefonoTrimmed) {
+                        userReservations.push({ id: doc.id, ...data });
+                    }
                 });
                 
                 console.log(`📚 Encontradas ${userReservations.length} reservas para el usuario`);
