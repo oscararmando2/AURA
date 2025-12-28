@@ -4029,6 +4029,15 @@
                 <p style="color: #999; font-size: 0.85rem; margin-top: 6px;">Solo números, sin espacios ni guiones</p>
             </div>
             
+            <div id="reservation-password-container" style="margin-bottom: 25px;">
+                <label for="reservation-password" style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Contraseña (mínimo 4 caracteres)</label>
+                <div style="position: relative;">
+                    <input type="password" id="reservation-password" placeholder="Crea tu contraseña" autocomplete="new-password" style="width: 100%; padding: 14px; padding-right: 45px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EFE9E1'" onblur="this.style.borderColor='rgba(239, 233, 225, 0.3)'" />
+                    <button type="button" id="toggle-reservation-password" aria-label="Mostrar contraseña" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.5rem; padding: 0; line-height: 1; color: #666; transition: color 0.3s ease; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#666'">👁️</button>
+                </div>
+                <p style="color: #999; font-size: 0.85rem; margin-top: 6px;">Para poder ver tus clases después</p>
+            </div>
+            
             <!-- Contador de clases seleccionadas -->
             <div style="background: rgba(239, 233, 225, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 25px; text-align: center;">
                 <p style="color: #666; font-size: 0.95rem; margin-bottom: 5px;">Progreso de reservas</p>
@@ -4959,6 +4968,19 @@
                     // Toggle icon between eye and eye-slash
                     toggleLoginPassword.textContent = type === 'password' ? '👁️' : '🙈';
                     toggleLoginPassword.setAttribute('aria-label', type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                });
+            }
+            
+            // Password visibility toggle for reservation modal
+            const toggleReservationPassword = document.getElementById('toggle-reservation-password');
+            const reservationPasswordInput = document.getElementById('reservation-password');
+            if (toggleReservationPassword && reservationPasswordInput) {
+                toggleReservationPassword.addEventListener('click', () => {
+                    const type = reservationPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    reservationPasswordInput.setAttribute('type', type);
+                    // Toggle icon between eye and eye-slash
+                    toggleReservationPassword.textContent = type === 'password' ? '👁️' : '🙈';
+                    toggleReservationPassword.setAttribute('aria-label', type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
                 });
             }
             
@@ -6159,6 +6181,40 @@
                 phoneInput.value = savedPhone;
             }
             
+            // Show/hide password field based on whether user already has an account
+            const passwordContainer = document.getElementById('reservation-password-container');
+            const passwordInput = document.getElementById('reservation-password');
+            
+            // Check if we have a saved phone and if it has a password
+            const phoneDigitsFromStorage = savedPhone.startsWith(MEXICO_COUNTRY_CODE) 
+                ? savedPhone.substring(MEXICO_COUNTRY_CODE.length) 
+                : savedPhone;
+            
+            const hasExistingPassword = phoneDigitsFromStorage && localStorage.getItem('userPassword_' + phoneDigitsFromStorage);
+            
+            if (hasExistingPassword) {
+                // User already has an account, hide password field
+                passwordContainer.style.display = 'none';
+                passwordInput.value = ''; // Clear password field
+            } else {
+                // New user, show password field
+                passwordContainer.style.display = 'block';
+            }
+            
+            // Also check phone input changes to toggle password field visibility
+            phoneInput.addEventListener('input', () => {
+                const phoneDigits = phoneInput.value.trim().replace(/\D/g, '');
+                if (phoneDigits.length === PHONE_DIGITS_LENGTH) {
+                    const hasPassword = localStorage.getItem('userPassword_' + phoneDigits);
+                    if (hasPassword) {
+                        passwordContainer.style.display = 'none';
+                        passwordInput.value = '';
+                    } else {
+                        passwordContainer.style.display = 'block';
+                    }
+                }
+            });
+            
             // Event handlers
             confirmBtn.onclick = () => {
                 confirmFinalPayment();
@@ -6177,14 +6233,16 @@
         }
         
         /**
-         * Confirmar el pago final después de ingresar nombre y teléfono
+         * Confirmar el pago final después de ingresar nombre, teléfono y contraseña
          */
-        function confirmFinalPayment() {
+        async function confirmFinalPayment() {
             const nameInput = document.getElementById('reservation-name');
             const phoneInput = document.getElementById('reservation-phone');
+            const passwordInput = document.getElementById('reservation-password');
             
             const nombre = nameInput.value.trim();
             const phoneDigits = phoneInput.value.trim().replace(/\D/g, '');
+            const password = passwordInput.value;
             
             // Validar campos
             if (!nombre) {
@@ -6199,11 +6257,37 @@
                 return;
             }
             
+            // Check if user already has a password
+            const existingPassword = localStorage.getItem('userPassword_' + phoneDigits);
+            
+            // If no existing password, require password creation
+            if (!existingPassword) {
+                if (!password || password.length < 4) {
+                    alert('⚠️ Por favor crea una contraseña de al menos 4 caracteres.\n\nEsto te permitirá ver tus clases después.');
+                    passwordInput.focus();
+                    return;
+                }
+                
+                // Hash password for secure storage
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                // Store hashed password associated with phone number
+                localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
+                // Store user name associated with phone number
+                localStorage.setItem('userName_' + phoneDigits, nombre);
+                console.log('✅ Nueva cuenta creada para', phoneDigits);
+            }
+            
             const telefono = MEXICO_COUNTRY_CODE + phoneDigits;
             
             // Guardar datos del cliente
             localStorage.setItem('userNombre', nombre);
             localStorage.setItem('userTelefono', telefono);
+            localStorage.setItem('registered', 'true');
             
             selectedPlan.userInfo = {
                 nombre: nombre,
