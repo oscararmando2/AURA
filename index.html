@@ -4820,10 +4820,14 @@
                 const phoneNumber = phoneDigits;
                 
                 try {
+                    // Retrieve user's name from localStorage (stored during registration)
+                    const userName = localStorage.getItem('userName') || 'Usuario';
+                    
                     // Store user info in localStorage for session
                     // Store with country code prefix for consistency with registration
                     const phoneWithCountryCode = '52' + phoneNumber;
                     localStorage.setItem('userTelefono', phoneWithCountryCode);
+                    localStorage.setItem('userNombre', userName); // Store for consistency with auth observer
                     localStorage.setItem('userLoggedIn', 'true');
                     
                     // Hide modal
