@@ -5084,22 +5084,67 @@
                 // Verify password against stored hashed password for this phone number
                 const storedPasswordHash = localStorage.getItem('userPassword_' + phoneDigits);
                 if (!storedPasswordHash) {
-                    // Check if user has reservations but no password (old payment flow users)
+                    // Check if user has reservations but no password
                     const phoneWithCountryCode = '52' + phoneDigits;
                     const storedName = localStorage.getItem('userName_' + phoneDigits);
                     const storedPhone = localStorage.getItem('userTelefono');
                     
-                    // If we have name/phone in storage but no password, it's an old user
+                    // First check localStorage for legacy data
                     if (storedName || (storedPhone === phoneWithCountryCode)) {
                         // Show create password modal
                         showLegacyPasswordCreationModal(phoneDigits, storedName);
                         return;
                     }
                     
-                    // Completely new user
-                    errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
-                    errorDiv.style.display = 'block';
-                    return;
+                    // Check Firestore for existing reservations with this phone number
+                    // This handles cases where admin scheduled classes or user paid but never registered
+                    try {
+                        // Wait for Firebase to be ready
+                        if (!window.firebaseReady || !window.db || !window.firestoreExports) {
+                            errorDiv.textContent = '⚠️ Sistema inicializando. Por favor, espera unos segundos e intenta nuevamente.';
+                            errorDiv.style.display = 'block';
+                            return;
+                        }
+                        
+                        const { query, collection, getDocs } = window.firestoreExports;
+                        const db = window.db;
+                        
+                        // Query all reservations and filter by phone client-side
+                        const q = query(collection(db, 'reservas'));
+                        const querySnapshot = await getDocs(q);
+                        
+                        let foundUserName = null;
+                        let hasReservations = false;
+                        
+                        querySnapshot.forEach((doc) => {
+                            const data = doc.data();
+                            if (data.telefono && data.telefono.trim() === phoneWithCountryCode) {
+                                hasReservations = true;
+                                if (!foundUserName && data.nombre) {
+                                    foundUserName = data.nombre;
+                                }
+                            }
+                        });
+                        
+                        if (hasReservations) {
+                            // User has reservations but no password - allow them to create one
+                            console.log(`✅ Encontradas reservas para ${phoneDigits}, permitiendo crear contraseña`);
+                            showLegacyPasswordCreationModal(phoneDigits, foundUserName);
+                            return;
+                        }
+                        
+                        // No reservations found - completely new user
+                        errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
+                        errorDiv.style.display = 'block';
+                        return;
+                        
+                    } catch (firestoreError) {
+                        console.error('Error checking Firestore for reservations:', firestoreError);
+                        // Fallback to showing the not found message
+                        errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
                 }
                 
                 // Hash the entered password for comparison
