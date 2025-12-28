@@ -3837,6 +3837,36 @@
                 font-size: 0.85rem !important;
             }
         }
+
+        /* ========== Password Toggle Button Mobile Fix ========== */
+        /* Ensure password toggle eye icon is visible and easily tappable on mobile */
+        @media (max-width: 768px) {
+            #toggle-register-password,
+            #toggle-login-password {
+                right: 15px !important;
+                top: 50% !important;
+                transform: translateY(-50%) !important;
+                font-size: 1.8rem !important;
+                padding: 8px !important;
+                min-width: 44px !important;
+                min-height: 44px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 10 !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #toggle-register-password,
+            #toggle-login-password {
+                right: 10px !important;
+                font-size: 2rem !important;
+                padding: 10px !important;
+                min-width: 48px !important;
+                min-height: 48px !important;
+            }
+        }
     </style>
 </head>
 <body>
