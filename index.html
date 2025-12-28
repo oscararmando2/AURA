@@ -7668,13 +7668,27 @@
                 if (user) {
                     // Si es admin, mostrar panel y cerrar modal
                     if (user.email === 'admin@aura.com') {
+                        console.log('✅ Admin autenticado, mostrando panel...');
+                        
                         // Establecer flag de admin globalmente para el calendario
                         window.isAdmin = true;
                         isAdmin = true;
                         
-                        adminLoginModal.style.display = 'none';
+                        // Cerrar modal de login de manera segura
+                        if (adminLoginModal) {
+                            adminLoginModal.style.display = 'none';
+                        }
+                        // Restore page scrolling by removing modal-open class and resetting overflow
                         document.body.classList.remove('modal-open');
-                        adminPanel.style.display = 'block';
+                        document.body.style.overflow = ''; // Explicitly reset overflow
+                        
+                        // Mostrar panel de admin
+                        if (adminPanel) {
+                            adminPanel.style.display = 'block';
+                            console.log('✅ Panel de admin mostrado');
+                        } else {
+                            console.error('❌ No se encontró el panel de admin');
+                        }
                         
                         // Apply mobile-admin-view class on mobile devices
                         applyMobileAdminView();
@@ -7683,21 +7697,44 @@
                         document.getElementById('admin-email-display').textContent = 'Michel';
                         
                         // Limpiar formulario de login
-                        loginForm.reset();
-                        loginError.style.display = 'none';
+                        if (loginForm) {
+                            loginForm.reset();
+                        }
+                        if (loginError) {
+                            loginError.style.display = 'none';
+                        }
                         
                         // Cargar reservas (que inicializa el calendario automáticamente)
-                        await loadReservations();
+                        try {
+                            await loadReservations();
+                        } catch (error) {
+                            console.error('Error al cargar reservas en auth observer:', error);
+                            // Fallback: Initialize calendar directly if reservation loading fails
+                            if (!window.adminCalendar) {
+                                try {
+                                    initAdminCalendar();
+                                } catch (calError) {
+                                    console.error('Error al inicializar calendario:', calError);
+                                }
+                            }
+                        }
                         
                         // Recargar eventos del calendario si está inicializado
                         if (typeof calendar !== 'undefined' && calendar) {
                             console.log('Recargando eventos del calendario como admin...');
-                            loadEventsFromFirestore();
+                            try {
+                                loadEventsFromFirestore();
+                            } catch (error) {
+                                console.error('Error al cargar eventos del calendario:', error);
+                            }
                         }
                         
-                        // Scroll al panel de admin
+                        // Scroll to admin panel - ensure this always happens
                         setTimeout(() => {
-                            adminPanel.scrollIntoView({ behavior: 'smooth' });
+                            if (adminPanel) {
+                                adminPanel.scrollIntoView({ behavior: 'smooth' });
+                                console.log('✅ Scroll al panel de admin completado');
+                            }
                         }, 300);
                         
                         // Ocultar login de admin y mostrar logout de admin en el menú
