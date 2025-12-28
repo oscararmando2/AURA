@@ -2677,6 +2677,16 @@
         }
 
         /* Unique clients list styles */
+        .unique-clients-modal-content {
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .unique-clients-list-body {
+            padding: 20px;
+        }
+
         .unique-clients-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -4660,12 +4670,12 @@
         
         <!-- Unique Clients Modal -->
         <div id="unique-clients-modal" class="event-detail-modal">
-            <div class="event-detail-content" style="max-width: 900px; max-height: 80vh; overflow-y: auto;">
+            <div class="event-detail-content unique-clients-modal-content">
                 <div class="event-detail-header">
                     <h3>👥 Clientes Únicos</h3>
                     <button type="button" class="event-detail-close" id="unique-clients-close">×</button>
                 </div>
-                <div class="event-detail-body" id="unique-clients-list" style="padding: 20px;">
+                <div class="event-detail-body unique-clients-list-body" id="unique-clients-list">
                     <!-- Client list will be inserted here dynamically -->
                 </div>
                 <div class="event-detail-actions">
@@ -8110,10 +8120,23 @@
                 return;
             }
             
+            // Helper function to update client statistics
+            function updateClientStats(client, eventDate) {
+                client.totalClasses += 1;
+                const now = new Date();
+                if (eventDate >= now) {
+                    client.upcomingClasses += 1;
+                } else {
+                    client.pastClasses += 1;
+                }
+            }
+            
             // Collect unique clients with their data
             const clientsMap = new Map();
             
             allReservationsData.forEach(event => {
+                const eventDate = new Date(event.start);
+                
                 if (event.extendedProps.isGrouped && event.extendedProps.participants) {
                     // Process grouped events
                     event.extendedProps.participants.forEach(p => {
@@ -8128,15 +8151,7 @@
                                 });
                             }
                             const client = clientsMap.get(p.telefono);
-                            client.totalClasses += 1;
-                            
-                            const eventDate = new Date(event.start);
-                            const now = new Date();
-                            if (eventDate >= now) {
-                                client.upcomingClasses += 1;
-                            } else {
-                                client.pastClasses += 1;
-                            }
+                            updateClientStats(client, eventDate);
                         }
                     });
                 } else {
@@ -8153,15 +8168,7 @@
                             });
                         }
                         const client = clientsMap.get(telefono);
-                        client.totalClasses += 1;
-                        
-                        const eventDate = new Date(event.start);
-                        const now = new Date();
-                        if (eventDate >= now) {
-                            client.upcomingClasses += 1;
-                        } else {
-                            client.pastClasses += 1;
-                        }
+                        updateClientStats(client, eventDate);
                     }
                 }
             });
@@ -8177,14 +8184,18 @@
             } else {
                 let html = '<div class="unique-clients-grid">';
                 
-                clientsArray.forEach((client) => {
+                clientsArray.forEach((client, index) => {
+                    // Sanitize data for HTML
+                    const safeNombre = escapeHtml(client.nombre);
+                    const safeTelefono = escapeHtml(client.telefono);
+                    
                     html += `
-                        <div class="unique-client-card">
+                        <div class="unique-client-card" data-index="${index}">
                             <div class="unique-client-header">
                                 <div class="unique-client-icon">👤</div>
                                 <div class="unique-client-info">
-                                    <div class="unique-client-name">${client.nombre}</div>
-                                    <div class="unique-client-phone">📱 ${client.telefono}</div>
+                                    <div class="unique-client-name">${safeNombre}</div>
+                                    <div class="unique-client-phone">📱 ${safeTelefono}</div>
                                 </div>
                             </div>
                             <div class="unique-client-stats">
@@ -8199,11 +8210,11 @@
                             </div>
                             <div class="unique-client-actions">
                                 <button type="button" class="unique-client-btn unique-client-btn-whatsapp" 
-                                    onclick="contactClientFromList('${client.telefono}', '${client.nombre.replace(/'/g, "\\'")}')">
+                                    data-client-index="${index}">
                                     📱 WhatsApp
                                 </button>
                                 <button type="button" class="unique-client-btn unique-client-btn-classes" 
-                                    onclick="searchClientReservations('${client.telefono}')">
+                                    data-client-index="${index}">
                                     📅 Ver Clases
                                 </button>
                             </div>
@@ -8213,10 +8224,49 @@
                 
                 html += '</div>';
                 clientsList.innerHTML = html;
+                
+                // Add event listeners to all buttons
+                attachClientButtonListeners(clientsArray);
             }
             
             // Show modal
             document.getElementById('unique-clients-modal').style.display = 'flex';
+        }
+        
+        /**
+         * Helper function to escape HTML entities
+         */
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        /**
+         * Attach event listeners to client action buttons
+         */
+        function attachClientButtonListeners(clientsArray) {
+            // WhatsApp buttons
+            document.querySelectorAll('.unique-client-btn-whatsapp').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const index = parseInt(this.getAttribute('data-client-index'), 10);
+                    const client = clientsArray[index];
+                    if (client) {
+                        await contactClientFromList(client.telefono, client.nombre);
+                    }
+                });
+            });
+            
+            // View Classes buttons
+            document.querySelectorAll('.unique-client-btn-classes').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-client-index'), 10);
+                    const client = clientsArray[index];
+                    if (client) {
+                        searchClientReservations(client.telefono);
+                    }
+                });
+            });
         }
         
         /**
