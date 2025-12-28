@@ -5120,8 +5120,8 @@
                         // Filter by phone and extract user name
                         querySnapshot.forEach((doc) => {
                             const data = doc.data();
-                            // Normalize phone numbers to handle formatting inconsistencies
-                            if (data.telefono && data.telefono.trim() === phoneWithCountryCode) {
+                            // Use flexible phone matching to handle format variations
+                            if (data.telefono && phonesMatch(data.telefono, phoneWithCountryCode)) {
                                 hasReservations = true;
                                 if (!foundUserName && data.nombre) {
                                     foundUserName = data.nombre;
@@ -9929,7 +9929,8 @@
                 const userReservations = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.telefono && data.telefono.trim() === userTelefonoTrimmed) {
+                    // Use flexible phone matching to handle format variations
+                    if (data.telefono && phonesMatch(data.telefono, userTelefonoTrimmed)) {
                         userReservations.push({ id: doc.id, ...data });
                     }
                 });
@@ -10032,6 +10033,66 @@
         // ========== MY CLASSES FUNCTIONALITY ==========
         
         /**
+         * Normalize phone number for comparison
+         * Removes all non-digits and returns just the digits
+         * @param {string} phone - Phone number to normalize
+         * @returns {string} - Normalized phone (digits only)
+         */
+        function normalizePhoneNumber(phone) {
+            if (!phone) return '';
+            // Remove all non-digit characters
+            return phone.replace(/\D/g, '');
+        }
+
+        /**
+         * Check if two phone numbers match
+         * Handles different formats:
+         * - With or without country code (52)
+         * - With or without spaces, dashes, parentheses
+         * @param {string} phone1 - First phone number
+         * @param {string} phone2 - Second phone number
+         * @returns {boolean} - True if phones match
+         */
+        function phonesMatch(phone1, phone2) {
+            if (!phone1 || !phone2) return false;
+            
+            // Normalize both phones (digits only)
+            const normalized1 = normalizePhoneNumber(phone1);
+            const normalized2 = normalizePhoneNumber(phone2);
+            
+            // Direct match
+            if (normalized1 === normalized2) return true;
+            
+            // Try matching with/without country code 52
+            // If one has country code and other doesn't
+            if (normalized1.startsWith('52') && normalized1.length === 12) {
+                // phone1 has country code, try matching without it
+                const phone1WithoutCode = normalized1.substring(2);
+                if (phone1WithoutCode === normalized2) return true;
+            }
+            
+            if (normalized2.startsWith('52') && normalized2.length === 12) {
+                // phone2 has country code, try matching without it
+                const phone2WithoutCode = normalized2.substring(2);
+                if (phone2WithoutCode === normalized1) return true;
+            }
+            
+            // If phone1 doesn't have country code, try adding it
+            if (normalized1.length === 10 && !normalized1.startsWith('52')) {
+                const phone1WithCode = '52' + normalized1;
+                if (phone1WithCode === normalized2) return true;
+            }
+            
+            // If phone2 doesn't have country code, try adding it
+            if (normalized2.length === 10 && !normalized2.startsWith('52')) {
+                const phone2WithCode = '52' + normalized2;
+                if (phone2WithCode === normalized1) return true;
+            }
+            
+            return false;
+        }
+
+        /**
          * Load user's classes from Firestore
          * This function loads only the reservations for the currently logged-in user
          * SISTEMA SUPER SIMPLE: Filtrar por teléfono en vez de email
@@ -10070,7 +10131,8 @@
 
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.telefono && data.telefono.trim() === userTelefonoTrimmed) {
+                    // Use phonesMatch for flexible phone number comparison
+                    if (data.telefono && phonesMatch(data.telefono, userTelefonoTrimmed)) {
                         userReservations.push({ id: doc.id, ...data });
                     }
                 });
@@ -10270,7 +10332,8 @@
                 const userReservations = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    if (data.telefono && data.telefono.trim() === userTelefonoTrimmed) {
+                    // Use flexible phone matching to handle format variations
+                    if (data.telefono && phonesMatch(data.telefono, userTelefonoTrimmed)) {
                         userReservations.push({ id: doc.id, ...data });
                     }
                 });
