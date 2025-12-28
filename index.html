@@ -3997,6 +3997,33 @@
         </div>
     </div>
 
+    <!-- Modal para Crear Contraseña (Legacy Users) -->
+    <div id="create-password-modal" role="dialog" aria-labelledby="create-password-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 2200; justify-content: center; align-items: center;">
+        <div style="background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 450px; width: 90%; border: 2px solid rgba(239, 233, 225, 0.3);">
+            <h2 id="create-password-title" style="color: #333; margin-bottom: 20px; font-size: 1.8rem; font-weight: 600; text-align: center;">Crear Contraseña</h2>
+            <p style="color: #666; margin-bottom: 25px; text-align: center; line-height: 1.6;">Tu cuenta no tiene contraseña configurada. Por favor, crea una contraseña para poder acceder a tus clases.</p>
+            
+            <div style="margin-bottom: 25px;">
+                <label for="legacy-new-password" style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Nueva Contraseña (mínimo 4 caracteres)</label>
+                <div style="position: relative;">
+                    <input type="password" id="legacy-new-password" placeholder="Crea tu contraseña" autocomplete="new-password" style="width: 100%; padding: 14px; padding-right: 45px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease;" onfocus="this.style.borderColor='#EFE9E1'" onblur="this.style.borderColor='rgba(239, 233, 225, 0.3)'" />
+                    <button type="button" id="toggle-legacy-password" aria-label="Mostrar contraseña" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1.5rem; padding: 0; line-height: 1; color: #666; transition: color 0.3s ease; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#666'">👁️</button>
+                </div>
+            </div>
+            
+            <div id="legacy-password-error" style="display: none; color: #C51162; background: rgba(197, 17, 98, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 0.95rem;"></div>
+            
+            <div style="display: flex; gap: 12px;">
+                <button type="button" id="legacy-password-cancel" style="flex: 1; background: #e0e0e0; color: #666; padding: 16px; border: 1px solid #ccc; border-radius: 10px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.background='#d0d0d0'" onmouseout="this.style.background='#e0e0e0'">
+                    Cancelar
+                </button>
+                <button type="button" id="legacy-password-confirm" style="flex: 2; background: linear-gradient(135deg, #EFE9E1 0%, #EFE9E1 100%); color: #000; padding: 16px; border: 2px solid #EFE9E1; border-radius: 10px; font-size: 1.05rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(239, 233, 225, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239, 233, 225, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(239, 233, 225, 0.4)'">
+                    Crear Contraseña
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal para Confirmación de Reserva (Nombre + Teléfono + Pagar) -->
     <div id="reservation-modal" role="dialog" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2100; justify-content: center; align-items: center;">
         <div style="background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 500px; width: 90%; border: 2px solid rgba(239, 233, 225, 0.3);">
@@ -4887,43 +4914,8 @@
                     
                     // If we have name/phone in storage but no password, it's an old user
                     if (storedName || (storedPhone === phoneWithCountryCode)) {
-                        // Prompt user to create a password
-                        errorDiv.innerHTML = '⚠️ Tu cuenta no tiene contraseña configurada.<br><br>Por favor, crea una contraseña ahora para continuar:';
-                        errorDiv.style.display = 'block';
-                        
-                        // Show a special "create password" flow
-                        const createPasswordBtn = document.createElement('button');
-                        createPasswordBtn.textContent = 'Crear Contraseña';
-                        createPasswordBtn.style.cssText = 'margin-top: 10px; background: #EFE9E1; color: #000; padding: 10px 20px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;';
-                        createPasswordBtn.onclick = async () => {
-                            const newPassword = prompt('Crea una contraseña para tu cuenta (mínimo 4 caracteres):');
-                            if (!newPassword || newPassword.length < 4) {
-                                alert('⚠️ La contraseña debe tener al menos 4 caracteres');
-                                return;
-                            }
-                            
-                            // Hash the new password
-                            const encoder = new TextEncoder();
-                            const data = encoder.encode(newPassword);
-                            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                            const hashArray = Array.from(new Uint8Array(hashBuffer));
-                            const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                            
-                            // Save the password
-                            localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
-                            if (storedName) {
-                                localStorage.setItem('userName_' + phoneDigits, storedName);
-                            }
-                            
-                            alert('✅ Contraseña creada exitosamente.\n\nAhora puedes iniciar sesión con tu nueva contraseña.');
-                            errorDiv.style.display = 'none';
-                            errorDiv.innerHTML = '';
-                            document.getElementById('user-login-phone').focus();
-                        };
-                        
-                        if (!errorDiv.querySelector('button')) {
-                            errorDiv.appendChild(createPasswordBtn);
-                        }
+                        // Show create password modal
+                        showLegacyPasswordCreationModal(phoneDigits, storedName);
                         return;
                     }
                     
@@ -5029,6 +5021,46 @@
                     // Toggle icon between eye and eye-slash
                     toggleReservationPassword.textContent = type === 'password' ? '👁️' : '🙈';
                     toggleReservationPassword.setAttribute('aria-label', type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                });
+            }
+            
+            // Password visibility toggle for legacy password modal
+            const toggleLegacyPassword = document.getElementById('toggle-legacy-password');
+            const legacyPasswordInput = document.getElementById('legacy-new-password');
+            if (toggleLegacyPassword && legacyPasswordInput) {
+                toggleLegacyPassword.addEventListener('click', () => {
+                    const type = legacyPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    legacyPasswordInput.setAttribute('type', type);
+                    // Toggle icon between eye and eye-slash
+                    toggleLegacyPassword.textContent = type === 'password' ? '👁️' : '🙈';
+                    toggleLegacyPassword.setAttribute('aria-label', type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                });
+            }
+            
+            // Setup legacy password creation modal handlers
+            const legacyPasswordModal = document.getElementById('create-password-modal');
+            const legacyPasswordConfirm = document.getElementById('legacy-password-confirm');
+            const legacyPasswordCancel = document.getElementById('legacy-password-cancel');
+            const legacyPasswordError = document.getElementById('legacy-password-error');
+            
+            if (legacyPasswordCancel) {
+                legacyPasswordCancel.addEventListener('click', () => {
+                    legacyPasswordModal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    legacyPasswordInput.value = '';
+                    legacyPasswordError.style.display = 'none';
+                });
+            }
+            
+            // Close legacy password modal on background click
+            if (legacyPasswordModal) {
+                legacyPasswordModal.addEventListener('click', (e) => {
+                    if (e.target === legacyPasswordModal) {
+                        legacyPasswordModal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        legacyPasswordInput.value = '';
+                        legacyPasswordError.style.display = 'none';
+                    }
                 });
             }
             
@@ -6174,6 +6206,95 @@
         const PHONE_DIGITS_LENGTH = 10;
         
         /**
+         * Show modal for legacy users to create a password
+         * @param {string} phoneDigits - User's phone number (10 digits)
+         * @param {string} storedName - User's stored name
+         */
+        function showLegacyPasswordCreationModal(phoneDigits, storedName) {
+            const modal = document.getElementById('create-password-modal');
+            const passwordInput = document.getElementById('legacy-new-password');
+            const errorDiv = document.getElementById('legacy-password-error');
+            const confirmBtn = document.getElementById('legacy-password-confirm');
+            
+            // Clear previous state
+            passwordInput.value = '';
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
+            // Store phone digits for later use
+            window.legacyUserPhone = phoneDigits;
+            window.legacyUserName = storedName;
+            
+            // Setup confirm handler
+            const handleConfirm = async () => {
+                const newPassword = passwordInput.value;
+                
+                // Validate password
+                if (!newPassword || newPassword.length < 4) {
+                    errorDiv.textContent = '⚠️ La contraseña debe tener al menos 4 caracteres';
+                    errorDiv.style.display = 'block';
+                    passwordInput.focus();
+                    return;
+                }
+                
+                try {
+                    // Hash the new password
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(newPassword);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    
+                    // Save the password
+                    localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
+                    if (storedName) {
+                        localStorage.setItem('userName_' + phoneDigits, storedName);
+                    }
+                    
+                    // Close modal
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                    
+                    // Show success message
+                    alert('✅ Contraseña creada exitosamente.\n\nAhora puedes iniciar sesión con tu nueva contraseña.');
+                    
+                    // Focus on login form
+                    const loginPhoneInput = document.getElementById('user-login-phone');
+                    if (loginPhoneInput) {
+                        loginPhoneInput.focus();
+                    }
+                    
+                    // Clean up
+                    passwordInput.value = '';
+                    errorDiv.style.display = 'none';
+                    delete window.legacyUserPhone;
+                    delete window.legacyUserName;
+                } catch (error) {
+                    console.error('Error creating password:', error);
+                    errorDiv.textContent = '❌ Error al crear contraseña. Por favor, intenta nuevamente.';
+                    errorDiv.style.display = 'block';
+                }
+            };
+            
+            // Remove old event listener and add new one
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            newConfirmBtn.addEventListener('click', handleConfirm);
+            
+            // Allow Enter key to submit
+            passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleConfirm();
+                }
+            });
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            passwordInput.focus();
+        }
+        
+        /**
          * Mostrar modal de confirmación final cuando el usuario hace clic en el botón de pago
          * Pide nombre y teléfono una sola vez al final, antes de proceder al pago
          */
@@ -6250,8 +6371,10 @@
             }
             
             // Also check phone input changes to toggle password field visibility
+            // Only check when phone number reaches exactly 10 digits to avoid excessive localStorage lookups
             phoneInput.addEventListener('input', () => {
                 const phoneDigits = phoneInput.value.trim().replace(/\D/g, '');
+                // Only perform check when we have exactly 10 digits
                 if (phoneDigits.length === PHONE_DIGITS_LENGTH) {
                     const hasPassword = localStorage.getItem('userPassword_' + phoneDigits);
                     if (hasPassword) {
@@ -6260,6 +6383,9 @@
                     } else {
                         passwordContainer.style.display = 'block';
                     }
+                } else if (phoneDigits.length < PHONE_DIGITS_LENGTH) {
+                    // Show password field for incomplete phone numbers (new users)
+                    passwordContainer.style.display = 'block';
                 }
             });
             
