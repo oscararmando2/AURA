@@ -77,6 +77,7 @@ async function guardarRegistroLocalYPagar() {
   const hashedPassword = await hashPassword(password);
   
   localStorage.setItem('userName', name);
+  localStorage.setItem('userNombre', name); // Store for consistency with auth observer
   localStorage.setItem('userTelefono', fullPhoneNumber);
   // Store hashed password associated with phone number for login verification
   localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
