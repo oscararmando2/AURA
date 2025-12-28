@@ -4673,7 +4673,7 @@
             <div class="event-detail-content unique-clients-modal-content">
                 <div class="event-detail-header">
                     <h3>👥 Clientes Únicos</h3>
-                    <button type="button" class="event-detail-close" id="unique-clients-close">×</button>
+                    <button type="button" class="event-detail-close" id="unique-clients-close" aria-label="Cerrar modal de clientes únicos">×</button>
                 </div>
                 <div class="event-detail-body unique-clients-list-body" id="unique-clients-list">
                     <!-- Client list will be inserted here dynamically -->
@@ -8249,7 +8249,15 @@
             // WhatsApp buttons
             document.querySelectorAll('.unique-client-btn-whatsapp').forEach(btn => {
                 btn.addEventListener('click', async function() {
-                    const index = parseInt(this.getAttribute('data-client-index'), 10);
+                    const indexStr = this.getAttribute('data-client-index');
+                    if (!indexStr) return;
+                    
+                    const index = parseInt(indexStr, 10);
+                    if (isNaN(index) || index < 0 || index >= clientsArray.length) {
+                        console.error('Invalid client index:', indexStr);
+                        return;
+                    }
+                    
                     const client = clientsArray[index];
                     if (client) {
                         await contactClientFromList(client.telefono, client.nombre);
@@ -8260,7 +8268,15 @@
             // View Classes buttons
             document.querySelectorAll('.unique-client-btn-classes').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-client-index'), 10);
+                    const indexStr = this.getAttribute('data-client-index');
+                    if (!indexStr) return;
+                    
+                    const index = parseInt(indexStr, 10);
+                    if (isNaN(index) || index < 0 || index >= clientsArray.length) {
+                        console.error('Invalid client index:', indexStr);
+                        return;
+                    }
+                    
                     const client = clientsArray[index];
                     if (client) {
                         searchClientReservations(client.telefono);
@@ -8329,10 +8345,6 @@
             }
         }
         
-        // Expose functions to window for onclick handlers
-        window.contactClientFromList = contactClientFromList;
-        window.searchClientReservations = searchClientReservations;
-        
         /**
          * Setup admin calendar controls
          */
@@ -8352,10 +8364,17 @@
             document.getElementById('btn-schedule-admin').addEventListener('click', openAdminScheduleModal);
             
             // Click handler for unique clients stat card
-            const uniqueClientsCard = document.querySelector('#stat-unique-clients').closest('.stat-card');
-            if (uniqueClientsCard) {
-                uniqueClientsCard.style.cursor = 'pointer';
-                uniqueClientsCard.addEventListener('click', showUniqueClientsModal);
+            const uniqueClientsStatValue = document.getElementById('stat-unique-clients');
+            if (uniqueClientsStatValue) {
+                const uniqueClientsCard = uniqueClientsStatValue.closest('.stat-card');
+                if (uniqueClientsCard) {
+                    uniqueClientsCard.style.cursor = 'pointer';
+                    uniqueClientsCard.addEventListener('click', showUniqueClientsModal);
+                } else {
+                    console.warn('Could not find parent .stat-card element for unique clients stat');
+                }
+            } else {
+                console.warn('Could not find #stat-unique-clients element');
             }
             
             // Unique clients modal controls
