@@ -4160,8 +4160,8 @@
     <!-- Modal para Crear Contraseña (Legacy Users) -->
     <div id="create-password-modal" role="dialog" aria-labelledby="create-password-title" aria-modal="true" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 2200; justify-content: center; align-items: center;">
         <div style="background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%); padding: 40px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); max-width: 450px; width: 90%; border: 2px solid rgba(239, 233, 225, 0.3);">
-            <h2 id="create-password-title" style="color: #333; margin-bottom: 20px; font-size: 1.8rem; font-weight: 600; text-align: center;">Crear Contraseña</h2>
-            <p style="color: #666; margin-bottom: 25px; text-align: center; line-height: 1.6;">Tu cuenta no tiene contraseña configurada. Por favor, crea una contraseña para poder acceder a tus clases.</p>
+            <h2 id="create-password-title" style="color: #333; margin-bottom: 20px; font-size: 1.8rem; font-weight: 600; text-align: center;">¡Encontramos tus clases!</h2>
+            <p style="color: #666; margin-bottom: 25px; text-align: center; line-height: 1.6;">Tienes clases agendadas pero tu cuenta no tiene contraseña configurada. Por favor, crea una contraseña para poder acceder a tus clases.</p>
             
             <div style="margin-bottom: 25px;">
                 <label for="legacy-new-password" style="display: block; color: #666; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;">Nueva Contraseña (mínimo 4 caracteres)</label>
@@ -5084,22 +5084,70 @@
                 // Verify password against stored hashed password for this phone number
                 const storedPasswordHash = localStorage.getItem('userPassword_' + phoneDigits);
                 if (!storedPasswordHash) {
-                    // Check if user has reservations but no password (old payment flow users)
+                    // Check if user has reservations but no password
                     const phoneWithCountryCode = '52' + phoneDigits;
                     const storedName = localStorage.getItem('userName_' + phoneDigits);
                     const storedPhone = localStorage.getItem('userTelefono');
                     
-                    // If we have name/phone in storage but no password, it's an old user
+                    // First check localStorage for legacy data
                     if (storedName || (storedPhone === phoneWithCountryCode)) {
                         // Show create password modal
                         showLegacyPasswordCreationModal(phoneDigits, storedName);
                         return;
                     }
                     
-                    // Completely new user
-                    errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
-                    errorDiv.style.display = 'block';
-                    return;
+                    // Check Firestore for existing reservations with this phone number
+                    // This handles cases where admin scheduled classes or user paid but never registered
+                    try {
+                        // Wait for Firebase to be ready
+                        if (!window.firebaseReady || !window.db || !window.firestoreExports) {
+                            errorDiv.textContent = '⚠️ Sistema inicializando. Por favor, espera unos segundos e intenta nuevamente.';
+                            errorDiv.style.display = 'block';
+                            return;
+                        }
+                        
+                        const { query, collection, getDocs } = window.firestoreExports;
+                        const db = window.db;
+                        
+                        // Query all reservations without filtering to avoid Firestore permission issues
+                        // Then filter client-side by phone (consistent with loadUserClasses approach)
+                        const q = query(collection(db, 'reservas'));
+                        const querySnapshot = await getDocs(q);
+                        
+                        let foundUserName = null;
+                        let hasReservations = false;
+                        
+                        // Filter by phone and extract user name
+                        querySnapshot.forEach((doc) => {
+                            const data = doc.data();
+                            // Normalize phone numbers to handle formatting inconsistencies
+                            if (data.telefono && data.telefono.trim() === phoneWithCountryCode) {
+                                hasReservations = true;
+                                if (!foundUserName && data.nombre) {
+                                    foundUserName = data.nombre;
+                                }
+                            }
+                        });
+                        
+                        if (hasReservations) {
+                            // User has reservations but no password - allow them to create one
+                            console.log(`✅ Encontradas reservas para ${phoneDigits}, permitiendo crear contraseña`);
+                            showLegacyPasswordCreationModal(phoneDigits, foundUserName);
+                            return;
+                        }
+                        
+                        // No reservations found - completely new user
+                        errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
+                        errorDiv.style.display = 'block';
+                        return;
+                        
+                    } catch (firestoreError) {
+                        console.error('Error checking Firestore for reservations:', firestoreError);
+                        // Fallback to showing the not found message
+                        errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
                 }
                 
                 // Hash the entered password for comparison
