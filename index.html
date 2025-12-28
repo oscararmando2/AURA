@@ -7422,6 +7422,17 @@
                     
                     console.log('Login exitoso:', userCredential.user.email);
                     
+                    // Cerrar modal de login - el onAuthStateChanged se encargará del resto
+                    const adminLoginModal = document.getElementById('admin-login-modal');
+                    if (adminLoginModal) {
+                        adminLoginModal.style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                    }
+                    
+                    // Limpiar formulario
+                    loginForm.reset();
+                    loginError.style.display = 'none';
+                    
                 } catch (error) {
                     console.error('Error de autenticación:', error);
                     
