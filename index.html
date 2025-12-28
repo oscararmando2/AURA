@@ -2631,6 +2631,41 @@
             box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
         }
 
+        /* Participant edit button */
+        .btn-participant-edit {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .btn-participant-edit:hover {
+            background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn-participant-edit:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
+        }
+
+        /* Participant buttons container */
+        .participant-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
         /* Modal input fields */
         .modal-input-field {
             width: 100%;
@@ -7638,6 +7673,61 @@
                     const mensaje = encodeURIComponent(mensajePersonalizado);
                     window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
                 }
+                
+                // Event delegation for participant edit buttons
+                if (e.target.classList.contains('btn-participant-edit')) {
+                    const telefono = e.target.getAttribute('data-telefono');
+                    const nombre = e.target.getAttribute('data-nombre');
+                    const firebaseId = e.target.getAttribute('data-firebase-id');
+                    
+                    if (!firebaseId) {
+                        alert('⚠️ No se encontró información para editar este participante');
+                        return;
+                    }
+                    
+                    // Find the participant's individual event from allReservationsData
+                    // Since grouped events still have individual reservations, search for the single event by firebaseId
+                    let participantEvent = allReservationsData.find(event => 
+                        event.extendedProps && 
+                        event.extendedProps.firebaseId === firebaseId
+                    );
+                    
+                    // If not found in single events, it might be stored in a grouped event's participants
+                    if (!participantEvent) {
+                        // Search through grouped events
+                        for (const event of allReservationsData) {
+                            if (event.extendedProps && event.extendedProps.isGrouped && event.extendedProps.participants) {
+                                const participant = event.extendedProps.participants.find(p => p.firebaseId === firebaseId);
+                                if (participant) {
+                                    // Create a pseudo-event for this participant with the same time slot
+                                    participantEvent = {
+                                        start: event.start,
+                                        end: event.end,
+                                        title: participant.fullName,
+                                        extendedProps: {
+                                            fullName: participant.fullName,
+                                            telefono: participant.telefono,
+                                            notas: participant.notas,
+                                            firebaseId: participant.firebaseId
+                                        }
+                                    };
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (!participantEvent) {
+                        alert('❌ No se encontró información del evento para editar');
+                        return;
+                    }
+                    
+                    // Set the current event and open edit modal
+                    window.currentEvent = participantEvent;
+                    window.currentEventTelefono = telefono;
+                    window.currentEventNombre = nombre;
+                    openEditReservationModal();
+                }
             });
             
             // Close modal on background click
@@ -8688,6 +8778,7 @@
                     // Escape data for HTML attributes
                     const escapedTelefono = (participant.telefono || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
                     const escapedNombre = (participant.fullName || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    const escapedFirebaseId = (participant.firebaseId || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
                     
                     participantsHTML += `
                         <div class="participant-item" style="padding: 10px; margin-bottom: 10px; border-left: 3px solid #EFE9E1; background-color: #EFE9E1; border-radius: 5px;">
@@ -8702,9 +8793,14 @@
                                     <span style="color: #EFE9E1; margin-right: 5px;">📝</span>${participant.notas}
                                 </div>
                             ` : ''}
-                            <button type="button" class="btn-participant-contact" data-telefono="${escapedTelefono}" data-nombre="${escapedNombre}">
-                                📱 Contactar
-                            </button>
+                            <div class="participant-buttons">
+                                <button type="button" class="btn-participant-contact" data-telefono="${escapedTelefono}" data-nombre="${escapedNombre}">
+                                    📱 Contactar
+                                </button>
+                                <button type="button" class="btn-participant-edit" data-telefono="${escapedTelefono}" data-nombre="${escapedNombre}" data-firebase-id="${escapedFirebaseId}">
+                                    ✏️ Editar
+                                </button>
+                            </div>
                         </div>
                     `;
                 });
