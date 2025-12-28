@@ -2580,6 +2580,30 @@
             box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
         }
 
+        .event-detail-actions .btn-edit {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+
+        .event-detail-actions .btn-edit:hover {
+            background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+        }
+
+        .event-detail-actions .btn-edit:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(33, 150, 243, 0.3);
+        }
+
         /* Participant contact button */
         .btn-participant-contact {
             background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
@@ -2605,6 +2629,16 @@
         .btn-participant-contact:active {
             transform: translateY(0);
             box-shadow: 0 2px 10px rgba(37, 211, 102, 0.3);
+        }
+
+        /* Modal input fields */
+        .modal-input-field {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid rgba(239, 233, 225, 0.3);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-top: 5px;
         }
 
         /* Admin package selection buttons */
@@ -4305,8 +4339,61 @@
                 </div>
                 <div class="event-detail-actions">
                     <button type="button" class="btn-secondary" id="detail-close-btn">Cerrar</button>
+                    <button type="button" class="btn-edit" id="detail-edit-btn" style="display: none;">✏️ Editar</button>
                     <button type="button" class="btn-primary" id="detail-contact-btn">📧 Contactar</button>
                     <button type="button" class="btn-whatsapp" id="detail-whatsapp-btn">📱 Mandar clases por WhatsApp</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Reservation Modal -->
+        <div id="edit-reservation-modal" class="event-detail-modal">
+            <div class="event-detail-content">
+                <div class="event-detail-header">
+                    <h3>✏️ Editar Reserva</h3>
+                    <button type="button" class="event-detail-close" id="edit-reservation-close">×</button>
+                </div>
+                <div class="event-detail-body">
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">👤</div>
+                        <div class="event-detail-info">
+                            <div class="event-detail-label">Cliente</div>
+                            <div class="event-detail-value" id="edit-client-name">-</div>
+                        </div>
+                    </div>
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">📅</div>
+                        <div class="event-detail-info" style="width: 100%;">
+                            <div class="event-detail-label">Nueva Fecha *</div>
+                            <input type="date" id="edit-reservation-date" class="modal-input-field" required>
+                        </div>
+                    </div>
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">🕐</div>
+                        <div class="event-detail-info" style="width: 100%;">
+                            <div class="event-detail-label">Nueva Hora *</div>
+                            <select id="edit-reservation-time" class="modal-input-field" required>
+                                <option value="">Selecciona una hora</option>
+                                <option value="07:00">07:00 AM</option>
+                                <option value="08:00">08:00 AM</option>
+                                <option value="09:00">09:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="13:00">01:00 PM</option>
+                                <option value="14:00">02:00 PM</option>
+                                <option value="15:00">03:00 PM</option>
+                                <option value="16:00">04:00 PM</option>
+                                <option value="17:00">05:00 PM</option>
+                                <option value="18:00">06:00 PM</option>
+                                <option value="19:00">07:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="event-detail-actions">
+                    <button type="button" class="btn-secondary" id="edit-reservation-cancel">Cancelar</button>
+                    <button type="button" class="btn-primary" id="edit-reservation-save">💾 Guardar Cambios</button>
                 </div>
             </div>
         </div>
@@ -6654,7 +6741,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         console.log('✅ Firebase SDK v10 importado correctamente');
 
@@ -7503,6 +7590,19 @@
             document.getElementById('detail-close-btn').addEventListener('click', closeEventDetailModal);
             document.getElementById('detail-contact-btn').addEventListener('click', contactClient);
             document.getElementById('detail-whatsapp-btn').addEventListener('click', sendClassScheduleToClient);
+            document.getElementById('detail-edit-btn').addEventListener('click', openEditReservationModal);
+            
+            // Edit reservation modal controls
+            document.getElementById('edit-reservation-close').addEventListener('click', closeEditReservationModal);
+            document.getElementById('edit-reservation-cancel').addEventListener('click', closeEditReservationModal);
+            document.getElementById('edit-reservation-save').addEventListener('click', saveEditedReservation);
+            
+            // Close edit modal on background click
+            document.getElementById('edit-reservation-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeEditReservationModal();
+                }
+            });
             
             // Event delegation for participant contact buttons
             document.getElementById('event-detail-modal').addEventListener('click', async function(e) {
@@ -8619,12 +8719,14 @@
                 // Hide notes row for grouped events (notes shown per participant)
                 document.getElementById('detail-notes-row').style.display = 'none';
                 
-                // Hide contact button for grouped events (multiple emails)
+                // Hide contact button and edit button for grouped events
                 document.getElementById('detail-contact-btn').style.display = 'none';
                 document.getElementById('detail-whatsapp-btn').style.display = 'none';
+                document.getElementById('detail-edit-btn').style.display = 'none';
                 window.currentEventEmail = null;
                 window.currentEventTelefono = null;
                 window.currentEventNombre = null;
+                window.currentEvent = null;
             } else {
                 // Handle single event - show one client
                 const modalHeader = document.querySelector('.event-detail-header h3');
@@ -8650,11 +8752,13 @@
                     notesRow.style.display = 'none';
                 }
                 
-                // Show contact button and store telefono
+                // Show contact button, edit button, and store event data
                 document.getElementById('detail-contact-btn').style.display = 'inline-block';
                 document.getElementById('detail-whatsapp-btn').style.display = 'inline-block';
+                document.getElementById('detail-edit-btn').style.display = 'inline-block';
                 window.currentEventTelefono = props.telefono;
                 window.currentEventNombre = props.fullName || event.title;
+                window.currentEvent = event;
             }
             
             // Show modal and lock body scroll
@@ -8668,6 +8772,123 @@
         function closeEventDetailModal() {
             document.getElementById('event-detail-modal').style.display = 'none';
             document.body.classList.remove('modal-open');
+        }
+        
+        /**
+         * Open edit reservation modal
+         */
+        function openEditReservationModal() {
+            // Get the current event from global variable
+            if (!window.currentEvent) {
+                alert('❌ No se encontró información del evento para editar');
+                return;
+            }
+            
+            const event = window.currentEvent;
+            const props = event.extendedProps;
+            
+            // Set client name
+            document.getElementById('edit-client-name').textContent = props.fullName || event.title;
+            
+            // Set current date in date picker (format: YYYY-MM-DD)
+            const startDate = event.start;
+            const year = startDate.getFullYear();
+            const month = String(startDate.getMonth() + 1).padStart(2, '0');
+            const day = String(startDate.getDate()).padStart(2, '0');
+            document.getElementById('edit-reservation-date').value = `${year}-${month}-${day}`;
+            
+            // Set current time in time picker (format: HH:MM)
+            const hours = String(startDate.getHours()).padStart(2, '0');
+            const minutes = String(startDate.getMinutes()).padStart(2, '0');
+            document.getElementById('edit-reservation-time').value = `${hours}:${minutes}`;
+            
+            // Close detail modal and open edit modal
+            closeEventDetailModal();
+            document.getElementById('edit-reservation-modal').style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+        
+        /**
+         * Close edit reservation modal
+         */
+        function closeEditReservationModal() {
+            document.getElementById('edit-reservation-modal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+        
+        /**
+         * Save edited reservation
+         */
+        async function saveEditedReservation() {
+            // Store original button text for restoration
+            const saveBtn = document.getElementById('edit-reservation-save');
+            const originalText = saveBtn.textContent;
+            
+            try {
+                // Get form values
+                const newDate = document.getElementById('edit-reservation-date').value;
+                const newTime = document.getElementById('edit-reservation-time').value;
+                
+                // Validate inputs
+                if (!newDate || !newTime) {
+                    alert('⚠️ Por favor selecciona una fecha y hora');
+                    return;
+                }
+                
+                if (!window.currentEvent || !window.currentEvent.extendedProps.firebaseId) {
+                    alert('❌ No se encontró el ID del evento para actualizar');
+                    return;
+                }
+                
+                // Combine date and time into ISO format (YYYY-MM-DDTHH:mm:ss)
+                const newDateTime = `${newDate}T${newTime}:00`;
+                
+                // Validate that the new date is not in the past
+                // Create date objects and reset to midnight for fair comparison
+                const newDateObj = new Date(newDateTime);
+                const now = new Date();
+                
+                // Compare timestamps
+                if (newDateObj.getTime() < now.getTime()) {
+                    alert('⚠️ No puedes mover una reserva a una fecha pasada');
+                    return;
+                }
+                
+                // Show loading state
+                saveBtn.textContent = '⏳ Guardando...';
+                saveBtn.disabled = true;
+                
+                // Update in Firestore
+                const firebaseId = window.currentEvent.extendedProps.firebaseId;
+                const docRef = doc(db, 'reservas', firebaseId);
+                
+                await updateDoc(docRef, {
+                    fechaHora: newDateTime
+                });
+                
+                console.log('✅ Reserva actualizada exitosamente:', firebaseId);
+                
+                // Close modal
+                closeEditReservationModal();
+                
+                // Reload calendar to show updated reservation
+                await loadAdminCalendarReservations();
+                
+                // Show success message
+                alert('✅ Reserva actualizada exitosamente');
+                
+                // Reset button state
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('❌ Error al actualizar reserva:', error);
+                alert('❌ Error al actualizar la reserva. Por favor, intenta nuevamente.');
+                
+                // Reset button state using stored original text
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+            }
         }
         
         /**
