@@ -10063,29 +10063,29 @@
             // Direct match
             if (normalized1 === normalized2) return true;
             
-            // Try matching with/without country code 52
+            // Try matching with/without country code
             // If one has country code and other doesn't
-            if (normalized1.startsWith('52') && normalized1.length === 12) {
+            if (normalized1.startsWith(COUNTRY_CODE) && normalized1.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
                 // phone1 has country code, try matching without it
-                const phone1WithoutCode = normalized1.substring(2);
+                const phone1WithoutCode = normalized1.substring(COUNTRY_CODE.length);
                 if (phone1WithoutCode === normalized2) return true;
             }
             
-            if (normalized2.startsWith('52') && normalized2.length === 12) {
+            if (normalized2.startsWith(COUNTRY_CODE) && normalized2.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
                 // phone2 has country code, try matching without it
-                const phone2WithoutCode = normalized2.substring(2);
+                const phone2WithoutCode = normalized2.substring(COUNTRY_CODE.length);
                 if (phone2WithoutCode === normalized1) return true;
             }
             
             // If phone1 doesn't have country code, try adding it
-            if (normalized1.length === 10 && !normalized1.startsWith('52')) {
-                const phone1WithCode = '52' + normalized1;
+            if (normalized1.length === MEXICAN_PHONE_LENGTH && !normalized1.startsWith(COUNTRY_CODE)) {
+                const phone1WithCode = COUNTRY_CODE + normalized1;
                 if (phone1WithCode === normalized2) return true;
             }
             
             // If phone2 doesn't have country code, try adding it
-            if (normalized2.length === 10 && !normalized2.startsWith('52')) {
-                const phone2WithCode = '52' + normalized2;
+            if (normalized2.length === MEXICAN_PHONE_LENGTH && !normalized2.startsWith(COUNTRY_CODE)) {
+                const phone2WithCode = COUNTRY_CODE + normalized2;
                 if (phone2WithCode === normalized1) return true;
             }
             
@@ -11016,6 +11016,8 @@
 
         // Constants for the application
         const COUNTRY_CODE = '52'; // Mexico country code
+        const MEXICAN_PHONE_LENGTH = 10; // Phone number length without country code
+        const PHONE_WITH_COUNTRY_CODE_LENGTH = 12; // Phone number length with country code (52 + 10 digits)
         const DEFAULT_NAME = 'Sin nombre';
         const DEFAULT_PHONE = 'Sin teléfono';
         const MAX_CAPACITY = 5; // Maximum number of people per time slot
