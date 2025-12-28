@@ -8185,12 +8185,13 @@
                 let html = '<div class="unique-clients-grid">';
                 
                 clientsArray.forEach((client, index) => {
-                    // Sanitize data for HTML
+                    // Sanitize data for HTML (including numeric index for consistency)
                     const safeNombre = escapeHtml(client.nombre);
                     const safeTelefono = escapeHtml(client.telefono);
+                    const safeIndex = parseInt(index, 10); // Ensure index is a valid integer
                     
                     html += `
-                        <div class="unique-client-card" data-index="${index}">
+                        <div class="unique-client-card" data-index="${safeIndex}">
                             <div class="unique-client-header">
                                 <div class="unique-client-icon">👤</div>
                                 <div class="unique-client-info">
@@ -8210,11 +8211,11 @@
                             </div>
                             <div class="unique-client-actions">
                                 <button type="button" class="unique-client-btn unique-client-btn-whatsapp" 
-                                    data-client-index="${index}">
+                                    data-client-index="${safeIndex}">
                                     📱 WhatsApp
                                 </button>
                                 <button type="button" class="unique-client-btn unique-client-btn-classes" 
-                                    data-client-index="${index}">
+                                    data-client-index="${safeIndex}">
                                     📅 Ver Clases
                                 </button>
                             </div>
