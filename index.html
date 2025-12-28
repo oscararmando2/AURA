@@ -7678,7 +7678,7 @@
                         if (adminLoginModal) {
                             adminLoginModal.style.display = 'none';
                         }
-                        // Ensure body overflow is restored (remove modal-open class)
+                        // Restore page scrolling by removing modal-open class and resetting overflow
                         document.body.classList.remove('modal-open');
                         document.body.style.overflow = ''; // Explicitly reset overflow
                         
@@ -7709,8 +7709,7 @@
                             await loadReservations();
                         } catch (error) {
                             console.error('Error al cargar reservas en auth observer:', error);
-                            // Continue anyway - the panel should still be shown even if reservations fail to load
-                            // Initialize calendar even if loading reservations failed
+                            // Fallback: Initialize calendar directly if reservation loading fails
                             if (!window.adminCalendar) {
                                 try {
                                     initAdminCalendar();
@@ -7730,7 +7729,7 @@
                             }
                         }
                         
-                        // Scroll al panel de admin - ensure this always happens
+                        // Scroll to admin panel - ensure this always happens
                         setTimeout(() => {
                             if (adminPanel) {
                                 adminPanel.scrollIntoView({ behavior: 'smooth' });
