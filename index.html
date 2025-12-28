@@ -3907,8 +3907,9 @@
           <span style="font-size: 1.3rem; font-weight: 600; color: #999; background: #f8f8f8; padding: 15px 12px; border-radius: 12px 0 0 12px; border: 1px solid #EFE9E1; border-right: none;">+52</span>
           <input type="tel" id="quick-phone-digits" placeholder="715 159 6586" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" autocomplete="tel" style="flex: 1; padding: 15px; border: 1px solid #EFE9E1; border-radius: 0 12px 12px 0; font-size: 1.1rem;" required>
         </div>
-        <div style="margin-bottom: 20px;">
-          <input type="password" id="quick-password" placeholder="Crear contraseña (mínimo 4 caracteres)" aria-label="Crear contraseña" autocomplete="new-password" minlength="4" required style="width:100%; padding:15px; border:1px solid #EFE9E1; border-radius:12px; font-size:1.1rem; box-sizing: border-box;">
+        <div style="margin-bottom: 20px; position: relative;">
+          <input type="password" id="quick-password" placeholder="Crear contraseña (mínimo 4 caracteres)" aria-label="Crear contraseña" autocomplete="new-password" minlength="4" required style="width:100%; padding:15px 50px 15px 15px; border:1px solid #EFE9E1; border-radius:12px; font-size:1.1rem; box-sizing: border-box;">
+          <button type="button" id="toggle-register-password" aria-label="Mostrar contraseña" style="position: absolute; right: 12px; top: 15px; background: none; border: none; cursor: pointer; font-size: 1.5rem; padding: 0; line-height: 1; color: #666; transition: color 0.3s ease;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#666'">👁️</button>
           <p style="color:#999; font-size:0.85rem; margin-top:6px; text-align:left;">Esta contraseña te permitirá ver tus clases</p>
         </div>
         <div style="display:flex; gap:15px;">
@@ -3929,8 +3930,9 @@
               <span style="font-size: 1.3rem; font-weight: 600; color: #999; background: #f8f8f8; padding: 15px 12px; border-radius: 12px 0 0 12px; border: 1px solid #EFE9E1; border-right: none;">+52</span>
               <input type="tel" id="user-login-phone" placeholder="10 dígitos" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" autocomplete="tel" style="flex: 1; padding: 15px; border: 1px solid #EFE9E1; border-radius: 0 12px 12px 0; font-size: 1.1rem;" required>
             </div>
-            <div style="margin-bottom: 20px;">
-              <input type="password" id="user-login-password" placeholder="Contraseña" autocomplete="current-password" style="width:100%; padding:15px; border:1px solid #EFE9E1; border-radius:12px; font-size:1.1rem; box-sizing: border-box;" required>
+            <div style="margin-bottom: 20px; position: relative;">
+              <input type="password" id="user-login-password" placeholder="Contraseña" autocomplete="current-password" style="width:100%; padding:15px 50px 15px 15px; border:1px solid #EFE9E1; border-radius:12px; font-size:1.1rem; box-sizing: border-box;" required>
+              <button type="button" id="toggle-login-password" aria-label="Mostrar contraseña" style="position: absolute; right: 12px; top: 15px; background: none; border: none; cursor: pointer; font-size: 1.5rem; padding: 0; line-height: 1; color: #666; transition: color 0.3s ease;" onmouseover="this.style.color='#333'" onmouseout="this.style.color='#666'">👁️</button>
             </div>
             <div style="display:flex; gap:15px;">
               <button type="submit" style="flex:1; background:#EFE9E1; color:#000; padding:15px; border:none; border-radius:12px; font-size:1.1rem; cursor:pointer;">Ver Mis Clases</button>
@@ -4833,7 +4835,7 @@
                 // Verify password against stored hashed password for this phone number
                 const storedPasswordHash = localStorage.getItem('userPassword_' + phoneDigits);
                 if (!storedPasswordHash) {
-                    errorDiv.textContent = '⚠️ No hay cuenta registrada con este teléfono. Por favor regístrate primero.';
+                    errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
                     errorDiv.style.display = 'block';
                     return;
                 }
@@ -4897,6 +4899,32 @@
                     errorDiv.style.display = 'block';
                 }
             });
+            
+            // Password visibility toggle for registration form
+            const toggleRegisterPassword = document.getElementById('toggle-register-password');
+            const registerPasswordInput = document.getElementById('quick-password');
+            if (toggleRegisterPassword && registerPasswordInput) {
+                toggleRegisterPassword.addEventListener('click', () => {
+                    const type = registerPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    registerPasswordInput.setAttribute('type', type);
+                    // Toggle icon between eye and eye-slash
+                    toggleRegisterPassword.textContent = type === 'password' ? '👁️' : '🙈';
+                    toggleRegisterPassword.setAttribute('aria-label', type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                });
+            }
+            
+            // Password visibility toggle for login form
+            const toggleLoginPassword = document.getElementById('toggle-login-password');
+            const loginPasswordInput = document.getElementById('user-login-password');
+            if (toggleLoginPassword && loginPasswordInput) {
+                toggleLoginPassword.addEventListener('click', () => {
+                    const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    loginPasswordInput.setAttribute('type', type);
+                    // Toggle icon between eye and eye-slash
+                    toggleLoginPassword.textContent = type === 'password' ? '👁️' : '🙈';
+                    toggleLoginPassword.setAttribute('aria-label', type === 'password' ? 'Mostrar contraseña' : 'Ocultar contraseña');
+                });
+            }
             
             // Show admin login modal
             menuAdminLogin.addEventListener('click', () => {
