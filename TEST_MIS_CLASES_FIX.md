@@ -85,7 +85,7 @@ The system now checks Firestore for existing reservations when no password is fo
 3. Click "Ver Mis Clases"
 
 #### Expected Result
-✅ Error message: "⚠️ No encontramos tu cuenta. ¿Ya te registrarse? Si es tu primer acceso, usa el botón 'Registrarse' en el menú."
+✅ Error message: "⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón 'Registrarse' en el menú."
 
 ### Scenario 5: User Paid But Never Registered
 

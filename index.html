@@ -5109,15 +5109,18 @@
                         const { query, collection, getDocs } = window.firestoreExports;
                         const db = window.db;
                         
-                        // Query all reservations and filter by phone client-side
+                        // Query all reservations without filtering to avoid Firestore permission issues
+                        // Then filter client-side by phone (consistent with loadUserClasses approach)
                         const q = query(collection(db, 'reservas'));
                         const querySnapshot = await getDocs(q);
                         
                         let foundUserName = null;
                         let hasReservations = false;
                         
+                        // Filter by phone and extract user name
                         querySnapshot.forEach((doc) => {
                             const data = doc.data();
+                            // Normalize phone numbers to handle formatting inconsistencies
                             if (data.telefono && data.telefono.trim() === phoneWithCountryCode) {
                                 hasReservations = true;
                                 if (!foundUserName && data.nombre) {
