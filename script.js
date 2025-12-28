@@ -76,7 +76,8 @@ async function guardarRegistroLocalYPagar() {
   // Hash password before storing for security
   const hashedPassword = await hashPassword(password);
   
-  localStorage.setItem('userName', name);
+  // Store user name associated with phone number (per-user storage)
+  localStorage.setItem('userName_' + phoneDigits, name);
   localStorage.setItem('userNombre', name); // Store for consistency with auth observer
   localStorage.setItem('userTelefono', fullPhoneNumber);
   // Store hashed password associated with phone number for login verification
@@ -116,7 +117,7 @@ async function guardarRegistroLocalYPagar() {
 }
 
 async function crearPreferenciaYpagar(title, price) {
-  const nombre = localStorage.getItem("userName");
+  const nombre = localStorage.getItem("userNombre");
   const telefono = localStorage.getItem("userTelefono");
 
   // Validate user data before making the API call

@@ -4855,8 +4855,8 @@
                 const phoneNumber = phoneDigits;
                 
                 try {
-                    // Retrieve user's name from localStorage (stored during registration)
-                    const userName = localStorage.getItem('userName') || 'Usuario';
+                    // Retrieve user's name from localStorage using phone-specific key (stored during registration)
+                    const userName = localStorage.getItem('userName_' + phoneDigits) || 'Usuario';
                     
                     // Store user info in localStorage for session
                     // Store with country code prefix for consistency with registration
