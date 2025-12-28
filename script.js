@@ -76,9 +76,10 @@ async function guardarRegistroLocalYPagar() {
   // Hash password before storing for security
   const hashedPassword = await hashPassword(password);
   
-  // Store user name associated with phone number (per-user storage)
+  // Store user name associated with phone number (per-user storage for future logins)
   localStorage.setItem('userName_' + phoneDigits, name);
-  localStorage.setItem('userNombre', name); // Store for consistency with auth observer
+  // Set session variables - user is now logged in after registration
+  localStorage.setItem('userNombre', name);
   localStorage.setItem('userTelefono', fullPhoneNumber);
   // Store hashed password associated with phone number for login verification
   localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
