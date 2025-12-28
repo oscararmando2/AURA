@@ -9348,7 +9348,7 @@
             
             try {
                 // Validate event exists
-                if (!window.currentEvent || !window.currentEvent.extendedProps.firebaseId) {
+                if (!window.currentEvent?.extendedProps?.firebaseId) {
                     alert('❌ No se encontró el ID del evento para eliminar');
                     return;
                 }
@@ -9374,15 +9374,11 @@
                 // Show success message
                 alert('✅ Clase eliminada exitosamente. El espacio ahora está disponible para otras personas.');
                 
-                // Reset button state
-                deleteBtn.textContent = originalText;
-                deleteBtn.disabled = false;
-                
             } catch (error) {
                 console.error('❌ Error al eliminar reserva:', error);
                 alert('❌ Error al eliminar la clase. Por favor, intenta nuevamente.');
-                
-                // Reset button state using stored original text
+            } finally {
+                // Reset button state
                 deleteBtn.textContent = originalText;
                 deleteBtn.disabled = false;
             }
