@@ -4880,6 +4880,54 @@
                 // Verify password against stored hashed password for this phone number
                 const storedPasswordHash = localStorage.getItem('userPassword_' + phoneDigits);
                 if (!storedPasswordHash) {
+                    // Check if user has reservations but no password (old payment flow users)
+                    const phoneWithCountryCode = '52' + phoneDigits;
+                    const storedName = localStorage.getItem('userName_' + phoneDigits);
+                    const storedPhone = localStorage.getItem('userTelefono');
+                    
+                    // If we have name/phone in storage but no password, it's an old user
+                    if (storedName || (storedPhone === phoneWithCountryCode)) {
+                        // Prompt user to create a password
+                        errorDiv.innerHTML = '⚠️ Tu cuenta no tiene contraseña configurada.<br><br>Por favor, crea una contraseña ahora para continuar:';
+                        errorDiv.style.display = 'block';
+                        
+                        // Show a special "create password" flow
+                        const createPasswordBtn = document.createElement('button');
+                        createPasswordBtn.textContent = 'Crear Contraseña';
+                        createPasswordBtn.style.cssText = 'margin-top: 10px; background: #EFE9E1; color: #000; padding: 10px 20px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600;';
+                        createPasswordBtn.onclick = async () => {
+                            const newPassword = prompt('Crea una contraseña para tu cuenta (mínimo 4 caracteres):');
+                            if (!newPassword || newPassword.length < 4) {
+                                alert('⚠️ La contraseña debe tener al menos 4 caracteres');
+                                return;
+                            }
+                            
+                            // Hash the new password
+                            const encoder = new TextEncoder();
+                            const data = encoder.encode(newPassword);
+                            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                            const hashArray = Array.from(new Uint8Array(hashBuffer));
+                            const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                            
+                            // Save the password
+                            localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
+                            if (storedName) {
+                                localStorage.setItem('userName_' + phoneDigits, storedName);
+                            }
+                            
+                            alert('✅ Contraseña creada exitosamente.\n\nAhora puedes iniciar sesión con tu nueva contraseña.');
+                            errorDiv.style.display = 'none';
+                            errorDiv.innerHTML = '';
+                            document.getElementById('user-login-phone').focus();
+                        };
+                        
+                        if (!errorDiv.querySelector('button')) {
+                            errorDiv.appendChild(createPasswordBtn);
+                        }
+                        return;
+                    }
+                    
+                    // Completely new user
                     errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
                     errorDiv.style.display = 'block';
                     return;
