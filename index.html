@@ -2556,6 +2556,16 @@
             background: #d0d0d0;
         }
 
+        .event-detail-actions .btn-danger {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+        }
+
+        .event-detail-actions .btn-danger:hover {
+            background: #c82333;
+        }
+
         .event-detail-actions .btn-whatsapp {
             background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
             color: #fff;
@@ -4502,6 +4512,7 @@
                 </div>
                 <div class="event-detail-actions">
                     <button type="button" class="btn-secondary" id="edit-reservation-cancel">Cancelar</button>
+                    <button type="button" class="btn-danger" id="edit-reservation-delete">🗑️ Eliminar Clase</button>
                     <button type="button" class="btn-primary" id="edit-reservation-save">💾 Guardar Cambios</button>
                 </div>
             </div>
@@ -7108,7 +7119,7 @@
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         console.log('✅ Firebase SDK v10 importado correctamente');
 
@@ -7963,6 +7974,7 @@
             document.getElementById('edit-reservation-close').addEventListener('click', closeEditReservationModal);
             document.getElementById('edit-reservation-cancel').addEventListener('click', closeEditReservationModal);
             document.getElementById('edit-reservation-save').addEventListener('click', saveEditedReservation);
+            document.getElementById('edit-reservation-delete').addEventListener('click', deleteReservation);
             
             // Close edit modal on background click
             document.getElementById('edit-reservation-modal').addEventListener('click', function(e) {
@@ -9316,6 +9328,59 @@
                 // Reset button state using stored original text
                 saveBtn.textContent = originalText;
                 saveBtn.disabled = false;
+            }
+        }
+        
+        /**
+         * Delete a reservation
+         */
+        async function deleteReservation() {
+            // Show confirmation dialog
+            const confirmDelete = confirm('⚠️ ¿Estás seguro de que deseas eliminar esta clase? Esta acción no se puede deshacer.');
+            
+            if (!confirmDelete) {
+                return;
+            }
+            
+            // Store original button text for restoration
+            const deleteBtn = document.getElementById('edit-reservation-delete');
+            const originalText = deleteBtn.textContent;
+            
+            try {
+                // Validate event exists
+                if (!window.currentEvent?.extendedProps?.firebaseId) {
+                    alert('❌ No se encontró el ID del evento para eliminar');
+                    return;
+                }
+                
+                // Show loading state
+                deleteBtn.textContent = '⏳ Eliminando...';
+                deleteBtn.disabled = true;
+                
+                // Delete from Firestore
+                const firebaseId = window.currentEvent.extendedProps.firebaseId;
+                const docRef = doc(db, 'reservas', firebaseId);
+                
+                await deleteDoc(docRef);
+                
+                console.log('✅ Reserva eliminada exitosamente:', firebaseId);
+                
+                // Close modal
+                closeEditReservationModal();
+                
+                // Reload calendar to show updated schedule (this will free up the slot)
+                await loadAdminCalendarReservations();
+                
+                // Show success message
+                alert('✅ Clase eliminada exitosamente. El espacio ahora está disponible para otras personas.');
+                
+            } catch (error) {
+                console.error('❌ Error al eliminar reserva:', error);
+                alert('❌ Error al eliminar la clase. Por favor, intenta nuevamente.');
+            } finally {
+                // Reset button state
+                deleteBtn.textContent = originalText;
+                deleteBtn.disabled = false;
             }
         }
         
