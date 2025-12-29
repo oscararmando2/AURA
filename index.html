@@ -4127,7 +4127,7 @@
         <h2 id="user-login-modal-title" style="color:#333; margin-bottom:15px;">Mis Clases</h2>
         <p style="color:#666; margin-bottom:20px;">Ingresa tus datos para ver tus clases agendadas</p>
         <div id="user-login-error" style="display: none; background: linear-gradient(135deg, #EFE9E1 0%, #EFE9E1 100%); color: #000; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
-        <form id="user-login-form">
+        <form id="user-login-form" onsubmit="return false;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
               <span style="font-size: 1.3rem; font-weight: 600; color: #999; background: #f8f8f8; padding: 15px 12px; border-radius: 12px 0 0 12px; border: 1px solid #EFE9E1; border-right: none;">+52</span>
               <input type="tel" id="user-login-phone" placeholder="10 dígitos" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" autocomplete="tel" style="flex: 1; padding: 15px; border: 1px solid #EFE9E1; border-radius: 0 12px 12px 0; font-size: 1.1rem;" required>
@@ -4474,7 +4474,7 @@
             <h2 id="admin-login-modal-title" style="color: #333; margin-bottom: 10px; font-size: 1.8rem; font-weight: 600;">Acceso de Administrador</h2>
             <p style="color: #666; margin-bottom: 20px; font-size: 0.95rem;">Ingresa con tu cuenta de administrador</p>
             <div id="login-error" style="display: none; background: linear-gradient(135deg, #EFE9E1 0%, #EFE9E1 100%); color: #000; padding: 12px; border-radius: 10px; margin-bottom: 15px; text-align: center; font-size: 0.9rem;"></div>
-            <form id="admin-login-form">
+            <form id="admin-login-form" onsubmit="return false;">
                 <div style="margin-bottom: 15px;">
                     <label for="admin-email" style="display: block; margin-bottom: 5px; color: #666; font-weight: 500; font-size: 0.95rem;">Correo Electrónico</label>
                     <input type="email" id="admin-email" required autocomplete="username" style="width: 100%; padding: 12px; border: 1px solid rgba(239, 233, 225, 0.5); border-radius: 10px; font-size: 1rem; transition: all 0.3s ease; box-sizing: border-box;">
