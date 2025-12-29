@@ -3772,7 +3772,7 @@
             body.mobile-admin-view .booking-section,
             body.mobile-admin-view #my-classes-section,
             body.mobile-admin-view .image-scroll-section,
-            body.mobile-admin-view .contact-section,
+            body.mobile-admin-view .contact-section:not(#admin-panel-section),
             body.mobile-admin-view .reglamento-link {
                 display: none !important;
             }
@@ -4034,6 +4034,12 @@
             }
         }
     </style>
+    
+    <!-- Vercel Speed Insights -->
+    <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
 <body>
     <!-- ========== Page Loader ========== -->
