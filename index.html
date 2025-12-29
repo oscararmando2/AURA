@@ -8377,15 +8377,6 @@
         }
         
         /**
-         * Helper function to escape HTML entities
-         */
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        /**
          * Helper function to validate and get client from index attribute
          */
         function getClientFromIndexAttribute(element, clientsArray) {
