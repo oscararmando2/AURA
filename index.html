@@ -7401,6 +7401,18 @@
         let currentUser = null;
 
         /**
+         * Normalize phone number for comparison
+         * Removes all non-digits and returns just the digits
+         * @param {string} phone - Phone number to normalize
+         * @returns {string} - Normalized phone (digits only)
+         */
+        function normalizePhoneNumber(phone) {
+            if (!phone) return '';
+            // Remove all non-digit characters
+            return phone.replace(/\D/g, '');
+        }
+
+        /**
          * Manejar el envío del formulario de login de administrador
          */
         function setupAdminLogin() {
@@ -9261,16 +9273,6 @@
         /**
          * Apply filters to calendar
          */
-        /**
-         * Normalize phone number for search by removing formatting characters
-         * Removes: spaces, dashes (-), parentheses (()), plus signs (+), and dots (.)
-         */
-        function normalizePhoneNumber(phone) {
-            if (!phone) return '';
-            // Remove spaces, dashes, parentheses, plus signs, and dots
-            return phone.replace(/[\s\-\(\)\+\.]/g, '');
-        }
-        
         function applyFilters() {
             if (!adminCalendar || !allReservationsData) return;
             
@@ -10117,18 +10119,6 @@
 
         // ========== MY CLASSES FUNCTIONALITY ==========
         
-        /**
-         * Normalize phone number for comparison
-         * Removes all non-digits and returns just the digits
-         * @param {string} phone - Phone number to normalize
-         * @returns {string} - Normalized phone (digits only)
-         */
-        function normalizePhoneNumber(phone) {
-            if (!phone) return '';
-            // Remove all non-digit characters
-            return phone.replace(/\D/g, '');
-        }
-
         /**
          * Check if two phone numbers match
          * Handles different formats:
