@@ -5040,7 +5040,9 @@
                     menuDropdown.setAttribute('aria-hidden', 'true');
                     
                     // Show all sections again
-                    showAllSectionsExceptAdmin();
+                    if (typeof window.showAllSectionsExceptAdmin === 'function') {
+                        window.showAllSectionsExceptAdmin();
+                    }
                     
                     // Hide "Mis Clases" section
                     hideUserClasses();
@@ -5190,7 +5192,9 @@
                     errorDiv.style.display = 'none';
                     
                     // Update UI for logged in user (hide sections, update menu)
-                    updateUIForLoggedInUser();
+                    if (typeof window.updateUIForLoggedInUser === 'function') {
+                        window.updateUIForLoggedInUser();
+                    }
                     
                     // Load and show user's classes
                     // Pass phone with country code to match stored reservations
@@ -7717,6 +7721,13 @@
             const adminPanel = document.getElementById('admin-panel-section');
             if (adminPanel) adminPanel.style.display = 'none';
         }
+        
+        // ========== EXPOSE UI FUNCTIONS GLOBALLY ==========
+        // These functions need to be accessible from other script blocks
+        window.updateUIForLoggedInUser = updateUIForLoggedInUser;
+        window.updateUIForLoggedOutUser = updateUIForLoggedOutUser;
+        window.hideAllSectionsExceptMyClasses = hideAllSectionsExceptMyClasses;
+        window.showAllSectionsExceptAdmin = showAllSectionsExceptAdmin;
         
         // ========== MOBILE ADMIN VIEW CONSTANTS ==========
         const MOBILE_BREAKPOINT = 768; // Max width for mobile view
