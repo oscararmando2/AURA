@@ -7414,6 +7414,54 @@
         }
 
         /**
+         * Check if two phone numbers match
+         * Handles different formats:
+         * - With or without country code (52)
+         * - With or without spaces, dashes, parentheses
+         * @param {string} phone1 - First phone number
+         * @param {string} phone2 - Second phone number
+         * @returns {boolean} - True if phones match
+         */
+        function phonesMatch(phone1, phone2) {
+            if (!phone1 || !phone2) return false;
+            
+            // Normalize both phones (digits only)
+            const normalized1 = normalizePhoneNumber(phone1);
+            const normalized2 = normalizePhoneNumber(phone2);
+            
+            // Direct match
+            if (normalized1 === normalized2) return true;
+            
+            // Try matching with/without country code
+            // If one has country code and other doesn't
+            if (normalized1.startsWith(MEXICO_COUNTRY_CODE) && normalized1.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
+                // phone1 has country code, try matching without it
+                const phone1WithoutCode = normalized1.substring(MEXICO_COUNTRY_CODE.length);
+                if (phone1WithoutCode === normalized2) return true;
+            }
+            
+            if (normalized2.startsWith(MEXICO_COUNTRY_CODE) && normalized2.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
+                // phone2 has country code, try matching without it
+                const phone2WithoutCode = normalized2.substring(MEXICO_COUNTRY_CODE.length);
+                if (phone2WithoutCode === normalized1) return true;
+            }
+            
+            // If phone1 doesn't have country code (exactly 10 digits), try adding it
+            if (normalized1.length === PHONE_DIGITS_LENGTH) {
+                const phone1WithCode = MEXICO_COUNTRY_CODE + normalized1;
+                if (phone1WithCode === normalized2) return true;
+            }
+            
+            // If phone2 doesn't have country code (exactly 10 digits), try adding it
+            if (normalized2.length === PHONE_DIGITS_LENGTH) {
+                const phone2WithCode = MEXICO_COUNTRY_CODE + normalized2;
+                if (phone2WithCode === normalized1) return true;
+            }
+            
+            return false;
+        }
+
+        /**
          * Manejar el envío del formulario de login de administrador
          */
         function setupAdminLogin() {
@@ -10120,54 +10168,6 @@
 
         // ========== MY CLASSES FUNCTIONALITY ==========
         
-        /**
-         * Check if two phone numbers match
-         * Handles different formats:
-         * - With or without country code (52)
-         * - With or without spaces, dashes, parentheses
-         * @param {string} phone1 - First phone number
-         * @param {string} phone2 - Second phone number
-         * @returns {boolean} - True if phones match
-         */
-        function phonesMatch(phone1, phone2) {
-            if (!phone1 || !phone2) return false;
-            
-            // Normalize both phones (digits only)
-            const normalized1 = normalizePhoneNumber(phone1);
-            const normalized2 = normalizePhoneNumber(phone2);
-            
-            // Direct match
-            if (normalized1 === normalized2) return true;
-            
-            // Try matching with/without country code
-            // If one has country code and other doesn't
-            if (normalized1.startsWith(MEXICO_COUNTRY_CODE) && normalized1.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
-                // phone1 has country code, try matching without it
-                const phone1WithoutCode = normalized1.substring(MEXICO_COUNTRY_CODE.length);
-                if (phone1WithoutCode === normalized2) return true;
-            }
-            
-            if (normalized2.startsWith(MEXICO_COUNTRY_CODE) && normalized2.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
-                // phone2 has country code, try matching without it
-                const phone2WithoutCode = normalized2.substring(MEXICO_COUNTRY_CODE.length);
-                if (phone2WithoutCode === normalized1) return true;
-            }
-            
-            // If phone1 doesn't have country code (exactly 10 digits), try adding it
-            if (normalized1.length === PHONE_DIGITS_LENGTH) {
-                const phone1WithCode = MEXICO_COUNTRY_CODE + normalized1;
-                if (phone1WithCode === normalized2) return true;
-            }
-            
-            // If phone2 doesn't have country code (exactly 10 digits), try adding it
-            if (normalized2.length === PHONE_DIGITS_LENGTH) {
-                const phone2WithCode = MEXICO_COUNTRY_CODE + normalized2;
-                if (phone2WithCode === normalized1) return true;
-            }
-            
-            return false;
-        }
-
         /**
          * Load user's classes from Firestore
          * This function loads only the reservations for the currently logged-in user
