@@ -5330,7 +5330,10 @@
                         }
                         console.log('🔄 Creando nuevo reCAPTCHA verifier para reenvío...');
                         window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
-                            'size': 'invisible'
+                            'size': 'invisible',
+                            'callback': (response) => {
+                                console.log('✅ reCAPTCHA resuelto');
+                            }
                         });
                         
                         // Resend code
