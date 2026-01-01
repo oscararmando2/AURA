@@ -4,10 +4,11 @@ service cloud.firestore {
 
     // ====== RESERVAS ======
     match /reservas/{reservaId} {
-      // Admin tiene acceso total (por email)
+      // Admin tiene acceso total (por email o por teléfono)
       allow read, write: if request.auth != null && 
           (request.auth.token.email == 'admin@aura.com' || 
-           request.auth.token.email == '7151596586');
+           request.auth.token.email == '7151596586' ||
+           request.auth.token.phone_number == '+527151596586');
 
       // Cualquier persona puede crear reservas (nuevo flujo - después del pago exitoso)
       // Las reservas se crean desde el frontend después de confirmar el pago
@@ -21,7 +22,8 @@ service cloud.firestore {
       // Solo admin puede actualizar o borrar reservas
       allow update, delete: if request.auth != null && 
           (request.auth.token.email == 'admin@aura.com' || 
-           request.auth.token.email == '7151596586');
+           request.auth.token.email == '7151596586' ||
+           request.auth.token.phone_number == '+527151596586');
     }
 
     // ====== PERFIL DE USUARIOS ======
@@ -29,16 +31,17 @@ service cloud.firestore {
       // Admin tiene acceso total
       allow read, write: if request.auth != null && 
           (request.auth.token.email == 'admin@aura.com' || 
-           request.auth.token.email == '7151596586');
+           request.auth.token.email == '7151596586' ||
+           request.auth.token.phone_number == '+527151596586');
       
       // Usuario normal puede crear su perfil si está autenticado
       allow create: if request.auth != null;
       
       // Usuario normal puede leer y actualizar su propio perfil
-      // Usa el email del token (que es phoneNumber@aurapilates.app)
-      // Para verificar acceso, comparamos el email almacenado con el email del token
+      // Compara el teléfono almacenado con el teléfono del token de autenticación
       allow read, update: if request.auth != null && 
-          resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase();
+          (resource.data.telefono == request.auth.token.phone_number ||
+           resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase());
     }
 
     // Todo lo demás bloqueado
