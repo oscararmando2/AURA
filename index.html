@@ -7514,10 +7514,9 @@
                 signOut
             };
             
-            // Initialize reCAPTCHA verifier (invisible)
-            console.log('🔐 Inicializando reCAPTCHA verifier...');
-            try {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            // Helper function to create reCAPTCHA verifier with proper expired handling
+            function createRecaptchaVerifier() {
+                return new RecaptchaVerifier(auth, 'recaptcha-container', {
                     'size': 'invisible',
                     'callback': (response) => {
                         console.log('✅ reCAPTCHA resuelto');
@@ -7534,15 +7533,7 @@
                         }
                         // Recreate the verifier for the next attempt
                         try {
-                            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                                'size': 'invisible',
-                                'callback': (response) => {
-                                    console.log('✅ reCAPTCHA resuelto');
-                                },
-                                'expired-callback': () => {
-                                    console.log('⚠️ reCAPTCHA expiró nuevamente');
-                                }
-                            });
+                            window.recaptchaVerifier = createRecaptchaVerifier();
                             console.log('✅ reCAPTCHA verifier recreado después de expiración');
                         } catch (e) {
                             console.error('❌ Error al recrear reCAPTCHA:', e);
@@ -7550,6 +7541,12 @@
                         }
                     }
                 });
+            }
+            
+            // Initialize reCAPTCHA verifier (invisible)
+            console.log('🔐 Inicializando reCAPTCHA verifier...');
+            try {
+                window.recaptchaVerifier = createRecaptchaVerifier();
                 console.log('✅ reCAPTCHA verifier inicializado');
             } catch (error) {
                 console.error('❌ Error al inicializar reCAPTCHA:', error);
