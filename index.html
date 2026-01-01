@@ -5098,7 +5098,7 @@
                     const storedPhone = localStorage.getItem('userTelefono');
                     
                     // First check localStorage for legacy data (check both 10-digit and 12-digit formats)
-                    if (storedName || (storedPhone === phoneDigits) || (storedPhone === MEXICO_COUNTRY_CODE + phoneDigits)) {
+                    if (storedName || (storedPhone === phoneDigits) || (storedPhone === '52' + phoneDigits)) {
                         // Show create password modal
                         showLegacyPasswordCreationModal(phoneDigits, storedName);
                         return;
@@ -7449,7 +7449,10 @@
             }
             
             // Compare base phone numbers (10 digits)
-            if (phone1Base === phone2Base && phone1Base.length === PHONE_DIGITS_LENGTH) {
+            // Both must be exactly 10 digits to match
+            if (phone1Base === phone2Base && 
+                phone1Base.length === PHONE_DIGITS_LENGTH && 
+                phone2Base.length === PHONE_DIGITS_LENGTH) {
                 return true;
             }
             
@@ -8880,7 +8883,7 @@
                 return;
             }
             
-            // Store state
+            // Store state - phone is already validated as exactly 10 digits
             adminScheduleState.clientName = name;
             adminScheduleState.clientPhone = phone; // Store only 10 digits (no country code)
             adminScheduleState.packageSize = packageSize;
