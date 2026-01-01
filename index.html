@@ -5098,7 +5098,7 @@
                     const storedPhone = localStorage.getItem('userTelefono');
                     
                     // First check localStorage for legacy data (check both 10-digit and 12-digit formats)
-                    if (storedName || (storedPhone === phoneDigits) || (storedPhone === '52' + phoneDigits)) {
+                    if (storedName || (storedPhone === phoneDigits) || (storedPhone === MEXICO_COUNTRY_CODE + phoneDigits)) {
                         // Show create password modal
                         showLegacyPasswordCreationModal(phoneDigits, storedName);
                         return;
