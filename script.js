@@ -76,45 +76,105 @@ async function guardarRegistroLocalYPagar() {
   // Hash password before storing for security
   const hashedPassword = await hashPassword(password);
   
-  // Store user name associated with phone number (per-user storage for future logins)
-  localStorage.setItem('userName_' + phoneDigits, name);
-  // Set session variables - user is now logged in after registration
-  localStorage.setItem('userNombre', name);
-  localStorage.setItem('userTelefono', fullPhoneNumber);
-  // Store hashed password associated with phone number for login verification
-  localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
-  localStorage.setItem('registered', 'true');
-  
-  // Close modal
-  document.getElementById('register-modal').style.display = 'none';
-  
-  // If registration is for payment, proceed to payment
-  if (registrationContext === 'payment') {
-    // Clear form fields
-    document.getElementById('quick-name').value = '';
-    document.getElementById('quick-phone-digits').value = '';
-    document.getElementById('quick-password').value = '';
-    
-    crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
-  } else {
-    // Standalone registration - show success message and scroll to "Mis Clases"
-    console.log('✅ Usuario registrado exitosamente:', name);
-    alert('✅ ¡Registro exitoso!\n\nAhora puedes ver tus clases reservadas.');
-    
-    // Clear form fields after showing success message
-    document.getElementById('quick-name').value = '';
-    document.getElementById('quick-phone-digits').value = '';
-    document.getElementById('quick-password').value = '';
-    
-    // Scroll to "Mis Clases" section if it exists
-    const myClassesSection = document.getElementById('my-classes-section');
-    if (myClassesSection) {
-      myClassesSection.scrollIntoView({ behavior: 'smooth' });
+  // Create Firebase Authentication account for the user
+  try {
+    // Wait for Firebase to be ready
+    if (!window.firebaseReady || !window.auth) {
+      console.error('❌ Firebase no está listo');
+      alert('⚠️ Sistema inicializando. Por favor, espera unos segundos e intenta nuevamente.');
+      return;
     }
+    
+    // Use phone number as email for Firebase Auth (e.g., 527151234567@aurapilates.app)
+    const email = `${fullPhoneNumber}@aurapilates.app`;
+    const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.firebaseAuthExports || {};
+    
+    if (!createUserWithEmailAndPassword || !signInWithEmailAndPassword) {
+      console.error('❌ Firebase Auth functions not available');
+      throw new Error('Sistema de autenticación no disponible');
+    }
+    
+    console.log('🔐 Creando cuenta de Firebase Auth para:', email);
+    
+    try {
+      // Try to create new account
+      const userCredential = await createUserWithEmailAndPassword(window.auth, email, password);
+      console.log('✅ Cuenta de Firebase creada:', userCredential.user.uid);
+    } catch (authError) {
+      // If account already exists, sign in instead
+      if (authError.code === 'auth/email-already-in-use') {
+        console.log('ℹ️ Cuenta ya existe, iniciando sesión...');
+        try {
+          await signInWithEmailAndPassword(window.auth, email, password);
+          console.log('✅ Inicio de sesión exitoso con cuenta existente');
+        } catch (signInError) {
+          console.error('❌ Error al iniciar sesión con cuenta existente:', signInError);
+          throw new Error('La cuenta ya existe pero la contraseña no coincide. Intenta iniciar sesión en vez de registrarte.');
+        }
+      } else {
+        console.error('❌ Error al crear cuenta de Firebase:', authError);
+        throw authError;
+      }
+    }
+    
+    // Store user name associated with phone number (per-user storage for future logins)
+    localStorage.setItem('userName_' + phoneDigits, name);
+    // Set session variables - user is now logged in after registration
+    localStorage.setItem('userNombre', name);
+    localStorage.setItem('userTelefono', fullPhoneNumber);
+    // Store hashed password associated with phone number for login verification (backup)
+    localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
+    localStorage.setItem('registered', 'true');
+    
+    // Close modal
+    document.getElementById('register-modal').style.display = 'none';
+    
+    // If registration is for payment, proceed to payment
+    if (registrationContext === 'payment') {
+      // Clear form fields
+      document.getElementById('quick-name').value = '';
+      document.getElementById('quick-phone-digits').value = '';
+      document.getElementById('quick-password').value = '';
+      
+      crearPreferenciaYpagar(selectedPackage.title, selectedPackage.price);
+    } else {
+      // Standalone registration - show success message and scroll to "Mis Clases"
+      console.log('✅ Usuario registrado exitosamente:', name);
+      alert('✅ ¡Registro exitoso!\n\nAhora puedes ver tus clases reservadas.');
+      
+      // Clear form fields after showing success message
+      document.getElementById('quick-name').value = '';
+      document.getElementById('quick-phone-digits').value = '';
+      document.getElementById('quick-password').value = '';
+      
+      // Scroll to "Mis Clases" section if it exists
+      const myClassesSection = document.getElementById('my-classes-section');
+      if (myClassesSection) {
+        myClassesSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    
+    // Reset context
+    registrationContext = 'standalone';
+    
+  } catch (error) {
+    console.error('❌ Error en registro:', error);
+    let errorMessage = '❌ Error al registrar. ';
+    
+    if (error.message) {
+      errorMessage += error.message;
+    } else if (error.code === 'auth/weak-password') {
+      errorMessage += 'La contraseña es demasiado débil. Usa al menos 6 caracteres.';
+    } else if (error.code === 'auth/invalid-email') {
+      errorMessage += 'Error de configuración. Por favor, contacta con soporte.';
+    } else if (error.code === 'auth/network-request-failed') {
+      errorMessage += 'Error de conexión. Verifica tu internet e intenta nuevamente.';
+    } else {
+      errorMessage += 'Por favor, intenta nuevamente o contacta con soporte.';
+    }
+    
+    alert(errorMessage);
   }
-  
-  // Reset context
-  registrationContext = 'standalone';
 }
 
 async function crearPreferenciaYpagar(title, price) {

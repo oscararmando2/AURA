@@ -5090,100 +5090,37 @@
                     return;
                 }
                 
-                // Verify password against stored hashed password for this phone number
-                const storedPasswordHash = localStorage.getItem('userPassword_' + phoneDigits);
-                if (!storedPasswordHash) {
-                    // Check if user has reservations but no password
-                    const phoneWithCountryCode = '52' + phoneDigits;
-                    const storedName = localStorage.getItem('userName_' + phoneDigits);
-                    const storedPhone = localStorage.getItem('userTelefono');
-                    
-                    // First check localStorage for legacy data
-                    if (storedName || (storedPhone === phoneWithCountryCode)) {
-                        // Show create password modal
-                        showLegacyPasswordCreationModal(phoneDigits, storedName);
-                        return;
-                    }
-                    
-                    // Check Firestore for existing reservations with this phone number
-                    // This handles cases where admin scheduled classes or user paid but never registered
-                    try {
-                        // Wait for Firebase to be ready
-                        if (!window.firebaseReady || !window.db || !window.firestoreExports) {
-                            errorDiv.textContent = '⚠️ Sistema inicializando. Por favor, espera unos segundos e intenta nuevamente.';
-                            errorDiv.style.display = 'block';
-                            return;
-                        }
-                        
-                        const { query, collection, getDocs } = window.firestoreExports;
-                        const db = window.db;
-                        
-                        // Query all reservations without filtering to avoid Firestore permission issues
-                        // Then filter client-side by phone (consistent with loadUserClasses approach)
-                        const q = query(collection(db, 'reservas'));
-                        const querySnapshot = await getDocs(q);
-                        
-                        let foundUserName = null;
-                        let hasReservations = false;
-                        
-                        // Filter by phone and extract user name
-                        querySnapshot.forEach((doc) => {
-                            const data = doc.data();
-                            // Use flexible phone matching to handle format variations
-                            if (data.telefono && phonesMatch(data.telefono, phoneWithCountryCode)) {
-                                hasReservations = true;
-                                if (!foundUserName && data.nombre) {
-                                    foundUserName = data.nombre;
-                                }
-                            }
-                        });
-                        
-                        if (hasReservations) {
-                            // User has reservations but no password - allow them to create one
-                            console.log(`✅ Encontradas reservas para ${phoneDigits}, permitiendo crear contraseña`);
-                            showLegacyPasswordCreationModal(phoneDigits, foundUserName);
-                            return;
-                        }
-                        
-                        // No reservations found - completely new user
-                        errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
-                        errorDiv.style.display = 'block';
-                        return;
-                        
-                    } catch (firestoreError) {
-                        console.error('Error checking Firestore for reservations:', firestoreError);
-                        // Fallback to showing the not found message
-                        errorDiv.textContent = '⚠️ No encontramos tu cuenta. ¿Ya te registraste? Si es tu primer acceso, usa el botón "Registrarse" en el menú.';
-                        errorDiv.style.display = 'block';
-                        return;
-                    }
-                }
+                const phoneWithCountryCode = '52' + phoneDigits;
                 
-                // Hash the entered password for comparison
-                const encoder = new TextEncoder();
-                const data = encoder.encode(password);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const enteredPasswordHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                
-                if (enteredPasswordHash !== storedPasswordHash) {
-                    errorDiv.textContent = '❌ Contraseña incorrecta. Intenta nuevamente.';
+                // Check if Firebase is ready
+                if (!window.firebaseReady || !window.auth) {
+                    errorDiv.textContent = '⚠️ Sistema inicializando. Por favor, espera unos segundos e intenta nuevamente.';
                     errorDiv.style.display = 'block';
                     return;
                 }
                 
-                // Use the phone number for querying reservations
-                const phoneNumber = phoneDigits;
-                
+                // Try Firebase Authentication first
                 try {
+                    const email = `${phoneWithCountryCode}@aurapilates.app`;
+                    const { signInWithEmailAndPassword } = window.firebaseAuthExports || {};
+                    
+                    if (!signInWithEmailAndPassword) {
+                        console.error('❌ Firebase Auth functions not available');
+                        throw new Error('Sistema de autenticación no disponible');
+                    }
+                    
+                    console.log('🔐 Intentando autenticar con Firebase:', email);
+                    
+                    // Sign in with Firebase Authentication
+                    const userCredential = await signInWithEmailAndPassword(window.auth, email, password);
+                    console.log('✅ Autenticación de Firebase exitosa:', userCredential.user.uid);
+                    
                     // Retrieve user's name from localStorage using phone-specific key (stored during registration)
                     const userName = localStorage.getItem('userName_' + phoneDigits) || 'Usuario';
                     
                     // Store user info in localStorage for session
-                    // Store with country code prefix for consistency with registration
-                    const phoneWithCountryCode = '52' + phoneNumber;
                     localStorage.setItem('userTelefono', phoneWithCountryCode);
-                    localStorage.setItem('userNombre', userName); // Store for consistency with auth observer
+                    localStorage.setItem('userNombre', userName);
                     localStorage.setItem('userLoggedIn', 'true');
                     
                     // Hide modal
@@ -5216,7 +5153,74 @@
                     
                 } catch (error) {
                     console.error('Error during user login:', error);
-                    errorDiv.textContent = '❌ Error al verificar. Intenta nuevamente.';
+                    
+                    // Handle Firebase Authentication errors
+                    let errorMessage = '❌ ';
+                    
+                    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                        // User doesn't exist in Firebase Auth or wrong password
+                        // Check if user has reservations (legacy user without Firebase Auth account)
+                        console.log('ℹ️ Usuario no encontrado en Firebase Auth, verificando reservas...');
+                        
+                        try {
+                            if (!window.db || !window.firestoreExports) {
+                                errorMessage += 'Sistema inicializando. Por favor, espera unos segundos e intenta nuevamente.';
+                                errorDiv.textContent = errorMessage;
+                                errorDiv.style.display = 'block';
+                                return;
+                            }
+                            
+                            const { query, collection, getDocs } = window.firestoreExports;
+                            const db = window.db;
+                            
+                            // Query all reservations
+                            const q = query(collection(db, 'reservas'));
+                            const querySnapshot = await getDocs(q);
+                            
+                            let foundUserName = null;
+                            let hasReservations = false;
+                            
+                            // Filter by phone and extract user name
+                            querySnapshot.forEach((doc) => {
+                                const data = doc.data();
+                                if (data.telefono && phonesMatch(data.telefono, phoneWithCountryCode)) {
+                                    hasReservations = true;
+                                    if (!foundUserName && data.nombre) {
+                                        foundUserName = data.nombre;
+                                    }
+                                }
+                            });
+                            
+                            if (hasReservations) {
+                                // Legacy user with reservations but no Firebase Auth account
+                                console.log(`✅ Encontradas reservas para ${phoneDigits}, permitiendo crear cuenta`);
+                                errorMessage = '✨ ¡Encontramos tus clases!\n\nPero necesitas crear una cuenta para acceder.\n\nPor favor, usa el botón "Registrarse" en el menú para crear tu cuenta con este teléfono y acceder a tus clases.';
+                                errorDiv.textContent = errorMessage;
+                                errorDiv.style.display = 'block';
+                                return;
+                            }
+                            
+                            // No reservations - completely new user
+                            errorMessage = 'No encontramos tu cuenta. ¿Ya te registraste?\n\nSi es tu primer acceso, usa el botón "Registrarse" en el menú.';
+                            
+                        } catch (firestoreError) {
+                            console.error('Error checking Firestore:', firestoreError);
+                            errorMessage = 'Contraseña incorrecta o cuenta no encontrada.\n\nVerifica tus datos o regístrate si es tu primer acceso.';
+                        }
+                        
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Error de configuración. Por favor, contacta con soporte.';
+                    } else if (error.code === 'auth/network-request-failed') {
+                        errorMessage = 'Error de conexión. Verifica tu internet e intenta nuevamente.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'Demasiados intentos fallidos. Por favor, espera unos minutos e intenta nuevamente.';
+                    } else if (error.message) {
+                        errorMessage += error.message;
+                    } else {
+                        errorMessage += 'Error al iniciar sesión. Intenta nuevamente.';
+                    }
+                    
+                    errorDiv.textContent = errorMessage;
                     errorDiv.style.display = 'block';
                 }
             });
@@ -7386,6 +7390,14 @@
                 orderBy,
                 getDocs,
                 serverTimestamp
+            };
+            
+            // Exponer funciones de Firebase Auth para script.js
+            window.firebaseAuthExports = {
+                createUserWithEmailAndPassword,
+                signInWithEmailAndPassword,
+                onAuthStateChanged,
+                signOut
             };
             
             console.log('✅ Firebase inicializado correctamente');

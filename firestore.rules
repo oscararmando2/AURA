@@ -15,6 +15,7 @@ service cloud.firestore {
 
       // Lectura pública para mostrar disponibilidad en el calendario
       // Solo se muestran datos limitados (fechaHora) en el frontend
+      // También permite que usuarios autenticados lean todas las reservas para filtrar client-side
       allow read: if true;
       
       // Solo admin puede actualizar o borrar reservas
@@ -30,12 +31,14 @@ service cloud.firestore {
           (request.auth.token.email == 'admin@aura.com' || 
            request.auth.token.email == '7151596586');
       
-      // Usuario normal puede crear su perfil
+      // Usuario normal puede crear su perfil si está autenticado
       allow create: if request.auth != null;
       
-      // Usuario normal puede leer y actualizar SOLO su propio perfil
+      // Usuario normal puede leer y actualizar su propio perfil
+      // Ahora usa el email del token (que es phoneNumber@aurapilates.app)
       allow read, update: if request.auth != null && 
-          resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase();
+          (resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase() ||
+           resource.data.telefono == request.auth.token.phone_number);
     }
 
     // Todo lo demás bloqueado
