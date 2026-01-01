@@ -35,10 +35,10 @@ service cloud.firestore {
       allow create: if request.auth != null;
       
       // Usuario normal puede leer y actualizar su propio perfil
-      // Ahora usa el email del token (que es phoneNumber@aurapilates.app)
+      // Usa el email del token (que es phoneNumber@aurapilates.app)
+      // Para verificar acceso, comparamos el email almacenado con el email del token
       allow read, update: if request.auth != null && 
-          (resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase() ||
-           resource.data.telefono == request.auth.token.phone_number);
+          resource.data.email.toLowerCase() == request.auth.token.email.toLowerCase();
     }
 
     // Todo lo demás bloqueado

@@ -109,7 +109,7 @@ async function guardarRegistroLocalYPagar() {
           console.log('✅ Inicio de sesión exitoso con cuenta existente');
         } catch (signInError) {
           console.error('❌ Error al iniciar sesión con cuenta existente:', signInError);
-          throw new Error('La cuenta ya existe pero la contraseña no coincide. Intenta iniciar sesión en vez de registrarte.');
+          throw new Error('Ya tienes una cuenta con este teléfono. Usa "Iniciar Sesión" para acceder o verifica tu contraseña si intentas registrarte nuevamente.');
         }
       } else {
         console.error('❌ Error al crear cuenta de Firebase:', authError);
