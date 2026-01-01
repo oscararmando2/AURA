@@ -81,16 +81,13 @@ async function guardarRegistroLocalYPagar() {
       throw new Error('Sistema de autenticación no disponible');
     }
     
-    // Ensure reCAPTCHA verifier exists
+    // Ensure reCAPTCHA verifier exists - reuse global instance
     if (!window.recaptchaVerifier) {
-      console.log('🔄 Creando nuevo reCAPTCHA verifier...');
-      window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': (response) => {
-          console.log('✅ reCAPTCHA resuelto');
-        }
-      });
+      console.error('❌ reCAPTCHA verifier no está inicializado');
+      throw new Error('Sistema de autenticación no está listo. Por favor, espera unos segundos e intenta nuevamente.');
     }
+    
+    console.log('✅ Usando reCAPTCHA verifier global existente');
     
     console.log('📱 Enviando código de verificación a:', fullPhoneNumber);
     
@@ -138,11 +135,9 @@ async function guardarRegistroLocalYPagar() {
     
     alert(errorMessage);
     
-    // Reset reCAPTCHA on error
-    if (window.recaptchaVerifier) {
-      window.recaptchaVerifier.clear();
-      window.recaptchaVerifier = null;
-    }
+    // Note: We don't clear the reCAPTCHA verifier on error
+    // to allow the user to retry without reloading the page.
+    // The global verifier will be reused on the next attempt.
   }
 }
 
@@ -321,15 +316,16 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const { fullPhoneNumber } = window.phoneVerificationData;
         
-        console.log('📱 Reenviando código a:', fullPhoneNumber);
-        
-        // Recreate reCAPTCHA verifier if needed
+        // Ensure reCAPTCHA verifier exists - reuse global instance
         if (!window.recaptchaVerifier) {
-          const { RecaptchaVerifier } = window.firebaseAuthExports || {};
-          window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
-            'size': 'invisible'
-          });
+          console.error('❌ reCAPTCHA verifier no está inicializado');
+          errorDiv.textContent = '❌ Error: Sistema no está listo. Por favor, espera unos segundos e intenta nuevamente.';
+          errorDiv.style.display = 'block';
+          return;
         }
+        
+        console.log('📱 Reenviando código a:', fullPhoneNumber);
+        console.log('✅ Usando reCAPTCHA verifier global existente');
         
         // Resend code
         const { signInWithPhoneNumber } = window.firebaseAuthExports || {};

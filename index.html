@@ -5126,30 +5126,13 @@
                         throw new Error('Sistema de autenticación no disponible');
                     }
                     
-                    // Ensure reCAPTCHA verifier exists
+                    // Ensure reCAPTCHA verifier exists - reuse global instance
                     if (!window.recaptchaVerifier) {
-                        console.log('🔄 Creando nuevo reCAPTCHA verifier...');
-                        window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
-                            'size': 'invisible',
-                            'callback': (response) => {
-                                console.log('✅ reCAPTCHA resuelto');
-                            }
-                        });
-                    } else {
-                        // Clear and recreate if verifier already exists
-                        console.log('🔄 Limpiando reCAPTCHA existente y creando nuevo verifier...');
-                        try {
-                            window.recaptchaVerifier.clear();
-                        } catch (e) {
-                            console.log('⚠️ No se pudo limpiar el verifier anterior:', e);
-                        }
-                        window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
-                            'size': 'invisible',
-                            'callback': (response) => {
-                                console.log('✅ reCAPTCHA resuelto');
-                            }
-                        });
+                        console.error('❌ reCAPTCHA verifier no está inicializado');
+                        throw new Error('Sistema de autenticación no está listo. Por favor, espera unos segundos e intenta nuevamente.');
                     }
+                    
+                    console.log('✅ Usando reCAPTCHA verifier global existente');
                     
                     console.log('📱 Enviando código de verificación para login:', phoneWithCountryCode);
                     
@@ -5195,11 +5178,9 @@
                     errorDiv.textContent = errorMessage;
                     errorDiv.style.display = 'block';
                     
-                    // Reset reCAPTCHA on error
-                    if (window.recaptchaVerifier) {
-                        window.recaptchaVerifier.clear();
-                        window.recaptchaVerifier = null;
-                    }
+                    // Note: We don't clear the reCAPTCHA verifier on error
+                    // to allow the user to retry without reloading the page.
+                    // The global verifier will be reused on the next attempt.
                 }
             });
             
@@ -5316,25 +5297,16 @@
                     try {
                         const { phoneWithCountryCode } = window.phoneLoginData;
                         
-                        console.log('📱 Reenviando código de login a:', phoneWithCountryCode);
-                        
-                        // Recreate reCAPTCHA verifier - always clear existing one first
-                        const { RecaptchaVerifier } = window.firebaseAuthExports || {};
-                        if (window.recaptchaVerifier) {
-                            console.log('🔄 Limpiando reCAPTCHA existente antes de reenviar...');
-                            try {
-                                window.recaptchaVerifier.clear();
-                            } catch (e) {
-                                console.log('⚠️ No se pudo limpiar el verifier anterior:', e);
-                            }
+                        // Ensure reCAPTCHA verifier exists - reuse global instance
+                        if (!window.recaptchaVerifier) {
+                            console.error('❌ reCAPTCHA verifier no está inicializado');
+                            errorDivLogin.textContent = '❌ Error: Sistema no está listo. Por favor, espera unos segundos e intenta nuevamente.';
+                            errorDivLogin.style.display = 'block';
+                            return;
                         }
-                        console.log('🔄 Creando nuevo reCAPTCHA verifier para reenvío...');
-                        window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
-                            'size': 'invisible',
-                            'callback': (response) => {
-                                console.log('✅ reCAPTCHA resuelto');
-                            }
-                        });
+                        
+                        console.log('📱 Reenviando código de login a:', phoneWithCountryCode);
+                        console.log('✅ Usando reCAPTCHA verifier global existente');
                         
                         // Resend code
                         const { signInWithPhoneNumber } = window.firebaseAuthExports || {};
@@ -7542,17 +7514,19 @@
                 signOut
             };
             
-            // Initialize reCAPTCHA verifier (invisible)
-            console.log('🔐 Inicializando reCAPTCHA verifier...');
-            try {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+            // Helper function to create reCAPTCHA verifier with proper expired handling
+            // This function is intentionally recursive - when a verifier expires,
+            // it creates a new one with the same callback structure, allowing
+            // seamless handling of multiple expirations without page reload.
+            function createRecaptchaVerifier() {
+                return new RecaptchaVerifier(auth, 'recaptcha-container', {
                     'size': 'invisible',
                     'callback': (response) => {
                         console.log('✅ reCAPTCHA resuelto');
                     },
                     'expired-callback': () => {
                         console.log('⚠️ reCAPTCHA expiró');
-                        // Clear and nullify verifier if expired
+                        // Clear the expired verifier
                         if (window.recaptchaVerifier) {
                             try {
                                 window.recaptchaVerifier.clear();
@@ -7560,9 +7534,22 @@
                                 console.log('⚠️ No se pudo limpiar el verifier expirado:', e);
                             }
                         }
-                        window.recaptchaVerifier = null;
+                        // Recreate the verifier for the next attempt
+                        try {
+                            window.recaptchaVerifier = createRecaptchaVerifier();
+                            console.log('✅ reCAPTCHA verifier recreado después de expiración');
+                        } catch (e) {
+                            console.error('❌ Error al recrear reCAPTCHA:', e);
+                            window.recaptchaVerifier = null;
+                        }
                     }
                 });
+            }
+            
+            // Initialize reCAPTCHA verifier (invisible)
+            console.log('🔐 Inicializando reCAPTCHA verifier...');
+            try {
+                window.recaptchaVerifier = createRecaptchaVerifier();
                 console.log('✅ reCAPTCHA verifier inicializado');
             } catch (error) {
                 console.error('❌ Error al inicializar reCAPTCHA:', error);
