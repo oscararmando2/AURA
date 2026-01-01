@@ -85,7 +85,9 @@ async function guardarRegistroLocalYPagar() {
       return;
     }
     
-    // Use phone number as email for Firebase Auth (e.g., 527151234567@aurapilates.app)
+    // Use phone number as email for Firebase Auth
+    // Format: country code (52) + 10 digits + @aurapilates.app
+    // Example: 527151234567@aurapilates.app (where fullPhoneNumber = '527151234567')
     const email = `${fullPhoneNumber}@aurapilates.app`;
     const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.firebaseAuthExports || {};
     
