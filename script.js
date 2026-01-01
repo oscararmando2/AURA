@@ -84,7 +84,7 @@ async function guardarRegistroLocalYPagar() {
     // Ensure reCAPTCHA verifier exists - reuse global instance
     if (!window.recaptchaVerifier) {
       console.error('❌ reCAPTCHA verifier no está inicializado');
-      throw new Error('Sistema de autenticación no disponible. Por favor, recarga la página.');
+      throw new Error('Sistema de autenticación no está listo. Por favor, espera unos segundos e intenta nuevamente.');
     }
     
     console.log('✅ Usando reCAPTCHA verifier global existente');
@@ -319,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ensure reCAPTCHA verifier exists - reuse global instance
         if (!window.recaptchaVerifier) {
           console.error('❌ reCAPTCHA verifier no está inicializado');
-          errorDiv.textContent = '❌ Error: Sistema no disponible. Por favor, recarga la página.';
+          errorDiv.textContent = '❌ Error: Sistema no está listo. Por favor, espera unos segundos e intenta nuevamente.';
           errorDiv.style.display = 'block';
           return;
         }

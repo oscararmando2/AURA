@@ -5129,7 +5129,7 @@
                     // Ensure reCAPTCHA verifier exists - reuse global instance
                     if (!window.recaptchaVerifier) {
                         console.error('❌ reCAPTCHA verifier no está inicializado');
-                        throw new Error('Sistema de autenticación no disponible. Por favor, recarga la página.');
+                        throw new Error('Sistema de autenticación no está listo. Por favor, espera unos segundos e intenta nuevamente.');
                     }
                     
                     console.log('✅ Usando reCAPTCHA verifier global existente');
@@ -5300,7 +5300,7 @@
                         // Ensure reCAPTCHA verifier exists - reuse global instance
                         if (!window.recaptchaVerifier) {
                             console.error('❌ reCAPTCHA verifier no está inicializado');
-                            errorDivLogin.textContent = '❌ Error: Sistema no disponible. Por favor, recarga la página.';
+                            errorDivLogin.textContent = '❌ Error: Sistema no está listo. Por favor, espera unos segundos e intenta nuevamente.';
                             errorDivLogin.style.display = 'block';
                             return;
                         }
@@ -7515,6 +7515,9 @@
             };
             
             // Helper function to create reCAPTCHA verifier with proper expired handling
+            // This function is intentionally recursive - when a verifier expires,
+            // it creates a new one with the same callback structure, allowing
+            // seamless handling of multiple expirations without page reload.
             function createRecaptchaVerifier() {
                 return new RecaptchaVerifier(auth, 'recaptcha-container', {
                     'size': 'invisible',
