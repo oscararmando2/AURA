@@ -5143,7 +5143,6 @@
                         } catch (e) {
                             console.log('⚠️ No se pudo limpiar el verifier anterior:', e);
                         }
-                        window.recaptchaVerifier = null;
                         window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
                             'size': 'invisible',
                             'callback': (response) => {
@@ -5328,7 +5327,6 @@
                             } catch (e) {
                                 console.log('⚠️ No se pudo limpiar el verifier anterior:', e);
                             }
-                            window.recaptchaVerifier = null;
                         }
                         console.log('🔄 Creando nuevo reCAPTCHA verifier para reenvío...');
                         window.recaptchaVerifier = new RecaptchaVerifier(window.auth, 'recaptcha-container', {
