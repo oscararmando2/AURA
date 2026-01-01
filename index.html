@@ -7448,11 +7448,8 @@
                 phone2Base = normalized2.substring(MEXICO_COUNTRY_CODE.length);
             }
             
-            // Compare base phone numbers (10 digits)
-            // Both must be exactly 10 digits to match
-            if (phone1Base === phone2Base && 
-                phone1Base.length === PHONE_DIGITS_LENGTH && 
-                phone2Base.length === PHONE_DIGITS_LENGTH) {
+            // Compare base phone numbers (must be exactly 10 digits)
+            if (phone1Base === phone2Base && phone1Base.length === PHONE_DIGITS_LENGTH) {
                 return true;
             }
             
@@ -10432,10 +10429,11 @@
                     return dateA - dateB;
                 });
                 
-                // Format phone number for display (already 10 digits, no need to remove country code)
+                // Format phone number for display
+                // New data is 10 digits, but legacy data may have 12 (with "52" prefix)
                 let phoneDisplay = userTelefonoTrimmed;
-                // If the stored number has country code (legacy data), remove it
                 if (phoneDisplay.startsWith('52') && phoneDisplay.length === 12) {
+                    // Remove country code from legacy data for cleaner display
                     phoneDisplay = phoneDisplay.substring(2);
                 }
                 
