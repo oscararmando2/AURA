@@ -5094,12 +5094,11 @@
                 const storedPasswordHash = localStorage.getItem('userPassword_' + phoneDigits);
                 if (!storedPasswordHash) {
                     // Check if user has reservations but no password
-                    const phoneWithCountryCode = '52' + phoneDigits;
                     const storedName = localStorage.getItem('userName_' + phoneDigits);
                     const storedPhone = localStorage.getItem('userTelefono');
                     
-                    // First check localStorage for legacy data
-                    if (storedName || (storedPhone === phoneWithCountryCode)) {
+                    // First check localStorage for legacy data (check both 10-digit and 12-digit formats)
+                    if (storedName || (storedPhone === phoneDigits) || (storedPhone === '52' + phoneDigits)) {
                         // Show create password modal
                         showLegacyPasswordCreationModal(phoneDigits, storedName);
                         return;
@@ -5180,9 +5179,8 @@
                     const userName = localStorage.getItem('userName_' + phoneDigits) || 'Usuario';
                     
                     // Store user info in localStorage for session
-                    // Store with country code prefix for consistency with registration
-                    const phoneWithCountryCode = '52' + phoneNumber;
-                    localStorage.setItem('userTelefono', phoneWithCountryCode);
+                    // Store only 10 digits (no country code) for consistency
+                    localStorage.setItem('userTelefono', phoneNumber);
                     localStorage.setItem('userNombre', userName); // Store for consistency with auth observer
                     localStorage.setItem('userLoggedIn', 'true');
                     
@@ -5197,9 +5195,9 @@
                     }
                     
                     // Load and show user's classes
-                    // Pass phone with country code to match stored reservations
+                    // Pass phone number (10 digits) to match stored reservations
                     if (typeof window.loadUserClasses === 'function') {
-                        await window.loadUserClasses(phoneWithCountryCode);
+                        await window.loadUserClasses(phoneNumber);
                         
                         // Scroll to My Classes section
                         const myClassesSection = document.getElementById('my-classes-section');
@@ -6699,7 +6697,7 @@
                 localStorage.setItem('userName_' + phoneDigits, nombre);
             }
             
-            const telefono = MEXICO_COUNTRY_CODE + phoneDigits;
+            const telefono = phoneDigits; // Store only 10 digits (no country code)
             
             // Guardar datos del cliente
             localStorage.setItem('userNombre', nombre);
@@ -6849,7 +6847,7 @@
                 return;
             }
             
-            const telefono = MEXICO_COUNTRY_CODE + phoneDigits;
+            const telefono = phoneDigits; // Store only 10 digits (no country code)
             
             // Guardar datos del cliente
             localStorage.setItem('userNombre', nombre);
@@ -7437,29 +7435,22 @@
             if (normalized1 === normalized2) return true;
             
             // Try matching with/without country code
-            // If one has country code and other doesn't
+            // Priority: match on 10 digits (without country code)
+            let phone1Base = normalized1;
+            let phone2Base = normalized2;
+            
+            // Remove country code if present
             if (normalized1.startsWith(MEXICO_COUNTRY_CODE) && normalized1.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
-                // phone1 has country code, try matching without it
-                const phone1WithoutCode = normalized1.substring(MEXICO_COUNTRY_CODE.length);
-                if (phone1WithoutCode === normalized2) return true;
+                phone1Base = normalized1.substring(MEXICO_COUNTRY_CODE.length);
             }
             
             if (normalized2.startsWith(MEXICO_COUNTRY_CODE) && normalized2.length === PHONE_WITH_COUNTRY_CODE_LENGTH) {
-                // phone2 has country code, try matching without it
-                const phone2WithoutCode = normalized2.substring(MEXICO_COUNTRY_CODE.length);
-                if (phone2WithoutCode === normalized1) return true;
+                phone2Base = normalized2.substring(MEXICO_COUNTRY_CODE.length);
             }
             
-            // If phone1 doesn't have country code (exactly 10 digits), try adding it
-            if (normalized1.length === PHONE_DIGITS_LENGTH) {
-                const phone1WithCode = MEXICO_COUNTRY_CODE + normalized1;
-                if (phone1WithCode === normalized2) return true;
-            }
-            
-            // If phone2 doesn't have country code (exactly 10 digits), try adding it
-            if (normalized2.length === PHONE_DIGITS_LENGTH) {
-                const phone2WithCode = MEXICO_COUNTRY_CODE + normalized2;
-                if (phone2WithCode === normalized1) return true;
+            // Compare base phone numbers (must be exactly 10 digits)
+            if (phone1Base === phone2Base && phone1Base.length === PHONE_DIGITS_LENGTH) {
+                return true;
             }
             
             return false;
@@ -8889,9 +8880,9 @@
                 return;
             }
             
-            // Store state
+            // Store state - phone is already validated as exactly 10 digits
             adminScheduleState.clientName = name;
-            adminScheduleState.clientPhone = COUNTRY_CODE + phone; // Add country code
+            adminScheduleState.clientPhone = phone; // Store only 10 digits (no country code)
             adminScheduleState.packageSize = packageSize;
             adminScheduleState.selectedDates = [];
             
@@ -10438,9 +10429,11 @@
                     return dateA - dateB;
                 });
                 
-                // Format phone number for display (remove country code 52)
+                // Format phone number for display
+                // New data is 10 digits, but legacy data may have 12 (with "52" prefix)
                 let phoneDisplay = userTelefonoTrimmed;
                 if (phoneDisplay.startsWith('52') && phoneDisplay.length === 12) {
+                    // Remove country code from legacy data for cleaner display
                     phoneDisplay = phoneDisplay.substring(2);
                 }
                 

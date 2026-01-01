@@ -70,17 +70,15 @@ async function guardarRegistroLocalYPagar() {
     return;
   }
   
-  // Construct full phone number with country code: 52 + 10 digits
-  const fullPhoneNumber = '52' + phoneDigits;
-  
   // Hash password before storing for security
   const hashedPassword = await hashPassword(password);
   
   // Store user name associated with phone number (per-user storage for future logins)
   localStorage.setItem('userName_' + phoneDigits, name);
   // Set session variables - user is now logged in after registration
+  // IMPORTANT: Store only 10 digits (no country code) for consistency
   localStorage.setItem('userNombre', name);
-  localStorage.setItem('userTelefono', fullPhoneNumber);
+  localStorage.setItem('userTelefono', phoneDigits);
   // Store hashed password associated with phone number for login verification
   localStorage.setItem('userPassword_' + phoneDigits, hashedPassword);
   localStorage.setItem('registered', 'true');
@@ -119,14 +117,17 @@ async function guardarRegistroLocalYPagar() {
 
 async function crearPreferenciaYpagar(title, price) {
   const nombre = localStorage.getItem("userNombre");
-  const telefono = localStorage.getItem("userTelefono");
+  const telefonoDigits = localStorage.getItem("userTelefono");
 
   // Validate user data before making the API call
-  if (!nombre || !telefono) {
+  if (!nombre || !telefonoDigits) {
     console.error('❌ Datos de usuario no encontrados en localStorage');
     alert("⚠️ Error: No se encontraron los datos de registro. Por favor, regístrate nuevamente.");
     return;
   }
+
+  // Add country code 52 for Mercado Pago API (expects 12 digits)
+  const telefono = '52' + telefonoDigits;
 
   console.log('📋 Creando preferencia de pago:', { title, price, nombre, telefono });
 
