@@ -4,12 +4,23 @@ import { join } from 'path';
 
 // Configuration constants
 const LOGO_FILENAME = 'auralogo2.png';
-const DAYS_PER_PAGE = 8; // Number of days to show per page
 
 // PDF Layout constants (in points)
 const PAGE_HEIGHT = 792; // LETTER size height
 const BOTTOM_MARGIN = 40;
 const LEGEND_FOOTER_MIN_HEIGHT = 205; // Legend (~125) + Footer (~80)
+
+// Day entry component heights
+const DAY_HEADER_HEIGHT = 22;    // Day name and date background row
+const TABLE_HEADER_HEIGHT = 18;  // Morning/Afternoon column headers
+const TIME_SLOTS_ROW_HEIGHT = 50; // Row containing all time slots
+const DAY_ENTRY_GAP = 3;         // Gap between day entries
+
+// Legend and footer component heights
+const LEGEND_TITLE_HEIGHT = 25;      // "Leyenda:" title
+const LEGEND_ITEM_HEIGHT = 25;       // Each legend item (3 items total)
+const LEGEND_FOOTER_SPACING = 30;    // Space between legend and footer
+const FOOTER_LINE_HEIGHT = 20;       // Each footer text line
 
 const BRAND_COLORS = {
   brown: '#8B6E55',
@@ -147,8 +158,8 @@ export default async function handler(req, res) {
     for (let i = 0; i < availability.length; i++) {
       const day = availability[i];
       
-      // Calculate space needed for this day entry (day header + table header + row + gap)
-      const dayEntryHeight = 22 + 18 + 50 + 3; // 93 points total
+      // Calculate space needed for this day entry using named constants
+      const dayEntryHeight = DAY_HEADER_HEIGHT + TABLE_HEADER_HEIGHT + TIME_SLOTS_ROW_HEIGHT + DAY_ENTRY_GAP;
       
       // Check if we need a new page based on remaining space
       // Reserve space for legend and footer on the last iteration
@@ -164,7 +175,7 @@ export default async function handler(req, res) {
       const dayHeader = `${day.dayName.charAt(0).toUpperCase() + day.dayName.slice(1)} ${day.dayNumber} ${day.monthName}`;
       
       // Day row background
-      doc.rect(40, currentY, 532, 22)
+      doc.rect(40, currentY, 532, DAY_HEADER_HEIGHT)
          .fillAndStroke(brandCream, brandBrown);
       
       doc.fontSize(10)
@@ -172,14 +183,14 @@ export default async function handler(req, res) {
          .font('Helvetica-Bold')
          .text(dayHeader, 45, currentY + 6);
       
-      currentY += 22;
+      currentY += DAY_HEADER_HEIGHT;
       
       // Table with 3 columns: Day, Morning, Afternoon
       const colWidths = [80, 226, 226];
       const colX = [40, 120, 346];
       
       // Header background
-      doc.rect(40, currentY, 532, 18)
+      doc.rect(40, currentY, 532, TABLE_HEADER_HEIGHT)
          .fillAndStroke(brandBrown, brandBrown);
       
       doc.fontSize(9)
@@ -190,10 +201,10 @@ export default async function handler(req, res) {
       doc.text('Mañana (6:00 - 11:00)', colX[1], currentY + 5, { width: colWidths[1], align: 'center' });
       doc.text('Tarde (17:00 - 20:00)', colX[2], currentY + 5, { width: colWidths[2], align: 'center' });
       
-      currentY += 18;
+      currentY += TABLE_HEADER_HEIGHT;
       
       // Single row with all time slots displayed horizontally
-      const rowHeight = 50; // Increased height to fit all slots
+      const rowHeight = TIME_SLOTS_ROW_HEIGHT;
       
       // Row background
       doc.rect(40, currentY, 532, rowHeight)
@@ -250,13 +261,13 @@ export default async function handler(req, res) {
         afternoonY += slotSpacing;
       });
       
-      currentY += rowHeight + 3; // Small gap between days
+      currentY += rowHeight + DAY_ENTRY_GAP;
     }
 
     // Add legend at the end
-    // Check if we need a new page for the legend
-    const legendHeight = 25 + (3 * 25); // Title + 3 legend items
-    const footerHeight = 30 + 20 + 20 + 20; // Spacing + 3 footer lines
+    // Check if we need a new page for the legend using named constants
+    const legendHeight = LEGEND_TITLE_HEIGHT + (3 * LEGEND_ITEM_HEIGHT); // Title + 3 legend items
+    const footerHeight = LEGEND_FOOTER_SPACING + (3 * FOOTER_LINE_HEIGHT); // Spacing + 3 footer lines
     const totalLegendFooterHeight = legendHeight + footerHeight;
     
     if (currentY + totalLegendFooterHeight > PAGE_HEIGHT - BOTTOM_MARGIN) {
@@ -272,7 +283,7 @@ export default async function handler(req, res) {
        .font('Helvetica-Bold')
        .text('Leyenda:', 40, currentY);
     
-    currentY += 25;
+    currentY += LEGEND_TITLE_HEIGHT;
     
     // Legend items
     const legendItems = [
@@ -292,25 +303,25 @@ export default async function handler(req, res) {
          .font('Helvetica')
          .text(item.text, 70, currentY + 3);
       
-      currentY += 25;
+      currentY += LEGEND_ITEM_HEIGHT;
     });
 
     // Footer
-    currentY += 30;
+    currentY += LEGEND_FOOTER_SPACING;
     
     doc.fontSize(11)
        .fillColor(darkText)
        .font('Helvetica-Bold')
        .text('Reservas online:', 0, currentY, { align: 'center' });
     
-    currentY += 20;
+    currentY += FOOTER_LINE_HEIGHT;
     
     doc.fontSize(10)
        .fillColor(brandBrown)
        .font('Helvetica')
        .text('aurapilates.app', 0, currentY, { align: 'center', link: 'https://aurapilates.app' });
     
-    currentY += 20;
+    currentY += FOOTER_LINE_HEIGHT;
     
     doc.fontSize(10)
        .fillColor(darkText)
