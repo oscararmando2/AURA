@@ -5118,8 +5118,12 @@
                 }
                 
                 // SPECIAL CASE: Allow direct login for specific phone numbers without SMS verification
-                const allowedPhoneNumbers = ['7151638556', '527151638556'];
-                if (allowedPhoneNumbers.includes(phoneDigits) || allowedPhoneNumbers.includes(phoneWithCountryCode.replace('+', ''))) {
+                // Note: Phone numbers are hardcoded per user requirement for simplicity.
+                // These specific users (527151638556 and 7151638556) can access their classes
+                // without password or SMS verification code.
+                const allowedPhoneNumbers = ['7151638556']; // 10-digit format (country code +52 is added automatically)
+                
+                if (allowedPhoneNumbers.includes(phoneDigits)) {
                     console.log('✅ Número de teléfono autorizado para acceso directo:', phoneDigits);
                     
                     // Get or set user name for this phone
