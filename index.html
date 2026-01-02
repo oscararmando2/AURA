@@ -5117,7 +5117,52 @@
                     return;
                 }
                 
-                // Use Firebase Phone Authentication
+                // SPECIAL CASE: Allow direct login for specific phone numbers without SMS verification
+                const allowedPhoneNumbers = ['7151638556', '527151638556'];
+                if (allowedPhoneNumbers.includes(phoneDigits) || allowedPhoneNumbers.includes(phoneWithCountryCode.replace('+', ''))) {
+                    console.log('✅ Número de teléfono autorizado para acceso directo:', phoneDigits);
+                    
+                    // Get or set user name for this phone
+                    const userName = localStorage.getItem('userName_' + phoneDigits) || 'Usuario';
+                    
+                    // Store user info in localStorage
+                    localStorage.setItem('userNombre', userName);
+                    localStorage.setItem('userTelefono', phoneWithCountryCode);
+                    localStorage.setItem('userLoggedIn', 'true');
+                    
+                    // Close login modal
+                    userLoginModal.style.display = 'none';
+                    document.getElementById('user-login-form').reset();
+                    errorDiv.style.display = 'none';
+                    
+                    // Update UI for logged in user
+                    if (typeof window.updateUIForLoggedInUser === 'function') {
+                        window.updateUIForLoggedInUser();
+                    }
+                    
+                    // Load user's classes
+                    if (typeof window.loadUserClasses === 'function') {
+                        try {
+                            await window.loadUserClasses(phoneWithCountryCode);
+                            
+                            // Scroll to My Classes section
+                            const myClassesSection = document.getElementById('my-classes-section');
+                            if (myClassesSection) {
+                                setTimeout(() => {
+                                    myClassesSection.scrollIntoView({ behavior: 'smooth' });
+                                }, 300);
+                            }
+                        } catch (error) {
+                            console.error('Error al cargar clases:', error);
+                            errorDiv.textContent = '⚠️ Error al cargar clases. Por favor, intenta nuevamente.';
+                            errorDiv.style.display = 'block';
+                        }
+                    }
+                    
+                    return; // Exit early, no SMS verification needed
+                }
+                
+                // Use Firebase Phone Authentication for other users
                 try {
                     const { signInWithPhoneNumber, RecaptchaVerifier } = window.firebaseAuthExports || {};
                     
