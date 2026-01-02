@@ -132,7 +132,7 @@ export default async function handler(req, res) {
     }
 
     // Process availability data day by day
-    const daysPerPage = 10; // Show approximately 10 days per page
+    const daysPerPage = 8; // Show approximately 8 days per page
     
     for (let i = 0; i < availability.length; i++) {
       const day = availability[i];
@@ -147,19 +147,19 @@ export default async function handler(req, res) {
       const dayHeader = `${day.dayName.charAt(0).toUpperCase() + day.dayName.slice(1)} ${day.dayNumber} ${day.monthName}`;
       
       // Day row background
-      doc.rect(40, currentY, 532, 25)
+      doc.rect(40, currentY, 532, 22)
          .fillAndStroke(brandCream, brandBrown);
       
-      doc.fontSize(11)
+      doc.fontSize(10)
          .fillColor(darkText)
          .font('Helvetica-Bold')
-         .text(dayHeader, 45, currentY + 7);
+         .text(dayHeader, 45, currentY + 6);
       
-      currentY += 25;
+      currentY += 22;
       
-      // Table header
-      const colWidths = [60, 236, 236];
-      const colX = [40, 100, 336];
+      // Table with 3 columns: Day, Morning, Afternoon
+      const colWidths = [80, 226, 226];
+      const colX = [40, 120, 346];
       
       // Header background
       doc.rect(40, currentY, 532, 18)
@@ -169,67 +169,71 @@ export default async function handler(req, res) {
          .fillColor('#FFFFFF')
          .font('Helvetica-Bold');
       
-      doc.text('', colX[0], currentY + 5, { width: colWidths[0], align: 'center' });
+      doc.text('Día', colX[0], currentY + 5, { width: colWidths[0], align: 'center' });
       doc.text('Mañana (6:00 - 11:00)', colX[1], currentY + 5, { width: colWidths[1], align: 'center' });
       doc.text('Tarde (17:00 - 20:00)', colX[2], currentY + 5, { width: colWidths[2], align: 'center' });
       
       currentY += 18;
       
-      // Calculate maximum rows needed (morning vs afternoon)
-      const maxRows = Math.max(day.morning.length, day.afternoon.length);
+      // Single row with all time slots displayed horizontally
+      const rowHeight = 50; // Increased height to fit all slots
       
-      // Time slots rows - align side by side
-      for (let rowIdx = 0; rowIdx < maxRows; rowIdx++) {
-        const morningSlot = day.morning[rowIdx];
-        const afternoonSlot = day.afternoon[rowIdx];
-        
-        const rowHeight = 20;
-        
-        // Row background (alternating)
-        const rowBg = rowIdx % 2 === 0 ? '#FFFFFF' : '#FAF8F5';
-        doc.rect(40, currentY, 532, rowHeight)
-           .fillAndStroke(rowBg, brandBrown);
-        
-        // Morning slot
-        if (morningSlot) {
-          const bgColor = getColorForAvailability(morningSlot.available, maxCapacity);
-          const text = morningSlot.isFull ? 
-            `${morningSlot.time} (Completo) ✕` : 
-            `${morningSlot.time} (${morningSlot.available} disp)`;
-          
-          // Small colored indicator
-          doc.rect(105, currentY + 4, 12, 12)
-             .fillAndStroke(bgColor, brandBrown);
-          
-          doc.fontSize(8)
-             .fillColor('#323232')
-             .font('Helvetica');
-          
-          doc.text(text, 122, currentY + 5, { width: colWidths[1] - 30, align: 'left' });
-        }
-        
-        // Afternoon slot
-        if (afternoonSlot) {
-          const bgColor = getColorForAvailability(afternoonSlot.available, maxCapacity);
-          const text = afternoonSlot.isFull ? 
-            `${afternoonSlot.time} (Completo) ✕` : 
-            `${afternoonSlot.time} (${afternoonSlot.available} disp)`;
-          
-          // Small colored indicator
-          doc.rect(341, currentY + 4, 12, 12)
-             .fillAndStroke(bgColor, brandBrown);
-          
-          doc.fontSize(8)
-             .fillColor('#323232')
-             .font('Helvetica');
-          
-          doc.text(text, 358, currentY + 5, { width: colWidths[2] - 30, align: 'left' });
-        }
-        
-        currentY += rowHeight;
-      }
+      // Row background
+      doc.rect(40, currentY, 532, rowHeight)
+         .fillAndStroke('#FFFFFF', brandBrown);
       
-      currentY += 5; // Small gap between days
+      // Day column (empty for this row)
+      doc.fontSize(8)
+         .fillColor('#323232')
+         .font('Helvetica')
+         .text('', colX[0] + 5, currentY + 5, { width: colWidths[0] - 10, align: 'center' });
+      
+      // Morning slots - display horizontally with color indicators
+      let morningY = currentY + 5;
+      let morningX = colX[1] + 5;
+      const slotSpacing = 12; // Vertical spacing between slots
+      
+      day.morning.forEach((slot, idx) => {
+        const bgColor = getColorForAvailability(slot.available, maxCapacity);
+        const displayText = slot.isFull ? `${slot.time} (Completo) ✕` : `${slot.time} (${slot.available} disp)`;
+        
+        // Draw small colored box
+        doc.rect(morningX, morningY, 8, 8)
+           .fillAndStroke(bgColor, brandBrown);
+        
+        // Draw text
+        doc.fontSize(7.5)
+           .fillColor('#323232')
+           .font('Helvetica')
+           .text(displayText, morningX + 12, morningY - 1, { width: 105, align: 'left' });
+        
+        // Move to next position
+        morningY += slotSpacing;
+      });
+      
+      // Afternoon slots - display horizontally with color indicators
+      let afternoonY = currentY + 5;
+      let afternoonX = colX[2] + 5;
+      
+      day.afternoon.forEach((slot, idx) => {
+        const bgColor = getColorForAvailability(slot.available, maxCapacity);
+        const displayText = slot.isFull ? `${slot.time} (Completo) ✕` : `${slot.time} (${slot.available} disp)`;
+        
+        // Draw small colored box
+        doc.rect(afternoonX, afternoonY, 8, 8)
+           .fillAndStroke(bgColor, brandBrown);
+        
+        // Draw text
+        doc.fontSize(7.5)
+           .fillColor('#323232')
+           .font('Helvetica')
+           .text(displayText, afternoonX + 12, afternoonY - 1, { width: 105, align: 'left' });
+        
+        // Move to next position
+        afternoonY += slotSpacing;
+      });
+      
+      currentY += rowHeight + 3; // Small gap between days
     }
 
     // Add legend on a new page or at the end
