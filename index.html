@@ -8716,6 +8716,27 @@
         }
         
         /**
+         * Helper function to detect if device is mobile
+         */
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                   window.innerWidth <= 768;
+        }
+        
+        /**
+         * Helper function to open WhatsApp link (mobile-compatible)
+         */
+        function openWhatsAppLink(url) {
+            if (isMobileDevice()) {
+                // On mobile, use location.href for better compatibility
+                window.location.href = url;
+            } else {
+                // On desktop, open in new tab
+                window.open(url, '_blank');
+            }
+        }
+        
+        /**
          * Contact client from unique clients list
          */
         async function contactClientFromList(telefono, nombre) {
@@ -8736,12 +8757,12 @@
             if (!mensajePersonalizado) {
                 // Fallback to generic message if generation fails
                 const mensaje = encodeURIComponent(`¡Hola ${nombre || 'Cliente'}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`);
-                window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
                 return;
             }
             
             const mensaje = encodeURIComponent(mensajePersonalizado);
-            window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+            openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
         }
         
         /**
@@ -8859,12 +8880,12 @@
                     if (!mensajePersonalizado) {
                         // Fallback to generic message if generation fails
                         const mensaje = encodeURIComponent(`¡Hola ${nombre || 'Cliente'}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`);
-                        window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                        openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
                         return;
                     }
                     
                     const mensaje = encodeURIComponent(mensajePersonalizado);
-                    window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                    openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
                 }
                 
                 // Event delegation for participant edit buttons
@@ -9753,12 +9774,12 @@
             if (!mensajePersonalizado) {
                 // Fallback to generic message if generation fails
                 const mensaje = encodeURIComponent(`¡Hola ${nombre || 'Cliente'}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`);
-                window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
                 return;
             }
             
             const mensaje = encodeURIComponent(mensajePersonalizado);
-            window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+            openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
         }
         
         // Expose contactParticipant globally for event handlers
@@ -10357,12 +10378,12 @@
             if (!mensajePersonalizado) {
                 // Fallback to generic message if generation fails
                 const mensaje = encodeURIComponent(`¡Hola ${nombre || 'Cliente'}!\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 😊`);
-                window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+                openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
                 return;
             }
             
             const mensaje = encodeURIComponent(mensajePersonalizado);
-            window.open(`https://wa.me/${normalizedPhone}?text=${mensaje}`, '_blank');
+            openWhatsAppLink(`https://wa.me/${normalizedPhone}?text=${mensaje}`);
         }
 
         /**
@@ -10708,7 +10729,7 @@
                 // Open WhatsApp
                 const whatsappUrl = `https://wa.me/${studioNumber}?text=${mensajeEncoded}`;
                 console.log('🔗 Abriendo WhatsApp con URL:', whatsappUrl.substring(0, 100) + '...');
-                window.open(whatsappUrl, '_blank');
+                openWhatsAppLink(whatsappUrl);
                 
                 console.log('✅ WhatsApp abierto con mensaje personalizado');
                 return true; // Return true to indicate success
