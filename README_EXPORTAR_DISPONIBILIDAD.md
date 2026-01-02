@@ -26,7 +26,7 @@ This feature allows administrators to export a 2-month availability schedule sho
 The generated PDF includes:
 
 ### Header
-- **AURA STUDIO** logo and name
+- **Logo only** (no text)
 - Date range (e.g., "Del 2 de enero al 2 de marzo 2026")
 - Business information: "Pilates a tu medida • Amado Nervo #38, Zitácuaro, Mich. • Tel: 715 159 6586"
 
@@ -99,7 +99,7 @@ Each day shows:
 ## Example PDF Output
 
 ```
-                    AURA STUDIO
+                    [AURA LOGO]
          Horarios Disponibles - Enero / Febrero 2026
                (Del 2 de enero al 2 de marzo 2026)
 

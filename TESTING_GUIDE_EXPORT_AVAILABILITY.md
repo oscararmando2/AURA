@@ -109,7 +109,7 @@ Before testing, ensure:
 2. Check header, footer, and overall design
 
 **Expected Result**:
-- Header shows "AURA STUDIO" with logo
+- Header shows logo only (no text)
 - Business info: "Pilates a tu medida • Amado Nervo #38, Zitácuaro, Mich. • Tel: 715 159 6586"
 - Footer shows:
   - "Reservas online: aurapilates.app"
@@ -118,7 +118,7 @@ Before testing, ensure:
 
 **Pass Criteria**:
 - ✅ Logo appears (if available)
-- ✅ Business name is correct
+- ✅ No "AURA STUDIO" text in header (logo only)
 - ✅ Address is correct
 - ✅ Phone number is correct
 - ✅ Website link is correct
