@@ -82,12 +82,6 @@ export default async function handler(req, res) {
       console.warn('⚠️ Logo not found, skipping');
     }
 
-    // Header - AURA STUDIO
-    doc.fontSize(28)
-       .fillColor(brandBrown)
-       .font('Helvetica-Bold')
-       .text('AURA STUDIO', 0, 80, { align: 'center' });
-
     // Subtitle - Date Range
     const startDateObj = new Date(startDate);
     const endDateObj = new Date(endDate);
@@ -107,27 +101,27 @@ export default async function handler(req, res) {
     doc.fontSize(16)
        .fillColor(darkText)
        .font('Helvetica')
-       .text(`Horarios Disponibles - ${startMonthYear} / ${endMonthYear}`, 0, 110, { align: 'center' });
+       .text(`Horarios Disponibles - ${startMonthYear} / ${endMonthYear}`, 0, 80, { align: 'center' });
     
     // Format: "(Del 2 de enero al 2 de marzo 2026)"
     doc.fontSize(12)
        .fillColor(lightGray)
-       .text(`(Del ${startDay} de ${startMonthName} al ${endDay} de ${endMonthName})`, 0, 130, { align: 'center' });
+       .text(`(Del ${startDay} de ${startMonthName} al ${endDay} de ${endMonthName})`, 0, 100, { align: 'center' });
 
     // Business Info
     doc.fontSize(10)
        .fillColor(darkText)
        .font('Helvetica-Oblique')
-       .text('Pilates a tu medida • Amado Nervo #38, Zitácuaro, Mich. • Tel: 715 159 6586', 0, 150, { align: 'center' });
+       .text('Pilates a tu medida • Amado Nervo #38, Zitácuaro, Mich. • Tel: 715 159 6586', 0, 120, { align: 'center' });
 
     // Decorative line
-    doc.moveTo(40, 170)
-       .lineTo(572, 170)
+    doc.moveTo(40, 140)
+       .lineTo(572, 140)
        .lineWidth(1.5)
        .strokeColor(brandBrown)
        .stroke();
 
-    let currentY = 185;
+    let currentY = 155;
 
     // Helper function to get color based on availability
     function getColorForAvailability(available, maxCapacity) {
@@ -246,8 +240,12 @@ export default async function handler(req, res) {
       currentY += rowHeight + 3; // Small gap between days
     }
 
-    // Add legend on a new page or at the end
-    if (currentY > 650) {
+    // Add legend at the end (check if we need a new page)
+    // Each day takes ~93 points (22 + 18 + 50 + 3)
+    // Legend needs ~125 points (25 + 3*25 + 5 buffer)
+    // Footer needs ~80 points (30 + 20 + 20 + 10)
+    // Total for legend+footer: ~205 points
+    if (currentY > 587) { // 792 - 40 (bottom margin) - 165 (legend+footer minimum)
       doc.addPage();
       currentY = 50;
     } else {
@@ -283,13 +281,8 @@ export default async function handler(req, res) {
       currentY += 25;
     });
 
-    // Footer
-    if (currentY > 680) {
-      doc.addPage();
-      currentY = 50;
-    } else {
-      currentY += 30;
-    }
+    // Footer - no need for separate page check since we already ensured space above
+    currentY += 30;
     
     doc.fontSize(11)
        .fillColor(darkText)
