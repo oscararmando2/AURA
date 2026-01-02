@@ -105,20 +105,9 @@ export default async function handler(req, res) {
     
     // Get month and year separately for more reliable formatting
     const startMonthName = startDateObj.toLocaleDateString('es-ES', { month: 'long' });
-    const startYear = startDateObj.toLocaleDateString('es-ES', { year: 'numeric' });
     const endMonthName = endDateObj.toLocaleDateString('es-ES', { month: 'long' });
-    const endYear = endDateObj.toLocaleDateString('es-ES', { year: 'numeric' });
     const startDay = startDateObj.getDate();
     const endDay = endDateObj.getDate();
-    
-    // Format: "Horarios Disponibles - enero 2026 / marzo 2026"
-    const startMonthYear = `${startMonthName} ${startYear}`;
-    const endMonthYear = `${endMonthName} ${endYear}`;
-    
-    doc.fontSize(16)
-       .fillColor(darkText)
-       .font('Helvetica')
-       .text(`Horarios Disponibles - ${startMonthYear} / ${endMonthYear}`, 0, 70, { align: 'center' });
     
     // Format: "(Del 2 de enero al 2 de marzo 2026)"
     doc.fontSize(12)
