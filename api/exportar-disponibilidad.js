@@ -5,6 +5,12 @@ import { join } from 'path';
 // Configuration constants
 const LOGO_FILENAME = 'auralogo2.png';
 const DAYS_PER_PAGE = 8; // Number of days to show per page
+
+// PDF Layout constants (in points)
+const PAGE_HEIGHT = 792; // LETTER size height
+const BOTTOM_MARGIN = 40;
+const LEGEND_FOOTER_MIN_HEIGHT = 205; // Legend (~125) + Footer (~80)
+
 const BRAND_COLORS = {
   brown: '#8B6E55',
   cream: '#EFE9E1',
@@ -245,7 +251,8 @@ export default async function handler(req, res) {
     // Legend needs ~125 points (25 + 3*25 + 5 buffer)
     // Footer needs ~80 points (30 + 20 + 20 + 10)
     // Total for legend+footer: ~205 points
-    if (currentY > 587) { // 792 - 40 (bottom margin) - 165 (legend+footer minimum)
+    const maxYBeforeLegend = PAGE_HEIGHT - BOTTOM_MARGIN - LEGEND_FOOTER_MIN_HEIGHT;
+    if (currentY > maxYBeforeLegend) {
       doc.addPage();
       currentY = 50;
     } else {
