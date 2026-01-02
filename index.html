@@ -4571,6 +4571,7 @@
                     <input type="date" id="filter-date-end" placeholder="Hasta">
 
                     <button type="button" id="btn-export-calendar">📥 Exportar</button>
+                    <button type="button" id="btn-export-availability">📊 Exportar Disponibilidad</button>
                     <button type="button" id="btn-schedule-admin">📅 Agendar</button>
                 </div>
             </div>
@@ -8856,6 +8857,7 @@
             
             // Filter buttons (removed filter/clear/refresh buttons, keeping only export and schedule)
             document.getElementById('btn-export-calendar').addEventListener('click', exportCalendarData);
+            document.getElementById('btn-export-availability').addEventListener('click', exportAvailabilityData);
             document.getElementById('btn-schedule-admin').addEventListener('click', openAdminScheduleModal);
             
             // Setup unique clients stat card
@@ -9979,6 +9981,219 @@
                 const btnExport = document.getElementById('btn-export-calendar');
                 if (btnExport) {
                     btnExport.textContent = '📥 Exportar';
+                    btnExport.disabled = false;
+                }
+            }
+        }
+        
+        /**
+         * Export availability data to PDF showing 2-month schedule
+         * Shows morning (6:00-11:00) and afternoon (17:00-20:00) slots
+         * with available spots for each time slot
+         */
+        async function exportAvailabilityData() {
+            console.log('📊 Export availability button clicked');
+            
+            try {
+                // Calculate date range (2 months from today)
+                const today = new Date();
+                const endDate = new Date(today);
+                endDate.setMonth(endDate.getMonth() + 2);
+                
+                console.log(`📅 Generando disponibilidad desde ${today.toISOString().split('T')[0]} hasta ${endDate.toISOString().split('T')[0]}`);
+                
+                // Wait for Firebase to be ready
+                if (!window.firebaseReady || !window.db || !window.firestoreExports) {
+                    console.error('❌ Firebase no está listo');
+                    alert('⚠️ Error: Sistema de reservas no inicializado.\n\nPor favor, recarga la página.');
+                    return;
+                }
+                
+                // Show loading indicator
+                const btnExport = document.getElementById('btn-export-availability');
+                if (!btnExport) {
+                    console.error('❌ Botón de exportar disponibilidad no encontrado');
+                    alert('⚠️ Error: Botón no encontrado.\n\nPor favor, recarga la página.');
+                    return;
+                }
+                
+                const originalText = btnExport.textContent;
+                btnExport.textContent = '⏳ Generando PDF...';
+                btnExport.disabled = true;
+                
+                // Get all reservations from Firestore
+                const { query, collection, getDocs, where } = window.firestoreExports;
+                const db = window.db;
+                
+                // Query reservations in the date range
+                const startDateStr = today.toISOString().split('T')[0] + 'T00:00:00';
+                const endDateStr = endDate.toISOString().split('T')[0] + 'T23:59:59';
+                
+                console.log('🔍 Consultando reservas en Firestore...');
+                const q = query(
+                    collection(db, 'reservas'),
+                    where('fechaHora', '>=', startDateStr),
+                    where('fechaHora', '<=', endDateStr)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                const allReservations = [];
+                querySnapshot.forEach((doc) => {
+                    allReservations.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log(`📚 ${allReservations.length} reservas encontradas`);
+                
+                // Business hours configuration
+                const businessHours = {
+                    morning: [6, 7, 8, 9, 10], // 6:00 AM to 10:00 AM
+                    afternoon: [17, 18, 19] // 5:00 PM to 7:00 PM
+                };
+                const maxCapacity = 5;
+                const daysOfWeek = [1, 2, 3, 4, 5, 6]; // Monday to Saturday (0 = Sunday, 1 = Monday, etc.)
+                
+                // Generate availability data for each day
+                const availabilityData = [];
+                const currentDate = new Date(today);
+                
+                while (currentDate <= endDate) {
+                    const dayOfWeek = currentDate.getDay();
+                    
+                    // Skip Sundays
+                    if (dayOfWeek === 0) {
+                        currentDate.setDate(currentDate.getDate() + 1);
+                        continue;
+                    }
+                    
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    const dayData = {
+                        date: dateStr,
+                        dayName: currentDate.toLocaleDateString('es-ES', { weekday: 'short' }),
+                        dayNumber: currentDate.getDate(),
+                        monthName: currentDate.toLocaleDateString('es-ES', { month: 'short' }),
+                        morning: [],
+                        afternoon: []
+                    };
+                    
+                    // Process morning slots
+                    businessHours.morning.forEach(hour => {
+                        const timeSlot = `${String(hour).padStart(2, '0')}:00:00`;
+                        const dateTimeStr = `${dateStr}T${timeSlot}`;
+                        
+                        // Count reservations for this time slot
+                        const reservationsCount = allReservations.filter(r => r.fechaHora === dateTimeStr).length;
+                        const available = maxCapacity - reservationsCount;
+                        
+                        dayData.morning.push({
+                            hour: hour,
+                            time: `${hour}:00`,
+                            available: available,
+                            isFull: available === 0
+                        });
+                    });
+                    
+                    // Process afternoon slots
+                    businessHours.afternoon.forEach(hour => {
+                        const timeSlot = `${String(hour).padStart(2, '0')}:00:00`;
+                        const dateTimeStr = `${dateStr}T${timeSlot}`;
+                        
+                        // Count reservations for this time slot
+                        const reservationsCount = allReservations.filter(r => r.fechaHora === dateTimeStr).length;
+                        const available = maxCapacity - reservationsCount;
+                        
+                        dayData.afternoon.push({
+                            hour: hour,
+                            time: `${hour}:00`,
+                            available: available,
+                            isFull: available === 0
+                        });
+                    });
+                    
+                    availabilityData.push(dayData);
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                console.log(`📋 ${availabilityData.length} días de disponibilidad generados`);
+                
+                // Prepare data for API
+                const exportData = {
+                    startDate: today.toISOString().split('T')[0],
+                    endDate: endDate.toISOString().split('T')[0],
+                    availability: availabilityData,
+                    maxCapacity: maxCapacity
+                };
+                
+                // Send data to API endpoint
+                console.log('🔗 Enviando datos al servidor...');
+                const response = await fetch('/api/exportar-disponibilidad', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(exportData)
+                });
+                
+                console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+                
+                // Check if response is ok
+                if (!response.ok) {
+                    // Try to parse error message
+                    let errorMsg = `HTTP ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) {
+                        // Response is not JSON
+                    }
+                    throw new Error(`Error HTTP: ${response.status} - ${errorMsg}`);
+                }
+                
+                // For PDF response, create blob and download
+                const blob = await response.blob();
+                console.log('📄 PDF generado, tamaño:', blob.size);
+                
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'Disponibilidad.pdf';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Clean up blob URL
+                window.URL.revokeObjectURL(url);
+                
+                console.log('✅ Disponibilidad exportada: Disponibilidad.pdf');
+                alert('✅ Disponibilidad exportada exitosamente\n\nArchivo: Disponibilidad.pdf');
+                
+                // Restore button
+                btnExport.textContent = originalText;
+                btnExport.disabled = false;
+                
+            } catch (error) {
+                console.error('❌ Error al exportar disponibilidad:', error);
+                console.error('Detalles:', error.message, error.stack);
+                
+                // Determine error type
+                let errorMessage = 'Error al exportar disponibilidad.';
+                let errorDetails = 'Por favor, intente nuevamente.';
+                
+                if (error.message.includes('fetch')) {
+                    errorDetails = 'Error de red. Verifica tu conexión a internet.';
+                } else if (error.message.includes('HTTP')) {
+                    errorDetails = 'Error del servidor. Contacta al administrador.';
+                } else if (error.message.includes('Firebase')) {
+                    errorDetails = 'Error al conectar con la base de datos.';
+                }
+                
+                alert(`❌ ${errorMessage}\n\n${errorDetails}\n\nDetalles técnicos: ${error.message}`);
+                
+                // Restore button
+                const btnExport = document.getElementById('btn-export-availability');
+                if (btnExport) {
+                    btnExport.textContent = '📊 Exportar Disponibilidad';
                     btnExport.disabled = false;
                 }
             }
