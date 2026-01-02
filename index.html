@@ -9994,6 +9994,10 @@
         async function exportAvailabilityData() {
             console.log('📊 Export availability button clicked');
             
+            // Button text constants
+            const BUTTON_TEXT_NORMAL = '📊 Exportar Disponibilidad';
+            const BUTTON_TEXT_LOADING = '⏳ Generando PDF...';
+            
             try {
                 // Calculate date range (2 months from today)
                 const today = new Date();
@@ -10017,8 +10021,7 @@
                     return;
                 }
                 
-                const originalText = btnExport.textContent;
-                btnExport.textContent = '⏳ Generando PDF...';
+                btnExport.textContent = BUTTON_TEXT_LOADING;
                 btnExport.disabled = true;
                 
                 // Get all reservations from Firestore
@@ -10046,8 +10049,8 @@
                 
                 // Business hours configuration
                 const businessHours = {
-                    morning: [6, 7, 8, 9, 10], // 6:00 AM to 10:00 AM
-                    afternoon: [17, 18, 19] // 5:00 PM to 7:00 PM
+                    morning: [6, 7, 8, 9, 10], // 6:00 AM to 11:00 AM (last class at 10:00 AM)
+                    afternoon: [17, 18, 19] // 5:00 PM to 8:00 PM (last class at 7:00 PM)
                 };
                 const maxCapacity = 5;
                 const daysOfWeek = [1, 2, 3, 4, 5, 6]; // Monday to Saturday (0 = Sunday, 1 = Monday, etc.)
@@ -10169,7 +10172,7 @@
                 alert('✅ Disponibilidad exportada exitosamente\n\nArchivo: Disponibilidad.pdf');
                 
                 // Restore button
-                btnExport.textContent = originalText;
+                btnExport.textContent = BUTTON_TEXT_NORMAL;
                 btnExport.disabled = false;
                 
             } catch (error) {
@@ -10193,7 +10196,7 @@
                 // Restore button
                 const btnExport = document.getElementById('btn-export-availability');
                 if (btnExport) {
-                    btnExport.textContent = '📊 Exportar Disponibilidad';
+                    btnExport.textContent = BUTTON_TEXT_NORMAL;
                     btnExport.disabled = false;
                 }
             }

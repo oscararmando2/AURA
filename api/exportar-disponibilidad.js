@@ -4,6 +4,7 @@ import { join } from 'path';
 
 // Configuration constants
 const LOGO_FILENAME = 'auralogo2.png';
+const DAYS_PER_PAGE = 8; // Number of days to show per page
 const BRAND_COLORS = {
   brown: '#8B6E55',
   cream: '#EFE9E1',
@@ -88,19 +89,30 @@ export default async function handler(req, res) {
        .text('AURA STUDIO', 0, 80, { align: 'center' });
 
     // Subtitle - Date Range
-    const startMonth = new Date(startDate).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-    const endMonth = new Date(endDate).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-    const startDay = new Date(startDate).getDate();
-    const endDay = new Date(endDate).getDate();
+    const startDateObj = new Date(startDate);
+    const endDateObj = new Date(endDate);
+    
+    // Get month and year separately for more reliable formatting
+    const startMonthName = startDateObj.toLocaleDateString('es-ES', { month: 'long' });
+    const startYear = startDateObj.toLocaleDateString('es-ES', { year: 'numeric' });
+    const endMonthName = endDateObj.toLocaleDateString('es-ES', { month: 'long' });
+    const endYear = endDateObj.toLocaleDateString('es-ES', { year: 'numeric' });
+    const startDay = startDateObj.getDate();
+    const endDay = endDateObj.getDate();
+    
+    // Format: "Horarios Disponibles - enero 2026 / marzo 2026"
+    const startMonthYear = `${startMonthName} ${startYear}`;
+    const endMonthYear = `${endMonthName} ${endYear}`;
     
     doc.fontSize(16)
        .fillColor(darkText)
        .font('Helvetica')
-       .text(`Horarios Disponibles - ${startMonth} / ${endMonth}`, 0, 110, { align: 'center' });
+       .text(`Horarios Disponibles - ${startMonthYear} / ${endMonthYear}`, 0, 110, { align: 'center' });
     
+    // Format: "(Del 2 de enero al 2 de marzo 2026)"
     doc.fontSize(12)
        .fillColor(lightGray)
-       .text(`(Del ${startDay} de ${startMonth.split(' ')[0]} al ${endDay} de ${endMonth.split(' ')[0]})`, 0, 130, { align: 'center' });
+       .text(`(Del ${startDay} de ${startMonthName} al ${endDay} de ${endMonthName})`, 0, 130, { align: 'center' });
 
     // Business Info
     doc.fontSize(10)
@@ -132,13 +144,11 @@ export default async function handler(req, res) {
     }
 
     // Process availability data day by day
-    const daysPerPage = 8; // Show approximately 8 days per page
-    
     for (let i = 0; i < availability.length; i++) {
       const day = availability[i];
       
       // Check if we need a new page
-      if (i > 0 && i % daysPerPage === 0) {
+      if (i > 0 && i % DAYS_PER_PAGE === 0) {
         doc.addPage();
         currentY = 50;
       }
