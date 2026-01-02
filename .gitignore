@@ -40,3 +40,4 @@ pdfs/*.pdf
 # Temporary files
 tmp/
 test_edit_modal.html
+test_phone_login.html
