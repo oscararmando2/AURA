@@ -16,13 +16,21 @@ En nuestro caso, las funciones de contacto usaban `await` para generar mensajes 
 ### 1. Función de Detección de Móvil
 ```javascript
 function isMobileDevice() {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-           window.innerWidth <= 768;
+    // Check user agent first (most reliable for actual mobile devices)
+    const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Check screen width as secondary indicator (for tablets and small screens)
+    const narrowScreen = window.innerWidth <= 768;
+    
+    // Only consider mobile if EITHER condition is true
+    // Additional check: use pointer type to distinguish touch devices
+    return mobileUserAgent || (narrowScreen && window.matchMedia('(pointer: coarse)').matches);
 }
 ```
-Esta función detecta si el usuario está en un dispositivo móvil basándose en:
-- User Agent (Android, iOS, etc.)
-- Ancho de pantalla (≤768px)
+Esta función detecta dispositivos móviles de forma más precisa:
+- **User Agent:** Detecta Android, iOS, etc. (método principal)
+- **Ancho de pantalla + Pointer type:** Para tablets y dispositivos táctiles
+- **Previene falsos positivos:** Ventanas de navegador de escritorio redimensionadas no se detectan como móvil
 
 ### 2. Función Helper para Abrir WhatsApp
 ```javascript
@@ -32,7 +40,13 @@ function openWhatsAppLink(url) {
         window.location.href = url;
     } else {
         // On desktop, open in new tab
-        window.open(url, '_blank');
+        const newWindow = window.open(url, '_blank');
+        // Handle popup blockers
+        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+            console.warn('Popup bloqueado. Intenta permitir popups para este sitio.');
+            // Fallback: try to open in same window
+            window.location.href = url;
+        }
     }
 }
 ```
@@ -142,8 +156,11 @@ Esto causaría que en desktop también se remplace la pestaña actual, lo cual n
 ### ¿Por qué no usar `setTimeout` para evadir el bloqueo?
 No es confiable y viola las políticas de popup de los navegadores modernos.
 
-### ¿Por qué comprobar `window.innerWidth`?
-Algunos tablets tienen user agents de desktop pero pantallas pequeñas. Combinamos ambas comprobaciones para mejor detección.
+### ¿Por qué comprobar `window.innerWidth` y pointer type?
+Algunos tablets tienen user agents de desktop pero pantallas pequeñas. Combinamos user agent, ancho de pantalla y tipo de pointer (`coarse` para touch devices) para mejor detección sin falsos positivos.
+
+### ¿Qué pasa si el popup es bloqueado en desktop?
+La función detecta si `window.open()` fue bloqueado y hace fallback a `location.href` como alternativa, asegurando que el usuario siempre pueda contactar por WhatsApp.
 
 ## Conclusión
 Esta solución proporciona la mejor experiencia de usuario en ambas plataformas:

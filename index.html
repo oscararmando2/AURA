@@ -8717,22 +8717,40 @@
         
         /**
          * Helper function to detect if device is mobile
+         * Uses both user agent and screen width for better detection
          */
         function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                   window.innerWidth <= 768;
+            // Check user agent first (most reliable for actual mobile devices)
+            const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            // Check screen width as secondary indicator (for tablets and small screens)
+            const narrowScreen = window.innerWidth <= 768;
+            
+            // Only consider mobile if EITHER condition is true
+            // This ensures desktop browser windows resized to narrow width still work correctly
+            // while actual mobile devices are properly detected
+            return mobileUserAgent || (narrowScreen && window.matchMedia('(pointer: coarse)').matches);
         }
         
         /**
          * Helper function to open WhatsApp link (mobile-compatible)
+         * Handles both mobile navigation and desktop new tab behavior
          */
         function openWhatsAppLink(url) {
             if (isMobileDevice()) {
                 // On mobile, use location.href for better compatibility
+                // This navigates away but WhatsApp will open, user can return with back button
                 window.location.href = url;
             } else {
                 // On desktop, open in new tab
-                window.open(url, '_blank');
+                const newWindow = window.open(url, '_blank');
+                // Handle popup blockers
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    // Popup was blocked, provide feedback
+                    console.warn('Popup bloqueado. Intenta permitir popups para este sitio.');
+                    // Fallback: try to open in same window
+                    window.location.href = url;
+                }
             }
         }
         
