@@ -19,34 +19,51 @@ function isMobileDevice() {
     // Check user agent first (most reliable for actual mobile devices)
     const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // Check screen width as secondary indicator (for tablets and small screens)
+    // If user agent indicates mobile, trust it
+    if (mobileUserAgent) {
+        return true;
+    }
+    
+    // For non-mobile user agents, check if it's a touch device with small screen
+    // This catches tablets and edge cases
     const narrowScreen = window.innerWidth <= 768;
     
-    // Only consider mobile if EITHER condition is true
-    // Additional check: use pointer type to distinguish touch devices
-    return mobileUserAgent || (narrowScreen && window.matchMedia('(pointer: coarse)').matches);
+    // Check if matchMedia is supported (for older browsers)
+    if (window.matchMedia) {
+        const hasCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+        return narrowScreen && hasCoarsePointer;
+    }
+    
+    // Fallback for older browsers: just check screen width
+    return narrowScreen;
 }
 ```
 Esta función detecta dispositivos móviles de forma más precisa:
-- **User Agent:** Detecta Android, iOS, etc. (método principal)
-- **Ancho de pantalla + Pointer type:** Para tablets y dispositivos táctiles
-- **Previene falsos positivos:** Ventanas de navegador de escritorio redimensionadas no se detectan como móvil
+- **User Agent:** Detecta Android, iOS, etc. (método principal) - si detecta móvil, retorna true inmediatamente
+- **Ancho de pantalla + Pointer type:** Para tablets y dispositivos táctiles cuando no hay user agent móvil
+- **Fallback para navegadores antiguos:** Solo ancho de pantalla si matchMedia no está disponible
+- **Previene falsos positivos:** Ventanas de navegador de escritorio redimensionadas no se detectan como móvil (requieren pointer coarse)
 
 ### 2. Función Helper para Abrir WhatsApp
 ```javascript
 function openWhatsAppLink(url) {
+    // Timeout to check if popup was blocked
+    const POPUP_CHECK_DELAY_MS = 100;
+    
     if (isMobileDevice()) {
         // On mobile, use location.href for better compatibility
         window.location.href = url;
     } else {
-        // On desktop, open in new tab
+        // On desktop, try to open in new tab
         const newWindow = window.open(url, '_blank');
-        // Handle popup blockers
-        if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-            console.warn('Popup bloqueado. Intenta permitir popups para este sitio.');
-            // Fallback: try to open in same window
-            window.location.href = url;
-        }
+        
+        // Check if popup was blocked (with small delay for popup to initialize)
+        setTimeout(() => {
+            if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                console.warn('⚠️ Popup blocked. Redirecting in same window...');
+                window.location.href = url;
+            }
+        }, POPUP_CHECK_DELAY_MS);
     }
 }
 ```
@@ -60,6 +77,8 @@ function openWhatsAppLink(url) {
 - **En desktop:** Usa `window.open()` con `_blank`
   - ✅ Abre WhatsApp Web en nueva pestaña
   - ✅ El usuario permanece en el sitio en la pestaña original
+  - ✅ Si popup es bloqueado, usa fallback automático (100ms timeout)
+  - ✅ Constante nombrada `POPUP_CHECK_DELAY_MS` para mantenibilidad
 
 ## Funciones Actualizadas
 

@@ -8747,6 +8747,9 @@
          * Handles both mobile navigation and desktop new tab behavior
          */
         function openWhatsAppLink(url) {
+            // Timeout to check if popup was blocked
+            const POPUP_CHECK_DELAY_MS = 100;
+            
             if (isMobileDevice()) {
                 // On mobile, use location.href for better compatibility
                 // This navigates away but WhatsApp will open, user can return with back button
@@ -8759,10 +8762,10 @@
                 setTimeout(() => {
                     if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
                         // Popup was blocked, provide feedback and use fallback
-                        console.warn('Popup bloqueado. Redirigiendo en misma ventana...');
+                        console.warn('⚠️ Popup blocked. Redirecting in same window...');
                         window.location.href = url;
                     }
-                }, 100);
+                }, POPUP_CHECK_DELAY_MS);
             }
         }
         
