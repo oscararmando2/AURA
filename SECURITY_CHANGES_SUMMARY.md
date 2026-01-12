@@ -102,6 +102,8 @@ const _tel = atob('NTI3MTUxNTk2NTg2'); // Studio phone number
 ### ⚠️ Limitaciones Conocidas:
 - **Ofuscación != Encriptación**: Los datos pueden ser decodificados con `atob()` o herramientas de desarrollo
 - **Protección limitada**: Esta es una capa básica de seguridad, no previene acceso determinado
+- **Firebase API Keys**: Según la documentación oficial de Firebase, las API keys están diseñadas para ser públicas y están protegidas por reglas de seguridad de Firestore. La ofuscación aquí es principalmente para evitar scraping automatizado.
+- **WhatsApp Link**: El número de teléfono en el onclick del link de contacto usa decodificación inline debido a limitaciones de scope del module script
 - **Recomendación**: Para seguridad completa, mover configuración sensible al backend
 
 ## 📝 Notas Importantes
