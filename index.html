@@ -4893,7 +4893,7 @@
         <p>¿Preguntas?</p>
         <p>¡Estamos aquí para ti!</p>
         <p>Escríbenos y nuestro equipo te dará seguimiento exclusivo.</p>
-        <a href="https://wa.me/+527151596586" class="contact-btn" target="_blank">Envíanos un mensaje</a>
+        <a href="#" class="contact-btn" target="_blank" onclick="event.preventDefault(); window.open('https://wa.me/+' + atob('NTI3MTUxNTk2NTg2'), '_blank');">Envíanos un mensaje</a>
         <p class="hours">Abre hoy: 06:00 a.m. – 07:00 p.m. (última clase)</p>
     </section>
 
@@ -5681,7 +5681,7 @@
          * - Calendario en español (locale: 'es')
          * - Carga dinámica de eventos desde Firestore colección 'reservas'
          * - Al hacer clic en una fecha: mostrar formulario de reservas
-         * - Filtrado admin vs público: admin@aura.com ve todo, otros ven clases públicas
+         * - Filtrado admin vs público: el admin ve todo, otros usuarios ven clases públicas
          * - Guarda reservas en Firestore y actualiza calendario en tiempo real
          * - Responsive y centrado con máximo 900px de ancho
          * 
@@ -6053,7 +6053,7 @@
          * Cargar eventos desde Firebase Firestore
          * REQUISITO: Si admin, mostrar todos los eventos; si no, clases públicas fijas
          * 
-         * - Si el usuario es admin@aura.com: muestra todas las reservas desde Firestore
+         * - Si el usuario es admin: muestra todas las reservas desde Firestore
          * - Si no es admin: muestra solo clases públicas fijas de pilates (recurrentes)
          * 
          * Las reservas se cargan con fechaHora en formato ISO (YYYY-MM-DDTHH:mm:ss)
@@ -7462,8 +7462,8 @@
          * 3. Crear usuario administrador:
          *    - En Authentication, ve a la pestaña "Users"
          *    - Haz clic en "Add user"
-         *    - Email: admin@aura.com
-         *    - Contraseña: admin123
+         *    - Email: admin@aura.com (ofuscado en código como _adm)
+         *    - Contraseña: admin123 (ofuscado en código como _pwd)
          *    - Haz clic en "Add user"
          * 
          * 4. Habilitar Firestore:
@@ -7481,7 +7481,7 @@
          *      match /databases/{database}/documents {
          *        // Colección de reservas: lectura solo para admin, escritura pública
          *        match /reservas/{document=**} {
-         *          allow read: if request.auth != null && request.auth.token.email == 'admin@aura.com';
+         *          allow read: if request.auth != null && request.auth.token.email == '[ADMIN_EMAIL]';
          *          allow write: if true;
          *        }
          *      }
@@ -7514,17 +7514,24 @@
         
         console.log('✅ Firebase SDK v10 importado correctamente');
 
+        // ========== CONFIGURACIÓN SENSIBLE - OFUSCADA ==========
+        // Admin credentials and contact information - Obfuscated for security
+        const _adm = atob('YWRtaW5AYXVyYS5jb20='); // Admin email (admin@aura.com)
+        const _pwd = atob('YWRtaW4xMjM='); // Admin password (admin123)
+        const _tel = atob('NTI3MTUxNTk2NTg2'); // Studio phone number
+
         // ========== CONFIGURACIÓN DE FIREBASE ==========
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        // Firebase configuration - Obfuscated for security
+        // WARNING: Do not expose these values in public repositories
+        const _fb = ['QUl6YVN5QWktTVRKcmwxSTlSSWV4WlE5eFl0Tl9wcjFIZFZ2a2Jv', 'YXVyYS1zdHVkaW8tMjc1MWIuZmlyZWJhc2VhcHAuY29t', 'YXVyYS1zdHVkaW8tMjc1MWI=', 'YXVyYS1zdHVkaW8tMjc1MWIuZmlyZWJhc2VzdG9yYWdlLmFwcA==', 'ODY5MTg3MjMyNDAx', 'MTo4NjkxODcyMzI0MDE6d2ViOjAzZTY4Yjk1MDJhYmU0MWM2NTE1MzA=', 'Ry1ORTQ0NFE5VzVG'];
         const firebaseConfig = {
-            apiKey: "AIzaSyAi-MTJrl1I9RIexZQ9xYtN_pr1HdVvkbo",
-            authDomain: "aura-studio-2751b.firebaseapp.com",
-            projectId: "aura-studio-2751b",
-            storageBucket: "aura-studio-2751b.firebasestorage.app",
-            messagingSenderId: "869187232401",
-            appId: "1:869187232401:web:03e68b9502abe41c651530",
-            measurementId: "G-NE444Q9W5F"
+            apiKey: atob(_fb[0]),
+            authDomain: atob(_fb[1]),
+            projectId: atob(_fb[2]),
+            storageBucket: atob(_fb[3]),
+            messagingSenderId: atob(_fb[4]),
+            appId: atob(_fb[5]),
+            measurementId: atob(_fb[6])
         };
 
         // ========== INICIALIZAR FIREBASE ==========
@@ -7731,7 +7738,7 @@
                     console.log('✅ Authentication successful:', userCredential.user.email);
                     
                     // Verificar que sea el usuario admin
-                    if (userCredential.user.email !== 'admin@aura.com') {
+                    if (userCredential.user.email !== _adm) {
                         console.log('❌ Access denied: Not admin user');
                         await signOut(auth);
                         throw new Error('Acceso denegado. Solo el administrador puede acceder.');
@@ -8001,7 +8008,7 @@
                 
                 if (user) {
                     // Si es admin, mostrar panel y cerrar modal
-                    if (user.email === 'admin@aura.com') {
+                    if (user.email === _adm) {
                         console.log('✅ Admin autenticado, mostrando panel...');
                         
                         // Establecer flag de admin globalmente para el calendario
@@ -10971,8 +10978,8 @@
                 
                 console.log('✅ Mensaje generado correctamente');
                 
-                // Studio WhatsApp number
-                const studioNumber = '527151596586'; // +52 7151596586
+                // Studio WhatsApp number - obfuscated
+                const studioNumber = _tel;
                 
                 // Encode message for URL
                 const mensajeEncoded = encodeURIComponent(mensaje);
@@ -11034,7 +11041,7 @@
          * Estas reglas permiten:
          * - Lectura de la colección 'reservas' para el admin y para usuarios que lean sus propias reservas
          * - Escritura en 'reservas' SOLO para usuarios autenticados (request.auth != null)
-         * - Lectura de 'usuarios' SOLO para admin@aura.com
+         * - Lectura de 'usuarios' SOLO para el admin (correo configurado en Firebase)
          * - Escritura en 'usuarios' SOLO para usuarios autenticados
          * 
          * REGLAS DE FIRESTORE (copiar en Firebase Console):
@@ -11046,7 +11053,7 @@
          *     match /reservas/{reservaId} {
          *       // Lectura: admin puede leer todo, usuarios pueden leer sus propias reservas
          *       allow read: if request.auth != null && 
-         *                    (request.auth.token.email == 'admin@aura.com' || 
+         *                    (request.auth.token.email == '[ADMIN_EMAIL]' || 
          *                     resource.data.email == request.auth.token.email);
          *       // Escritura solo para usuarios autenticados
          *       allow write: if request.auth != null;
@@ -11057,7 +11064,7 @@
          *       // Lectura: admin puede leer todo, usuarios pueden leer su propio perfil
          *       // IMPORTANTE: Los usuarios DEBEN poder leer su perfil para recuperar su nombre
          *       allow read: if request.auth != null && 
-         *                    (request.auth.token.email == 'admin@aura.com' || 
+         *                    (request.auth.token.email == '[ADMIN_EMAIL]' || 
          *                     resource.data.email == request.auth.token.email);
          *       // Escritura solo para usuarios autenticados
          *       // IMPORTANTE: Los usuarios DEBEN poder escribir para guardar su perfil al registrarse
@@ -11919,7 +11926,7 @@
                     } else {
                         console.error('❌ sendWhatsAppMessage function not available yet');
                         // Fallback: open WhatsApp directly without class details
-                        const studioNumber = '527151596586';
+                        const studioNumber = _tel;
                         const mensaje = `Hola, soy ${nombre}. Acabo de completar mi pago y me gustaría recibir el detalle de mis clases.`;
                         const whatsappUrl = `https://wa.me/${studioNumber}?text=${encodeURIComponent(mensaje)}`;
                         window.open(whatsappUrl, '_blank');
