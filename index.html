@@ -5118,56 +5118,7 @@
                     return;
                 }
                 
-                // SPECIAL CASE: Allow direct login for specific phone numbers without SMS verification
-                // Note: Phone numbers are hardcoded per user requirement for simplicity.
-                // These specific users (527151638556 and 7151638556) can access their classes
-                // without password or SMS verification code.
-                const allowedPhoneNumbers = ['7151638556']; // 10-digit format (country code +52 is added automatically)
-                
-                if (allowedPhoneNumbers.includes(phoneDigits)) {
-                    console.log('✅ Número de teléfono autorizado para acceso directo:', phoneDigits);
-                    
-                    // Get or set user name for this phone
-                    const userName = localStorage.getItem('userName_' + phoneDigits) || 'Usuario';
-                    
-                    // Store user info in localStorage
-                    localStorage.setItem('userNombre', userName);
-                    localStorage.setItem('userTelefono', phoneWithCountryCode);
-                    localStorage.setItem('userLoggedIn', 'true');
-                    
-                    // Close login modal
-                    userLoginModal.style.display = 'none';
-                    document.getElementById('user-login-form').reset();
-                    errorDiv.style.display = 'none';
-                    
-                    // Update UI for logged in user
-                    if (typeof window.updateUIForLoggedInUser === 'function') {
-                        window.updateUIForLoggedInUser();
-                    }
-                    
-                    // Load user's classes
-                    if (typeof window.loadUserClasses === 'function') {
-                        try {
-                            await window.loadUserClasses(phoneWithCountryCode);
-                            
-                            // Scroll to My Classes section
-                            const myClassesSection = document.getElementById('my-classes-section');
-                            if (myClassesSection) {
-                                setTimeout(() => {
-                                    myClassesSection.scrollIntoView({ behavior: 'smooth' });
-                                }, 300);
-                            }
-                        } catch (error) {
-                            console.error('Error al cargar clases:', error);
-                            errorDiv.textContent = '⚠️ Error al cargar clases. Por favor, intenta nuevamente.';
-                            errorDiv.style.display = 'block';
-                        }
-                    }
-                    
-                    return; // Exit early, no SMS verification needed
-                }
-                
-                // Use Firebase Phone Authentication for other users
+                // Use Firebase Phone Authentication
                 try {
                     const { signInWithPhoneNumber, RecaptchaVerifier } = window.firebaseAuthExports || {};
                     
@@ -7509,16 +7460,18 @@
         
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPhoneNumber, RecaptchaVerifier, PhoneAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithCustomToken, signInWithPhoneNumber, RecaptchaVerifier, PhoneAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
         
         console.log('✅ Firebase SDK v10 importado correctamente');
 
-        // ========== CONFIGURACIÓN SENSIBLE - OFUSCADA ==========
-        // Admin credentials and contact information - Obfuscated for security
-        const _adm = atob('YWRtaW5AYXVyYS5jb20='); // Admin email (admin@aura.com)
-        const _pwd = atob('YWRtaW4xMjM='); // Admin password (admin123)
+        // ========== CONFIGURACIÓN ==========
+        // Studio phone number for WhatsApp contact
         const _tel = atob('NTI3MTUxNTk2NTg2'); // Studio phone number
+        
+        // Admin email is now validated server-side via /api/admin-login
+        // The authenticated admin email is stored here after successful login
+        let _adminEmail = null;
 
         // ========== CONFIGURACIÓN DE FIREBASE ==========
         // Firebase configuration - Obfuscated for security
@@ -7564,6 +7517,7 @@
             window.firebaseAuthExports = {
                 createUserWithEmailAndPassword,
                 signInWithEmailAndPassword,
+                signInWithCustomToken,
                 signInWithPhoneNumber,
                 RecaptchaVerifier,
                 PhoneAuthProvider,
@@ -7691,6 +7645,7 @@
 
         /**
          * Manejar el envío del formulario de login de administrador
+         * SECURE: Credentials validated server-side via /api/admin-login
          */
         function setupAdminLogin() {
             const loginForm = document.getElementById('admin-login-form');
@@ -7722,7 +7677,7 @@
                 loginError.style.display = 'none';
                 
                 // Check if Firebase Auth is available
-                if (!auth || typeof signInWithEmailAndPassword !== 'function') {
+                if (!auth || typeof signInWithCustomToken !== 'function') {
                     console.error('❌ Firebase Auth not available');
                     loginError.textContent = 'Error: Sistema de autenticación no disponible. Por favor, recarga la página.';
                     loginError.style.display = 'block';
@@ -7730,21 +7685,32 @@
                 }
                 
                 try {
-                    console.log('🔐 Attempting to authenticate:', email);
+                    console.log('🔐 Validating credentials via secure API...');
                     
-                    // Autenticar con Firebase
-                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    // SECURE: Validate credentials server-side
+                    const response = await fetch('/api/admin-login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ email, password })
+                    });
                     
-                    console.log('✅ Authentication successful:', userCredential.user.email);
+                    const result = await response.json();
                     
-                    // Verificar que sea el usuario admin
-                    if (userCredential.user.email !== _adm) {
-                        console.log('❌ Access denied: Not admin user');
-                        await signOut(auth);
-                        throw new Error('Acceso denegado. Solo el administrador puede acceder.');
+                    if (!response.ok) {
+                        throw new Error(result.error || 'Error de autenticación');
                     }
                     
-                    console.log('✅ Admin verified, closing modal');
+                    console.log('✅ Server validated credentials, signing in with custom token...');
+                    
+                    // Store the admin email for verification in onAuthStateChanged
+                    _adminEmail = result.email;
+                    
+                    // Sign in to Firebase with the custom token from server
+                    const userCredential = await signInWithCustomToken(auth, result.customToken);
+                    
+                    console.log('✅ Firebase authentication successful');
                     
                     // Cerrar modal de login - el onAuthStateChanged se encargará del resto
                     const adminLoginModal = document.getElementById('admin-login-modal');
@@ -7761,23 +7727,9 @@
                     
                 } catch (error) {
                     console.error('❌ Error de autenticación:', error);
-                    console.error('Error code:', error.code);
-                    console.error('Error message:', error.message);
                     
                     // Mostrar mensaje de error
-                    let errorMessage = 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
-                    
-                    if (error.code === 'auth/user-not-found') {
-                        errorMessage = 'Usuario no encontrado. Por favor, verifica tu email.';
-                    } else if (error.code === 'auth/wrong-password') {
-                        errorMessage = 'Contraseña incorrecta. Por favor, inténtalo de nuevo.';
-                    } else if (error.code === 'auth/invalid-email') {
-                        errorMessage = 'Email inválido. Por favor, ingresa un email válido.';
-                    } else if (error.code === 'auth/invalid-credential') {
-                        errorMessage = 'Credenciales inválidas. Por favor, verifica tu email y contraseña.';
-                    } else if (error.message) {
-                        errorMessage = error.message;
-                    }
+                    let errorMessage = error.message || 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
                     
                     loginError.textContent = errorMessage;
                     loginError.style.display = 'block';
@@ -8008,7 +7960,11 @@
                 
                 if (user) {
                     // Si es admin, mostrar panel y cerrar modal
-                    if (user.email === _adm) {
+                    // Check if this is an admin user (authenticated via /api/admin-login)
+                    // Custom token auth uses uid = email, or we check the _adminEmail set during login
+                    const isAdminUser = _adminEmail && (user.uid === _adminEmail || user.email === _adminEmail);
+                    
+                    if (isAdminUser) {
                         console.log('✅ Admin autenticado, mostrando panel...');
                         
                         // Establecer flag de admin globalmente para el calendario
@@ -8086,6 +8042,7 @@
                     // No hay admin autenticado
                     window.isAdmin = false;
                     isAdmin = false;
+                    _adminEmail = null; // Clear admin email on logout
                     
                     // Remove mobile-admin-view class
                     removeMobileAdminView();
