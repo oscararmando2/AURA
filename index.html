@@ -7467,24 +7467,23 @@
 
         // ========== CONFIGURACIÓN ==========
         // Studio phone number for WhatsApp contact
-        const _tel = atob('NTI3MTUxNTk2NTg2'); // Studio phone number
+        const STUDIO_PHONE = '527151596586';
         
         // Admin email is now validated server-side via /api/admin-login
         // The authenticated admin email is stored here after successful login
         let _adminEmail = null;
 
         // ========== CONFIGURACIÓN DE FIREBASE ==========
-        // Firebase configuration - Obfuscated for security
-        // WARNING: Do not expose these values in public repositories
-        const _fb = ['QUl6YVN5QWktTVRKcmwxSTlSSWV4WlE5eFl0Tl9wcjFIZFZ2a2Jv', 'YXVyYS1zdHVkaW8tMjc1MWIuZmlyZWJhc2VhcHAuY29t', 'YXVyYS1zdHVkaW8tMjc1MWI=', 'YXVyYS1zdHVkaW8tMjc1MWIuZmlyZWJhc2VzdG9yYWdlLmFwcA==', 'ODY5MTg3MjMyNDAx', 'MTo4NjkxODcyMzI0MDE6d2ViOjAzZTY4Yjk1MDJhYmU0MWM2NTE1MzA=', 'Ry1ORTQ0NFE5VzVG'];
+        // Firebase API keys are designed to be public - security comes from Firestore Rules
+        // See: https://firebase.google.com/docs/projects/api-keys
         const firebaseConfig = {
-            apiKey: atob(_fb[0]),
-            authDomain: atob(_fb[1]),
-            projectId: atob(_fb[2]),
-            storageBucket: atob(_fb[3]),
-            messagingSenderId: atob(_fb[4]),
-            appId: atob(_fb[5]),
-            measurementId: atob(_fb[6])
+            apiKey: 'AIzaSyAi-MTJrl1I9RIexZQ9xYtN_pr1HdVvkbo',
+            authDomain: 'aura-studio-2751b.firebaseapp.com',
+            projectId: 'aura-studio-2751b',
+            storageBucket: 'aura-studio-2751b.firebasestorage.app',
+            messagingSenderId: '869187232401',
+            appId: '1:869187232401:web:03e68b9502abe41c651530',
+            measurementId: 'G-NE444Q9W5F'
         };
 
         // ========== INICIALIZAR FIREBASE ==========
@@ -10935,8 +10934,8 @@
                 
                 console.log('✅ Mensaje generado correctamente');
                 
-                // Studio WhatsApp number - obfuscated
-                const studioNumber = _tel;
+                // Studio WhatsApp number
+                const studioNumber = STUDIO_PHONE;
                 
                 // Encode message for URL
                 const mensajeEncoded = encodeURIComponent(mensaje);
@@ -11883,7 +11882,7 @@
                     } else {
                         console.error('❌ sendWhatsAppMessage function not available yet');
                         // Fallback: open WhatsApp directly without class details
-                        const studioNumber = _tel;
+                        const studioNumber = STUDIO_PHONE;
                         const mensaje = `Hola, soy ${nombre}. Acabo de completar mi pago y me gustaría recibir el detalle de mis clases.`;
                         const whatsappUrl = `https://wa.me/${studioNumber}?text=${encodeURIComponent(mensaje)}`;
                         window.open(whatsappUrl, '_blank');
