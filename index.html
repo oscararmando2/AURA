@@ -7466,8 +7466,27 @@
         console.log('✅ Firebase SDK v10 importado correctamente');
 
         // ========== CONFIGURACIÓN ==========
-        // Studio phone number for WhatsApp contact
-        const STUDIO_PHONE = '527151596586';
+        // Studio phone number for WhatsApp contact (loaded from /api/config)
+        // Default value used as fallback if API fails
+        let STUDIO_PHONE = '527151596586';
+        
+        // Load configuration from server
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    STUDIO_PHONE = config.studioPhone || STUDIO_PHONE;
+                    window.STUDIO_PHONE = STUDIO_PHONE;
+                    console.log('✅ Configuración cargada desde servidor');
+                }
+            } catch (error) {
+                console.warn('⚠️ No se pudo cargar config del servidor, usando valores por defecto');
+            }
+        }
+        
+        // Load config immediately
+        loadConfig();
         
         // Admin email is now validated server-side via /api/admin-login
         // The authenticated admin email is stored here after successful login
@@ -7500,6 +7519,7 @@
             // Exponer variables globalmente para acceso desde otros scripts
             window.db = db;
             window.auth = auth;
+            window.STUDIO_PHONE = STUDIO_PHONE; // Expose phone for WhatsApp functions
             
             // Exponer funciones de Firestore para el calendario
             window.firestoreExports = {
