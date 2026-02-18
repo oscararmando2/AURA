@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA STUDIO - Panel de Administrador</title>
+    
+    <!-- iOS/iPadOS/macOS Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167x167.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amita:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fondamento:ital@0;1&display=swap" rel="stylesheet">
+    
+    <!-- FullCalendar v6.1.15 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
+    
+    <!-- AURA Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <!-- Admin-specific styles -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #EFE9E1 0%, #D4C5B9 100%);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .admin-header .logo {
+            height: 50px;
+        }
+        
+        .admin-header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .admin-header-actions .btn-back {
+            background: #fff;
+            color: #333;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .admin-header-actions .btn-back:hover {
+            background: #f5f5f5;
+        }
+        
+        .admin-header-actions .btn-logout {
+            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        
+        .admin-header-actions .btn-logout:hover {
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        }
+        
+        .admin-loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50vh;
+            color: #EFE9E1;
+            font-size: 1.2rem;
+        }
+        
+        .admin-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(239, 233, 225, 0.2);
+            border-top-color: #EFE9E1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <img src="auralogo2.png" alt="AURA" class="logo">
+        <div class="admin-header-actions">
+            <span id="admin-user-display" style="color: #333; font-weight: 600;">Cargando...</span>
+            <a href="index.html" class="btn-back">← Volver al Sitio</a>
+            <button type="button" id="admin-logout-btn" class="btn-logout">Cerrar Sesión</button>
+        </div>
+    </header>
+
+    <!-- Loading State -->
+    <div id="admin-loading" class="admin-loading">
+        <div class="spinner"></div>
+        <span>Verificando autenticación...</span>
+    </div>
+
+    <!-- Admin Panel Section (hidden until authenticated) -->
+    <section id="admin-panel-section" class="contact-section" style="display: none;">
+        <h2 style="font-size: 2rem; margin-bottom: 15px; font-weight: 700;">Panel de Administrador</h2>
+        <p style="margin-bottom: 12px; font-size: 1.1rem; color: #666;">Hola <span id="admin-email-display" style="color: #1a1a1a; font-weight: 600;">Michel</span></p>
+        
+        <!-- Main Container -->
+        <div id="admin-panel-container" style="max-width: 1400px; margin: 0 auto; background: linear-gradient(135deg, #ffffff 0%, #EFE9E1 100%); padding: 50px; border-radius: 25px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12); border: 2px solid rgba(239, 233, 225, 0.3);">
+            <div style="margin-bottom: 40px;">
+                <h3 style="color: #333; margin: 0; font-size: 2.2rem; font-weight: 600; text-align: center; letter-spacing: 1px;">📅 Calendario de Reservas</h3>
+            </div>
+            
+            <div id="reservations-loading" style="text-align: center; padding: 40px; color: #666;">
+                <p style="font-size: 1.1rem;">Cargando reservas...</p>
+            </div>
+            
+            <!-- Statistics Summary -->
+            <div id="admin-stats-section" style="display: none;">
+                <div class="admin-stats-summary">
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-value" id="stat-total-reservations">0</div>
+                        <div class="stat-label">Total Reservas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-value" id="stat-this-week">0</div>
+                        <div class="stat-label">Esta Semana</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="stat-unique-clients">0</div>
+                        <div class="stat-label">Clientes Únicos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⭐</div>
+                        <div class="stat-value" id="stat-upcoming">0</div>
+                        <div class="stat-label">Próximas</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calendar Controls -->
+            <div id="admin-calendar-controls" style="display: none;">
+                <div class="admin-calendar-controls">
+                    <input type="text" id="search-client" placeholder="🔍 Buscar por nombre o teléfono..." style="flex: 1; min-width: 200px;">
+                    <input type="date" id="filter-date-start" placeholder="Desde">
+                    <input type="date" id="filter-date-end" placeholder="Hasta">
+                    <button type="button" id="btn-export-calendar">📥 Exportar</button>
+                    <button type="button" id="btn-export-availability">📊 Exportar Disponibilidad</button>
+                    <button type="button" id="btn-schedule-admin">📅 Agendar</button>
+                </div>
+            </div>
+            
+            <!-- Search Results Container for Mobile -->
+            <div id="search-results-container" style="display: none; margin-bottom: 20px;">
+                <h4 style="color: #333; font-size: 1.2rem; margin-bottom: 15px;">Participantes</h4>
+                <div id="search-results-list"></div>
+            </div>
+            
+            <!-- Calendar View for Admin -->
+            <div id="admin-calendar-view" style="display: none;">
+                <div class="calendar-scroll-hint">
+                    <span>💡 Consejo:</span> Desliza horizontalmente para ver todos los días de la semana →
+                </div>
+                <div id="admin-calendar"></div>
+            </div>
+            
+            <div id="no-reservations" style="display: none; text-align: center; padding: 40px; color: #666;">
+                <p style="font-size: 1.1rem;">No hay reservas en este momento.</p>
+            </div>
+        </div>
+        
+        <!-- Event Detail Modal -->
+        <div id="event-detail-modal" class="event-detail-modal">
+            <div class="event-detail-content">
+                <div class="event-detail-header">
+                    <h3>👤 Detalle de Reserva</h3>
+                    <button type="button" class="event-detail-close" id="event-detail-close">×</button>
+                </div>
+                <div class="event-detail-body">
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">👤</div>
+                        <div class="event-detail-info">
+                            <div class="event-detail-label">Cliente</div>
+                            <div class="event-detail-value" id="detail-client-name">-</div>
+                        </div>
+                    </div>
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">📱</div>
+                        <div class="event-detail-info">
+                            <div class="event-detail-label">Teléfono</div>
+                            <div class="event-detail-value" id="detail-client-email">-</div>
+                        </div>
+                    </div>
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">📅</div>
+                        <div class="event-detail-info">
+                            <div class="event-detail-label">Fecha</div>
+                            <div class="event-detail-value" id="detail-date">-</div>
+                        </div>
+                    </div>
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">🕐</div>
+                        <div class="event-detail-info">
+                            <div class="event-detail-label">Horario</div>
+                            <div class="event-detail-value" id="detail-time">-</div>
+                        </div>
+                    </div>
+                    <div class="event-detail-row" id="detail-notes-row" style="display: none;">
+                        <div class="event-detail-icon">📝</div>
+                        <div class="event-detail-info">
+                            <div class="event-detail-label">Notas</div>
+                            <div class="event-detail-value" id="detail-notes">-</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="event-detail-actions">
+                    <button type="button" class="btn-secondary" id="detail-close-btn">Cerrar</button>
+                    <button type="button" class="btn-edit" id="detail-edit-btn" style="display: none;">✏️ Editar</button>
+                    <button type="button" class="btn-primary" id="detail-contact-btn">📧 Contactar</button>
+                    <button type="button" class="btn-whatsapp" id="detail-whatsapp-btn">📱 Mandar clases por WhatsApp</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Reservation Modal -->
+        <div id="edit-reservation-modal" class="event-detail-modal">
+            <div class="event-detail-content">
+                <div class="event-detail-header">
+                    <h3>✏️ Editar Reserva</h3>
+                    <button type="button" class="event-detail-close" id="edit-reservation-close">×</button>
+                </div>
+                <div class="event-detail-body">
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">👤</div>
+                        <div class="event-detail-info">
+                            <div class="event-detail-label">Cliente</div>
+                            <div class="event-detail-value" id="edit-client-name">-</div>
+                        </div>
+                    </div>
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">📅</div>
+                        <div class="event-detail-info" style="width: 100%;">
+                            <div class="event-detail-label">Nueva Fecha *</div>
+                            <input type="date" id="edit-reservation-date" class="modal-input-field" required>
+                        </div>
+                    </div>
+                    <div class="event-detail-row">
+                        <div class="event-detail-icon">🕐</div>
+                        <div class="event-detail-info" style="width: 100%;">
+                            <div class="event-detail-label">Nueva Hora *</div>
+                            <select id="edit-reservation-time" class="modal-input-field" required>
+                                <option value="">Selecciona una hora</option>
+                                <option value="06:00">06:00 AM</option>
+                                <option value="07:00">07:00 AM</option>
+                                <option value="08:00">08:00 AM</option>
+                                <option value="09:00">09:00 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="13:00">01:00 PM</option>
+                                <option value="14:00">02:00 PM</option>
+                                <option value="15:00">03:00 PM</option>
+                                <option value="16:00">04:00 PM</option>
+                                <option value="17:00">05:00 PM</option>
+                                <option value="18:00">06:00 PM</option>
+                                <option value="19:00">07:00 PM</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="event-detail-actions">
+                    <button type="button" class="btn-secondary" id="edit-reservation-cancel">Cancelar</button>
+                    <button type="button" class="btn-danger" id="edit-reservation-delete">🗑️ Eliminar Clase</button>
+                    <button type="button" class="btn-primary" id="edit-reservation-save">💾 Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Unique Clients Modal -->
+        <div id="unique-clients-modal" class="event-detail-modal">
+            <div class="event-detail-content unique-clients-modal-content">
+                <div class="event-detail-header">
+                    <h3>👥 Clientes Únicos</h3>
+                    <button type="button" class="event-detail-close" id="unique-clients-close" aria-label="Cerrar modal de clientes únicos">×</button>
+                </div>
+                <div class="event-detail-body unique-clients-list-body" id="unique-clients-list">
+                    <!-- Client list will be inserted here dynamically -->
+                </div>
+                <div class="event-detail-actions">
+                    <button type="button" class="btn-secondary" id="unique-clients-close-btn">Cerrar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Schedule Modal - Multi-Step Interface -->
+        <div id="admin-schedule-modal" class="event-detail-modal">
+            <div class="event-detail-content" id="admin-schedule-modal-content">
+                <!-- Step 1: Client Info & Package Selection -->
+                <div id="admin-schedule-step1">
+                    <div class="event-detail-header">
+                        <h3>📅 Agendar Nueva Clase - Paso 1/2</h3>
+                        <button type="button" class="event-detail-close" id="admin-schedule-close">×</button>
+                    </div>
+                    <div class="event-detail-body">
+                        <div class="event-detail-row">
+                            <div class="event-detail-icon">👤</div>
+                            <div class="event-detail-info" style="width: 100%;">
+                                <div class="event-detail-label">Nombre del Cliente *</div>
+                                <input type="text" id="admin-schedule-name" required style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            </div>
+                        </div>
+                        <div class="event-detail-row">
+                            <div class="event-detail-icon">📱</div>
+                            <div class="event-detail-info" style="width: 100%;">
+                                <div class="event-detail-label">Teléfono * (10 dígitos)</div>
+                                <input type="tel" id="admin-schedule-phone" required pattern="[0-9]{10}" placeholder="10 dígitos sin guiones" style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            </div>
+                        </div>
+                        <div class="event-detail-row">
+                            <div class="event-detail-icon">📦</div>
+                            <div class="event-detail-info" style="width: 100%;">
+                                <div class="event-detail-label">Número de Clases *</div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 10px;">
+                                    <button type="button" class="admin-package-btn" data-classes="1">1 Clase</button>
+                                    <button type="button" class="admin-package-btn" data-classes="4">4 Clases</button>
+                                    <button type="button" class="admin-package-btn" data-classes="8">8 Clases</button>
+                                    <button type="button" class="admin-package-btn" data-classes="12">12 Clases</button>
+                                </div>
+                                <input type="hidden" id="admin-schedule-package" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-detail-actions">
+                        <button type="button" class="btn-secondary" id="admin-schedule-cancel-step1">Cancelar</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-next">Siguiente →</button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Calendar Selection -->
+                <div id="admin-schedule-step2" style="display: none;">
+                    <div class="event-detail-header">
+                        <h3>📅 Seleccionar Horarios - Paso 2/2</h3>
+                        <button type="button" class="event-detail-close" id="admin-schedule-close-step2">×</button>
+                    </div>
+                    <div class="event-detail-body">
+                        <div style="background: linear-gradient(135deg, #B8A99A 0%, #D4C5B9 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                            <p style="margin: 0; color: #1a1a1a; font-size: 1.1rem; font-weight: 600;">
+                                <strong id="admin-schedule-client-name-display" style="color: #1a1a1a;"></strong> - 
+                                <span id="admin-schedule-selected-count" style="color: #1a1a1a; font-size: 1.3rem; font-weight: 700;">0</span> de 
+                                <span id="admin-schedule-total-classes" style="color: #1a1a1a; font-size: 1.3rem; font-weight: 700;">0</span> clases seleccionadas
+                            </p>
+                        </div>
+                        <!-- Horizontal container for calendar and selected times on desktop -->
+                        <div class="admin-schedule-horizontal-container">
+                            <!-- Calendar for admin scheduling -->
+                            <div class="admin-schedule-calendar-wrapper">
+                                <div id="admin-schedule-calendar"></div>
+                            </div>
+                            
+                            <!-- Selected times list -->
+                            <div id="admin-selected-times-container" class="admin-selected-times-wrapper" style="display: none;">
+                                <h4 style="color: #1a1a1a; margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; border-bottom: 3px solid #B8A99A; padding-bottom: 15px; text-align: center;">✅ Horarios seleccionados:</h4>
+                                <div id="admin-selected-times-list" style="max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-detail-actions">
+                        <button type="button" class="btn-secondary" id="admin-schedule-back">← Atrás</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-confirm">✅ Confirmar Reservas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Scheduling Section (Full Page) -->
+    <section id="admin-scheduling-section" class="admin-scheduling-section" style="display: none;">
+        <div class="admin-scheduling-container">
+            <!-- Back Button -->
+            <div style="max-width: 1400px; margin: 0 auto; padding: 20px 20px 0 20px;">
+                <button type="button" id="back-to-admin-panel" class="btn-secondary" style="margin-bottom: 20px;">← Volver al Panel</button>
+            </div>
+            
+            <!-- Step 1: Client Info & Package Selection -->
+            <div id="admin-schedule-step1-fullpage">
+                <div class="admin-schedule-content">
+                    <div class="admin-schedule-header">
+                        <h2>📅 Agendar Nueva Clase - Paso 1/2</h2>
+                    </div>
+                    <div class="admin-schedule-body">
+                        <div class="admin-schedule-row">
+                            <div class="admin-schedule-icon">👤</div>
+                            <div class="admin-schedule-info" style="width: 100%;">
+                                <div class="admin-schedule-label">Nombre del Cliente *</div>
+                                <input type="text" id="admin-schedule-name-fullpage" required style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            </div>
+                        </div>
+                        <div class="admin-schedule-row">
+                            <div class="admin-schedule-icon">📱</div>
+                            <div class="admin-schedule-info" style="width: 100%;">
+                                <div class="admin-schedule-label">Teléfono * (10 dígitos)</div>
+                                <input type="tel" id="admin-schedule-phone-fullpage" required pattern="[0-9]{10}" placeholder="10 dígitos sin guiones" style="width: 100%; padding: 10px; border: 2px solid rgba(239, 233, 225, 0.3); border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            </div>
+                        </div>
+                        <div class="admin-schedule-row">
+                            <div class="admin-schedule-icon">📦</div>
+                            <div class="admin-schedule-info" style="width: 100%;">
+                                <div class="admin-schedule-label">Número de Clases *</div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-top: 10px;">
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="1">1 Clase</button>
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="4">4 Clases</button>
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="8">8 Clases</button>
+                                    <button type="button" class="admin-package-btn-fullpage" data-classes="12">12 Clases</button>
+                                </div>
+                                <input type="hidden" id="admin-schedule-package-fullpage" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-schedule-actions">
+                        <button type="button" class="btn-secondary" id="admin-schedule-cancel-step1-fullpage">Cancelar</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-next-fullpage">Siguiente →</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 2: Calendar Selection -->
+            <div id="admin-schedule-step2-fullpage" style="display: none;">
+                <div class="admin-schedule-content">
+                    <div class="admin-schedule-header">
+                        <h2>📅 Seleccionar Horarios - Paso 2/2</h2>
+                    </div>
+                    <div class="admin-schedule-body">
+                        <div style="background: linear-gradient(135deg, #B8A99A 0%, #D4C5B9 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                            <p style="margin: 0; color: #1a1a1a; font-size: 1.1rem; font-weight: 600;">
+                                <strong id="admin-schedule-client-name-display-fullpage" style="color: #1a1a1a;"></strong> - 
+                                <span id="admin-schedule-selected-count-fullpage" style="color: #1a1a1a; font-size: 1.3rem; font-weight: 700;">0</span> de 
+                                <span id="admin-schedule-total-classes-fullpage" style="color: #1a1a1a; font-size: 1.3rem; font-weight: 700;">0</span> clases seleccionadas
+                            </p>
+                        </div>
+                        <!-- Horizontal container for calendar and selected times on desktop -->
+                        <div class="admin-schedule-horizontal-container">
+                            <!-- Calendar for admin scheduling -->
+                            <div class="admin-schedule-calendar-wrapper">
+                                <div id="admin-schedule-calendar-fullpage"></div>
+                            </div>
+                            
+                            <!-- Selected times list -->
+                            <div id="admin-selected-times-container-fullpage" class="admin-selected-times-wrapper" style="display: none;">
+                                <h4 style="color: #1a1a1a; margin-bottom: 20px; font-size: 1.5rem; font-weight: 800; border-bottom: 3px solid #B8A99A; padding-bottom: 15px; text-align: center;">✅ Horarios seleccionados:</h4>
+                                <div id="admin-selected-times-list-fullpage" style="max-height: 500px; overflow-y: auto; padding-right: 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="admin-schedule-actions">
+                        <button type="button" class="btn-secondary" id="admin-schedule-back-fullpage">← Atrás</button>
+                        <button type="button" class="btn-primary" id="admin-schedule-confirm-fullpage">✅ Confirmar Reservas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FullCalendar v6.1.15 JS desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <!-- FullCalendar locales para español -->
+    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/es.global.min.js"></script>
+
+    <!-- Firebase and Admin Logic -->
+    <script type="module">
+        // ========== IMPORTAR FIREBASE SDK v10 ==========
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        console.log('🔐 Admin page: Firebase SDK imported');
+
+        // ========== CONSTANTS ==========
+        const COUNTRY_CODE = '+52';
+        const MEXICO_COUNTRY_CODE = '52';
+        const PHONE_DIGITS_LENGTH = 10;
+        const PHONE_WITH_COUNTRY_CODE_LENGTH = 12;
+        const DEFAULT_NAME = 'Sin nombre';
+        const DEFAULT_PHONE = 'Sin teléfono';
+        const MOBILE_BREAKPOINT = 768;
+
+        // ========== FIREBASE CONFIG ==========
+        const firebaseConfig = {
+            apiKey: 'AIzaSyAi-MTJrl1I9RIexZQ9xYtN_pr1HdVvkbo',
+            authDomain: 'aura-studio-2751b.firebaseapp.com',
+            projectId: 'aura-studio-2751b',
+            storageBucket: 'aura-studio-2751b.firebasestorage.app',
+            messagingSenderId: '869187232401',
+            appId: '1:869187232401:web:03e68b9502abe41c651530',
+            measurementId: 'G-NE444Q9W5F'
+        };
+
+        // ========== INITIALIZE FIREBASE ==========
+        let app, auth, db;
+        let isAdmin = false;
+        let adminCalendar = null;
+        let allReservationsData = [];
+        let STUDIO_PHONE = '527151596586';
+
+        // Admin scheduling state
+        let adminScheduleState = {
+            clientName: '',
+            clientPhone: '',
+            packageSize: 0,
+            selectedDates: [],
+            scheduleCalendar: null
+        };
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            window.db = db;
+            window.auth = auth;
+            console.log('✅ Firebase initialized for admin page');
+        } catch (error) {
+            console.error('❌ Firebase init error:', error);
+            document.getElementById('admin-loading').innerHTML = '<p style="color: #ff6b6b;">Error al conectar. Por favor, recarga la página.</p>';
+        }
+
+        // Load config from server
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                if (response.ok) {
+                    const config = await response.json();
+                    STUDIO_PHONE = config.studioPhone || STUDIO_PHONE;
+                    window.STUDIO_PHONE = STUDIO_PHONE;
+                }
+            } catch (error) {
+                console.warn('⚠️ Could not load config');
+            }
+        }
+        loadConfig();
+
+        // ========== AUTH STATE OBSERVER ==========
+        onAuthStateChanged(auth, async (user) => {
+            const loadingDiv = document.getElementById('admin-loading');
+            const adminPanel = document.getElementById('admin-panel-section');
+            const userDisplay = document.getElementById('admin-user-display');
+
+            if (user) {
+                // Check if this is an admin user
+                // In this system, any authenticated user with a valid token from /api/admin-login is admin
+                console.log('✅ User authenticated:', user.uid);
+                
+                isAdmin = true;
+                window.isAdmin = true;
+                
+                // Hide loading, show panel
+                loadingDiv.style.display = 'none';
+                adminPanel.style.display = 'block';
+                
+                // Update display
+                userDisplay.textContent = 'Hola, Michel';
+                document.getElementById('admin-email-display').textContent = 'Michel';
+                
+                // Load reservations
+                await loadReservations();
+                
+                // Setup event handlers
+                setupEventHandlers();
+                
+            } else {
+                // Not authenticated - redirect to login page
+                console.log('❌ Not authenticated, redirecting to login...');
+                loadingDiv.innerHTML = '<p style="color: #EFE9E1;">No autenticado. Redirigiendo...</p>';
+                
+                // Redirect to main page after a brief delay
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            }
+        });
+
+        // ========== SETUP EVENT HANDLERS ==========
+        function setupEventHandlers() {
+            // Logout button
+            document.getElementById('admin-logout-btn').addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            });
+
+            // Calendar controls
+            setupAdminCalendarControls();
+            
+            // Admin schedule modal handlers
+            setupAdminScheduleModalHandlers();
+        }
+
+        // ========== HELPER FUNCTIONS ==========
+        function normalizePhoneNumber(phone) {
+            if (!phone) return '';
+            return phone.replace(/\D/g, '');
+        }
+
+        function extractFirstName(fullName) {
+            if (!fullName || typeof fullName !== 'string') return '';
+            const trimmed = fullName.trim();
+            const parts = trimmed.split(/\s+/);
+            return parts[0] || trimmed;
+        }
+
+        function parseFechaHora(fechaHora) {
+            if (!fechaHora) return null;
+            try {
+                const date = new Date(fechaHora);
+                if (isNaN(date.getTime())) return null;
+                return date;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function normalizePhoneForWhatsApp(phone) {
+            if (!phone) return null;
+            const digits = phone.replace(/\D/g, '');
+            if (digits.length === 10) return MEXICO_COUNTRY_CODE + digits;
+            if (digits.length === 12 && digits.startsWith(MEXICO_COUNTRY_CODE)) return digits;
+            return null;
+        }
+
+        // ========== LOAD RESERVATIONS ==========
+        async function loadReservations() {
+            const loadingDiv = document.getElementById('reservations-loading');
+            const noReservationsDiv = document.getElementById('no-reservations');
+            
+            loadingDiv.style.display = 'block';
+            noReservationsDiv.style.display = 'none';
+            
+            try {
+                const q = query(collection(db, 'reservas'), orderBy('timestamp', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                if (!adminCalendar) {
+                    initAdminCalendar();
+                } else {
+                    await loadAdminCalendarReservations();
+                }
+                
+                loadingDiv.style.display = 'none';
+                
+                if (querySnapshot.empty) {
+                    noReservationsDiv.style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Error loading reservations:', error);
+                loadingDiv.innerHTML = '<p style="color: #EFE9E1;">Error al cargar reservas. Por favor, recarga la página.</p>';
+            }
+        }
+
+        // ========== INIT ADMIN CALENDAR ==========
+        function initAdminCalendar() {
+            console.log('Initializing admin calendar...');
+            
+            const calendarEl = document.getElementById('admin-calendar');
+            if (!calendarEl) {
+                console.error('❌ Admin calendar element not found');
+                return;
+            }
+            
+            try {
+                const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+                const initialView = isMobile ? 'timeGridDay' : 'timeGridWeek';
+                
+                adminCalendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: initialView,
+                    locale: 'es',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    slotMinTime: '06:00:00',
+                    slotMaxTime: '20:00:00',
+                    allDaySlot: false,
+                    expandRows: true,
+                    contentHeight: 'auto',
+                    height: 'auto',
+                    nowIndicator: true,
+                    slotDuration: '00:30:00',
+                    slotLabelInterval: '01:00',
+                    editable: false,
+                    selectable: false,
+                    buttonText: {
+                        today: 'Hoy',
+                        month: 'Mes',
+                        week: 'Semana',
+                        day: 'Día'
+                    },
+                    dayHeaderFormat: { weekday: 'narrow' },
+                    eventClick: function(info) {
+                        showEventDetailModal(info.event);
+                    },
+                    eventDidMount: function(info) {
+                        const title = info.el.querySelector('.fc-event-title');
+                        if (title && !title.querySelector('.event-icon')) {
+                            const icon = document.createElement('span');
+                            icon.className = 'event-icon';
+                            icon.textContent = '👤 ';
+                            title.prepend(icon);
+                        }
+                    },
+                    events: []
+                });
+                
+                adminCalendar.render();
+                console.log('✅ Admin calendar initialized');
+                
+                document.getElementById('admin-calendar-view').style.display = 'block';
+                document.getElementById('admin-calendar-controls').style.display = 'block';
+                document.getElementById('admin-stats-section').style.display = 'block';
+                
+                loadAdminCalendarReservations();
+                
+            } catch (error) {
+                console.error('❌ Calendar init error:', error);
+            }
+        }
+
+        // ========== LOAD CALENDAR RESERVATIONS ==========
+        async function loadAdminCalendarReservations() {
+            if (!adminCalendar) {
+                console.warn('⚠️ Calendar not initialized');
+                return;
+            }
+            
+            console.log('Loading reservations into calendar...');
+            
+            try {
+                adminCalendar.getEvents().forEach(event => event.remove());
+                allReservationsData = [];
+                
+                const q = query(collection(db, 'reservas'), orderBy('timestamp', 'desc'));
+                const querySnapshot = await getDocs(q);
+                
+                const reservations = [];
+                querySnapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    let startDate = null;
+                    
+                    if (data.fechaHora) {
+                        startDate = parseFechaHora(data.fechaHora);
+                    }
+                    
+                    if (!startDate && data.timestamp) {
+                        startDate = data.timestamp.toDate();
+                    }
+                    
+                    if (startDate) {
+                        const firstName = extractFirstName(data.nombre);
+                        const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+                        
+                        reservations.push({
+                            id: docSnap.id,
+                            firstName: firstName || 'Reserva',
+                            start: startDate,
+                            end: endDate,
+                            fullName: data.nombre || '',
+                            telefono: data.telefono || '',
+                            notas: data.notas || '',
+                            firebaseId: docSnap.id
+                        });
+                    }
+                });
+                
+                // Group reservations by time slot
+                const groupedByTime = {};
+                reservations.forEach(res => {
+                    const timeKey = res.start.toISOString();
+                    if (!groupedByTime[timeKey]) {
+                        groupedByTime[timeKey] = [];
+                    }
+                    groupedByTime[timeKey].push(res);
+                });
+                
+                // Create calendar events
+                Object.entries(groupedByTime).forEach(([timeKey, group]) => {
+                    if (group.length === 1) {
+                        // Single reservation
+                        const res = group[0];
+                        const event = {
+                            id: res.id,
+                            title: res.firstName,
+                            start: res.start,
+                            end: res.end,
+                            backgroundColor: '#EFE9E1',
+                            borderColor: '#D4C5B9',
+                            textColor: '#333',
+                            extendedProps: {
+                                fullName: res.fullName,
+                                telefono: res.telefono,
+                                notas: res.notas,
+                                firebaseId: res.firebaseId,
+                                isGrouped: false
+                            }
+                        };
+                        allReservationsData.push(event);
+                        adminCalendar.addEvent(event);
+                    } else {
+                        // Grouped reservations
+                        const firstNames = group.map(r => r.firstName).join(', ');
+                        const displayTitle = group.length <= 3 ? firstNames : `${group.length} personas`;
+                        
+                        const event = {
+                            id: `group_${timeKey}`,
+                            title: displayTitle,
+                            start: group[0].start,
+                            end: group[0].end,
+                            backgroundColor: '#D4C5B9',
+                            borderColor: '#B8A99A',
+                            textColor: '#333',
+                            extendedProps: {
+                                isGrouped: true,
+                                count: group.length,
+                                participants: group.map(r => ({
+                                    fullName: r.fullName,
+                                    telefono: r.telefono,
+                                    notas: r.notas,
+                                    firebaseId: r.firebaseId
+                                }))
+                            }
+                        };
+                        allReservationsData.push(event);
+                        adminCalendar.addEvent(event);
+                    }
+                });
+                
+                // Update statistics
+                updateStatistics(reservations);
+                
+                console.log(`✅ Loaded ${reservations.length} reservations`);
+                
+            } catch (error) {
+                console.error('❌ Error loading calendar reservations:', error);
+            }
+        }
+
+        // ========== UPDATE STATISTICS ==========
+        function updateStatistics(reservations) {
+            const now = new Date();
+            const weekStart = new Date(now);
+            weekStart.setDate(now.getDate() - now.getDay());
+            weekStart.setHours(0, 0, 0, 0);
+            
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 7);
+            
+            const thisWeek = reservations.filter(r => r.start >= weekStart && r.start < weekEnd).length;
+            const upcoming = reservations.filter(r => r.start > now).length;
+            
+            const uniquePhones = new Set();
+            reservations.forEach(r => {
+                if (r.telefono) uniquePhones.add(normalizePhoneNumber(r.telefono));
+            });
+            
+            document.getElementById('stat-total-reservations').textContent = reservations.length;
+            document.getElementById('stat-this-week').textContent = thisWeek;
+            document.getElementById('stat-unique-clients').textContent = uniquePhones.size;
+            document.getElementById('stat-upcoming').textContent = upcoming;
+        }
+
+        // ========== SETUP CALENDAR CONTROLS ==========
+        function setupAdminCalendarControls() {
+            const searchInput = document.getElementById('search-client');
+            const dateStartInput = document.getElementById('filter-date-start');
+            const dateEndInput = document.getElementById('filter-date-end');
+            const btnExport = document.getElementById('btn-export-calendar');
+            const btnExportAvailability = document.getElementById('btn-export-availability');
+            const btnSchedule = document.getElementById('btn-schedule-admin');
+            
+            // Search input
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilters);
+            }
+            
+            // Date filters
+            if (dateStartInput) {
+                dateStartInput.addEventListener('change', applyFilters);
+            }
+            if (dateEndInput) {
+                dateEndInput.addEventListener('change', applyFilters);
+            }
+            
+            // Export button
+            if (btnExport) {
+                btnExport.addEventListener('click', exportCalendarData);
+            }
+            
+            // Export availability button
+            if (btnExportAvailability) {
+                btnExportAvailability.addEventListener('click', exportAvailabilityData);
+            }
+            
+            // Schedule button
+            if (btnSchedule) {
+                btnSchedule.addEventListener('click', openAdminScheduleModal);
+            }
+            
+            // Unique clients stat card click
+            const uniqueClientsCard = document.querySelector('.stat-card:has(#stat-unique-clients)');
+            if (uniqueClientsCard) {
+                uniqueClientsCard.style.cursor = 'pointer';
+                uniqueClientsCard.addEventListener('click', showUniqueClientsModal);
+            }
+        }
+
+        // ========== APPLY FILTERS ==========
+        function applyFilters() {
+            if (!adminCalendar || !allReservationsData) return;
+            
+            const searchText = document.getElementById('search-client').value.toLowerCase().trim();
+            const dateStart = document.getElementById('filter-date-start').value;
+            const dateEnd = document.getElementById('filter-date-end').value;
+            
+            adminCalendar.getEvents().forEach(event => event.remove());
+            
+            const filteredEvents = allReservationsData.filter(event => {
+                // Search filter
+                if (searchText) {
+                    let matchFound = false;
+                    
+                    if (event.extendedProps.isGrouped && event.extendedProps.participants) {
+                        event.extendedProps.participants.forEach(participant => {
+                            const fullName = (participant.fullName || '').toLowerCase();
+                            const telefono = (participant.telefono || '').toLowerCase();
+                            if (fullName.includes(searchText) || telefono.includes(searchText)) {
+                                matchFound = true;
+                            }
+                        });
+                    } else {
+                        const fullName = (event.extendedProps.fullName || '').toLowerCase();
+                        const telefono = (event.extendedProps.telefono || '').toLowerCase();
+                        if (fullName.includes(searchText) || telefono.includes(searchText)) {
+                            matchFound = true;
+                        }
+                    }
+                    
+                    if (!matchFound) return false;
+                }
+                
+                // Date range filter
+                if (dateStart) {
+                    const startFilter = new Date(dateStart);
+                    startFilter.setHours(0, 0, 0, 0);
+                    if (event.start < startFilter) return false;
+                }
+                
+                if (dateEnd) {
+                    const endFilter = new Date(dateEnd);
+                    endFilter.setHours(23, 59, 59, 999);
+                    if (event.start > endFilter) return false;
+                }
+                
+                return true;
+            });
+            
+            filteredEvents.forEach(event => {
+                adminCalendar.addEvent(event);
+            });
+        }
+
+        // ========== SHOW EVENT DETAIL MODAL ==========
+        function showEventDetailModal(event) {
+            const props = event.extendedProps;
+            const modal = document.getElementById('event-detail-modal');
+            
+            // Format date and time
+            const date = event.start.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('detail-date').textContent = date;
+            
+            const startTime = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            const endTime = event.end ? event.end.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
+            document.getElementById('detail-time').textContent = endTime ? `${startTime} - ${endTime}` : startTime;
+            
+            if (props.isGrouped && props.participants && props.participants.length > 0) {
+                // Grouped event
+                const modalHeader = document.querySelector('.event-detail-header h3');
+                modalHeader.textContent = `👥 Detalle de Reserva - ${props.count} Personas`;
+                
+                let participantsHTML = '<div class="participants-list">';
+                props.participants.forEach((participant) => {
+                    const escapedTelefono = escapeHtml(participant.telefono || '');
+                    const escapedNombre = escapeHtml(participant.fullName || '');
+                    
+                    participantsHTML += `
+                        <div class="participant-item" style="padding: 10px; margin-bottom: 10px; border-left: 3px solid #EFE9E1; background-color: #EFE9E1; border-radius: 5px;">
+                            <div style="font-weight: 600; color: #333; margin-bottom: 5px;">
+                                <span style="margin-right: 5px;">👤</span>${escapedNombre || '-'}
+                            </div>
+                            <div style="font-size: 14px; color: #666; margin-bottom: 3px;">
+                                <span style="margin-right: 5px;">📱</span>${escapedTelefono || '-'}
+                            </div>
+                        </div>
+                    `;
+                });
+                participantsHTML += '</div>';
+                
+                document.getElementById('detail-client-name').innerHTML = participantsHTML;
+                document.querySelector('.event-detail-row:has(#detail-client-email)').style.display = 'none';
+            } else {
+                // Single event
+                document.querySelector('.event-detail-header h3').textContent = '👤 Detalle de Reserva';
+                document.getElementById('detail-client-name').textContent = props.fullName || '-';
+                document.getElementById('detail-client-email').textContent = props.telefono || '-';
+                document.querySelector('.event-detail-row:has(#detail-client-email)').style.display = 'flex';
+            }
+            
+            // Notes
+            const notesRow = document.getElementById('detail-notes-row');
+            if (props.notas && !props.isGrouped) {
+                document.getElementById('detail-notes').textContent = props.notas;
+                notesRow.style.display = 'flex';
+            } else {
+                notesRow.style.display = 'none';
+            }
+            
+            // Store current event data for actions
+            modal.dataset.currentEvent = JSON.stringify({
+                firebaseId: props.firebaseId || (props.participants ? props.participants[0]?.firebaseId : null),
+                telefono: props.telefono || (props.participants ? props.participants[0]?.telefono : null),
+                fullName: props.fullName || (props.participants ? props.participants[0]?.fullName : null),
+                start: event.start.toISOString()
+            });
+            
+            // Setup modal buttons
+            setupEventDetailModalButtons(event);
+            
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+
+        function setupEventDetailModalButtons(event) {
+            const modal = document.getElementById('event-detail-modal');
+            const props = event.extendedProps;
+            
+            // Close buttons
+            document.getElementById('event-detail-close').onclick = () => closeModal(modal);
+            document.getElementById('detail-close-btn').onclick = () => closeModal(modal);
+            
+            // Contact button
+            document.getElementById('detail-contact-btn').onclick = () => {
+                const telefono = props.telefono || (props.participants ? props.participants[0]?.telefono : null);
+                if (telefono) {
+                    const normalizedPhone = normalizePhoneForWhatsApp(telefono);
+                    if (normalizedPhone) {
+                        window.open(`https://wa.me/${normalizedPhone}`, '_blank');
+                    }
+                }
+            };
+            
+            // WhatsApp button
+            document.getElementById('detail-whatsapp-btn').onclick = async () => {
+                const telefono = props.telefono || (props.participants ? props.participants[0]?.telefono : null);
+                const nombre = props.fullName || (props.participants ? props.participants[0]?.fullName : 'Cliente');
+                if (telefono) {
+                    const message = await generateAdminToClientMessage(telefono, nombre);
+                    const normalizedPhone = normalizePhoneForWhatsApp(telefono);
+                    if (normalizedPhone) {
+                        window.open(`https://wa.me/${normalizedPhone}?text=${encodeURIComponent(message)}`, '_blank');
+                    }
+                }
+            };
+            
+            // Edit button (only for single events)
+            const editBtn = document.getElementById('detail-edit-btn');
+            if (!props.isGrouped && props.firebaseId) {
+                editBtn.style.display = 'inline-block';
+                editBtn.onclick = () => {
+                    closeModal(modal);
+                    openEditReservationModal(event);
+                };
+            } else {
+                editBtn.style.display = 'none';
+            }
+        }
+
+        function closeModal(modal) {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        // ========== GENERATE WHATSAPP MESSAGE ==========
+        async function generateAdminToClientMessage(telefono, nombre) {
+            try {
+                const q = query(
+                    collection(db, 'reservas'),
+                    where('telefono', '==', telefono),
+                    orderBy('fechaHora', 'asc')
+                );
+                const snapshot = await getDocs(q);
+                
+                const now = new Date();
+                const upcomingClasses = [];
+                
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const fechaHora = parseFechaHora(data.fechaHora);
+                    if (fechaHora && fechaHora > now) {
+                        upcomingClasses.push({
+                            fecha: fechaHora.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }),
+                            hora: fechaHora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+                        });
+                    }
+                });
+                
+                if (upcomingClasses.length === 0) {
+                    return `¡Hola ${nombre}! 🌸\n\nSomos AURA Studio. No tienes clases programadas próximamente.\n\n¿Te gustaría agendar una clase? Visita nuestra página web. 💫`;
+                }
+                
+                let message = `¡Hola ${nombre}! 🌸\n\nTus próximas clases en AURA Studio:\n\n`;
+                upcomingClasses.slice(0, 5).forEach((clase, index) => {
+                    message += `📅 ${clase.fecha} - ${clase.hora}\n`;
+                });
+                
+                if (upcomingClasses.length > 5) {
+                    message += `\n... y ${upcomingClasses.length - 5} clases más.\n`;
+                }
+                
+                message += `\n¡Te esperamos! 💫`;
+                
+                return message;
+                
+            } catch (error) {
+                console.error('Error generating message:', error);
+                return `¡Hola ${nombre}! 🌸\n\nSomos AURA Studio. ¿En qué podemos ayudarte? 💫`;
+            }
+        }
+
+        // ========== EDIT RESERVATION MODAL ==========
+        function openEditReservationModal(event) {
+            const modal = document.getElementById('edit-reservation-modal');
+            const props = event.extendedProps;
+            
+            document.getElementById('edit-client-name').textContent = props.fullName || '-';
+            
+            // Pre-fill date and time
+            const dateStr = event.start.toISOString().split('T')[0];
+            const timeStr = event.start.toTimeString().substring(0, 5);
+            
+            document.getElementById('edit-reservation-date').value = dateStr;
+            document.getElementById('edit-reservation-time').value = timeStr;
+            
+            modal.dataset.firebaseId = props.firebaseId;
+            modal.dataset.originalStart = event.start.toISOString();
+            
+            // Setup buttons
+            document.getElementById('edit-reservation-close').onclick = () => closeModal(modal);
+            document.getElementById('edit-reservation-cancel').onclick = () => closeModal(modal);
+            
+            document.getElementById('edit-reservation-save').onclick = async () => {
+                const newDate = document.getElementById('edit-reservation-date').value;
+                const newTime = document.getElementById('edit-reservation-time').value;
+                
+                if (!newDate || !newTime) {
+                    alert('Por favor selecciona fecha y hora');
+                    return;
+                }
+                
+                try {
+                    const newFechaHora = `${newDate}T${newTime}:00`;
+                    const docRef = doc(db, 'reservas', props.firebaseId);
+                    await updateDoc(docRef, { fechaHora: newFechaHora });
+                    
+                    alert('✅ Reserva actualizada correctamente');
+                    closeModal(modal);
+                    await loadAdminCalendarReservations();
+                } catch (error) {
+                    console.error('Error updating reservation:', error);
+                    alert('❌ Error al actualizar la reserva');
+                }
+            };
+            
+            document.getElementById('edit-reservation-delete').onclick = async () => {
+                if (!confirm('¿Estás seguro de eliminar esta clase?')) return;
+                
+                try {
+                    const docRef = doc(db, 'reservas', props.firebaseId);
+                    await deleteDoc(docRef);
+                    
+                    alert('✅ Clase eliminada correctamente');
+                    closeModal(modal);
+                    await loadAdminCalendarReservations();
+                } catch (error) {
+                    console.error('Error deleting reservation:', error);
+                    alert('❌ Error al eliminar la clase');
+                }
+            };
+            
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+
+        // ========== UNIQUE CLIENTS MODAL ==========
+        function showUniqueClientsModal() {
+            const modal = document.getElementById('unique-clients-modal');
+            const listContainer = document.getElementById('unique-clients-list');
+            
+            // Get unique clients from reservations
+            const clientsMap = new Map();
+            allReservationsData.forEach(event => {
+                if (event.extendedProps.isGrouped) {
+                    event.extendedProps.participants.forEach(p => {
+                        if (p.telefono) {
+                            clientsMap.set(normalizePhoneNumber(p.telefono), {
+                                nombre: p.fullName,
+                                telefono: p.telefono
+                            });
+                        }
+                    });
+                } else {
+                    if (event.extendedProps.telefono) {
+                        clientsMap.set(normalizePhoneNumber(event.extendedProps.telefono), {
+                            nombre: event.extendedProps.fullName,
+                            telefono: event.extendedProps.telefono
+                        });
+                    }
+                }
+            });
+            
+            const clients = Array.from(clientsMap.values());
+            
+            if (clients.length === 0) {
+                listContainer.innerHTML = '<p style="text-align: center; color: #666;">No hay clientes registrados.</p>';
+            } else {
+                let html = '';
+                clients.forEach(client => {
+                    html += `
+                        <div style="padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600;">${escapeHtml(client.nombre || 'Sin nombre')}</div>
+                                <div style="color: #666; font-size: 0.9rem;">${escapeHtml(client.telefono)}</div>
+                            </div>
+                            <button onclick="window.open('https://wa.me/${normalizePhoneForWhatsApp(client.telefono)}', '_blank')" style="background: #25D366; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                                📱 WhatsApp
+                            </button>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+            }
+            
+            document.getElementById('unique-clients-close').onclick = () => closeModal(modal);
+            document.getElementById('unique-clients-close-btn').onclick = () => closeModal(modal);
+            
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+
+        // ========== EXPORT FUNCTIONS ==========
+        async function exportCalendarData() {
+            if (!allReservationsData || allReservationsData.length === 0) {
+                alert('⚠️ No hay reservas para exportar.');
+                return;
+            }
+            
+            const btnExport = document.getElementById('btn-export-calendar');
+            const originalText = btnExport.textContent;
+            btnExport.textContent = '⏳ Generando PDF...';
+            btnExport.disabled = true;
+            
+            try {
+                const reservations = [];
+                allReservationsData.forEach(event => {
+                    if (!event.start) return;
+                    
+                    const date = event.start.toISOString().split('T')[0];
+                    const time = event.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                    
+                    if (event.extendedProps.isGrouped) {
+                        event.extendedProps.participants.forEach(p => {
+                            reservations.push({
+                                date, time,
+                                name: p.fullName || DEFAULT_NAME,
+                                phone: p.telefono || DEFAULT_PHONE,
+                                notes: p.notas || ''
+                            });
+                        });
+                    } else {
+                        reservations.push({
+                            date, time,
+                            name: event.extendedProps.fullName || event.title || DEFAULT_NAME,
+                            phone: event.extendedProps.telefono || DEFAULT_PHONE,
+                            notes: event.extendedProps.notas || ''
+                        });
+                    }
+                });
+                
+                const response = await fetch('/api/exportar-calendario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reservations })
+                });
+                
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'Calendario_Reservas.pdf';
+                link.click();
+                window.URL.revokeObjectURL(url);
+                
+                alert('✅ Calendario exportado exitosamente');
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('❌ Error al exportar. Por favor, intente nuevamente.');
+            } finally {
+                btnExport.textContent = originalText;
+                btnExport.disabled = false;
+            }
+        }
+
+        async function exportAvailabilityData() {
+            const btnExport = document.getElementById('btn-export-availability');
+            const originalText = btnExport.textContent;
+            btnExport.textContent = '⏳ Generando...';
+            btnExport.disabled = true;
+            
+            try {
+                // Similar implementation to exportCalendarData but for availability
+                alert('📊 Función de exportar disponibilidad en desarrollo');
+            } catch (error) {
+                console.error('Export availability error:', error);
+                alert('❌ Error al exportar disponibilidad.');
+            } finally {
+                btnExport.textContent = originalText;
+                btnExport.disabled = false;
+            }
+        }
+
+        // ========== ADMIN SCHEDULE MODAL ==========
+        function setupAdminScheduleModalHandlers() {
+            // Package buttons - modal version
+            document.querySelectorAll('.admin-package-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.admin-package-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('admin-schedule-package').value = this.dataset.classes;
+                });
+            });
+            
+            // Package buttons - fullpage version
+            document.querySelectorAll('.admin-package-btn-fullpage').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.admin-package-btn-fullpage').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    document.getElementById('admin-schedule-package-fullpage').value = this.dataset.classes;
+                });
+            });
+            
+            // Back to admin panel (fullpage)
+            const backBtn = document.getElementById('back-to-admin-panel');
+            if (backBtn) backBtn.addEventListener('click', showAdminPanel);
+            
+            // Cancel buttons
+            document.getElementById('admin-schedule-cancel-step1')?.addEventListener('click', closeAdminScheduleModal);
+            document.getElementById('admin-schedule-cancel-step1-fullpage')?.addEventListener('click', showAdminPanel);
+            
+            // Close buttons
+            document.getElementById('admin-schedule-close')?.addEventListener('click', closeAdminScheduleModal);
+            document.getElementById('admin-schedule-close-step2')?.addEventListener('click', closeAdminScheduleModal);
+            
+            // Next buttons
+            document.getElementById('admin-schedule-next')?.addEventListener('click', goToScheduleStep2Modal);
+            document.getElementById('admin-schedule-next-fullpage')?.addEventListener('click', goToScheduleStep2Fullpage);
+            
+            // Back buttons (step 2)
+            document.getElementById('admin-schedule-back')?.addEventListener('click', goToScheduleStep1Modal);
+            document.getElementById('admin-schedule-back-fullpage')?.addEventListener('click', goToScheduleStep1Fullpage);
+            
+            // Confirm buttons
+            document.getElementById('admin-schedule-confirm')?.addEventListener('click', confirmAdminScheduleModal);
+            document.getElementById('admin-schedule-confirm-fullpage')?.addEventListener('click', confirmAdminScheduleFullpage);
+        }
+
+        function openAdminScheduleModal() {
+            // Check if mobile - use fullpage on mobile
+            if (window.innerWidth <= MOBILE_BREAKPOINT) {
+                // Hide admin panel, show scheduling section
+                document.getElementById('admin-panel-section').style.display = 'none';
+                document.getElementById('admin-scheduling-section').style.display = 'block';
+                
+                // Reset fullpage form
+                document.getElementById('admin-schedule-name-fullpage').value = '';
+                document.getElementById('admin-schedule-phone-fullpage').value = '';
+                document.getElementById('admin-schedule-package-fullpage').value = '';
+                document.querySelectorAll('.admin-package-btn-fullpage').forEach(b => b.classList.remove('selected'));
+                
+                document.getElementById('admin-schedule-step1-fullpage').style.display = 'block';
+                document.getElementById('admin-schedule-step2-fullpage').style.display = 'none';
+                
+                window.scrollTo(0, 0);
+            } else {
+                // Use modal on desktop
+                const modal = document.getElementById('admin-schedule-modal');
+                
+                // Reset form
+                document.getElementById('admin-schedule-name').value = '';
+                document.getElementById('admin-schedule-phone').value = '';
+                document.getElementById('admin-schedule-package').value = '';
+                document.querySelectorAll('.admin-package-btn').forEach(b => b.classList.remove('selected'));
+                
+                document.getElementById('admin-schedule-step1').style.display = 'block';
+                document.getElementById('admin-schedule-step2').style.display = 'none';
+                
+                modal.style.display = 'flex';
+                document.body.classList.add('modal-open');
+            }
+            
+            // Reset state
+            adminScheduleState = {
+                clientName: '',
+                clientPhone: '',
+                packageSize: 0,
+                selectedDates: [],
+                scheduleCalendar: null
+            };
+        }
+
+        function showAdminPanel() {
+            document.getElementById('admin-scheduling-section').style.display = 'none';
+            document.getElementById('admin-panel-section').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function closeAdminScheduleModal() {
+            const modal = document.getElementById('admin-schedule-modal');
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            
+            if (adminScheduleState.scheduleCalendar) {
+                adminScheduleState.scheduleCalendar.destroy();
+                adminScheduleState.scheduleCalendar = null;
+            }
+        }
+
+        function goToScheduleStep2Modal() {
+            const name = document.getElementById('admin-schedule-name').value.trim();
+            const phone = document.getElementById('admin-schedule-phone').value.trim();
+            const packageSize = parseInt(document.getElementById('admin-schedule-package').value);
+            
+            if (!validateScheduleStep1(name, phone, packageSize)) return;
+            
+            adminScheduleState.clientName = name;
+            adminScheduleState.clientPhone = COUNTRY_CODE + phone;
+            adminScheduleState.packageSize = packageSize;
+            adminScheduleState.selectedDates = [];
+            
+            document.getElementById('admin-schedule-client-name-display').textContent = name;
+            document.getElementById('admin-schedule-total-classes').textContent = packageSize;
+            document.getElementById('admin-schedule-selected-count').textContent = '0';
+            
+            document.getElementById('admin-schedule-step1').style.display = 'none';
+            document.getElementById('admin-schedule-step2').style.display = 'block';
+            
+            initAdminScheduleCalendar('admin-schedule-calendar');
+        }
+
+        function goToScheduleStep2Fullpage() {
+            const name = document.getElementById('admin-schedule-name-fullpage').value.trim();
+            const phone = document.getElementById('admin-schedule-phone-fullpage').value.trim();
+            const packageSize = parseInt(document.getElementById('admin-schedule-package-fullpage').value);
+            
+            if (!validateScheduleStep1(name, phone, packageSize)) return;
+            
+            adminScheduleState.clientName = name;
+            adminScheduleState.clientPhone = COUNTRY_CODE + phone;
+            adminScheduleState.packageSize = packageSize;
+            adminScheduleState.selectedDates = [];
+            
+            document.getElementById('admin-schedule-client-name-display-fullpage').textContent = name;
+            document.getElementById('admin-schedule-total-classes-fullpage').textContent = packageSize;
+            document.getElementById('admin-schedule-selected-count-fullpage').textContent = '0';
+            
+            document.getElementById('admin-schedule-step1-fullpage').style.display = 'none';
+            document.getElementById('admin-schedule-step2-fullpage').style.display = 'block';
+            
+            window.scrollTo(0, 0);
+            
+            initAdminScheduleCalendar('admin-schedule-calendar-fullpage');
+        }
+
+        function validateScheduleStep1(name, phone, packageSize) {
+            if (!name) {
+                alert('⚠️ Por favor ingresa el nombre del cliente');
+                return false;
+            }
+            if (!phone || !/^\d{10}$/.test(phone)) {
+                alert('⚠️ Por favor ingresa un teléfono válido de 10 dígitos');
+                return false;
+            }
+            if (!packageSize || packageSize <= 0) {
+                alert('⚠️ Por favor selecciona el número de clases');
+                return false;
+            }
+            return true;
+        }
+
+        function goToScheduleStep1Modal() {
+            document.getElementById('admin-schedule-step2').style.display = 'none';
+            document.getElementById('admin-schedule-step1').style.display = 'block';
+        }
+
+        function goToScheduleStep1Fullpage() {
+            document.getElementById('admin-schedule-step2-fullpage').style.display = 'none';
+            document.getElementById('admin-schedule-step1-fullpage').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function initAdminScheduleCalendar(containerId) {
+            const calendarEl = document.getElementById(containerId);
+            if (!calendarEl) return;
+            
+            if (adminScheduleState.scheduleCalendar) {
+                adminScheduleState.scheduleCalendar.destroy();
+            }
+            
+            adminScheduleState.scheduleCalendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'timeGridWeek',
+                locale: 'es',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'timeGridWeek,timeGridDay'
+                },
+                slotMinTime: '06:00:00',
+                slotMaxTime: '20:00:00',
+                allDaySlot: false,
+                selectable: true,
+                selectMirror: true,
+                slotDuration: '01:00:00',
+                buttonText: {
+                    week: 'Semana',
+                    day: 'Día'
+                },
+                select: function(info) {
+                    handleTimeSlotSelect(info, containerId);
+                },
+                events: []
+            });
+            
+            adminScheduleState.scheduleCalendar.render();
+        }
+
+        function handleTimeSlotSelect(info, containerId) {
+            // Check if we've already selected enough classes
+            if (adminScheduleState.selectedDates.length >= adminScheduleState.packageSize) {
+                alert(`⚠️ Ya has seleccionado ${adminScheduleState.packageSize} clases`);
+                adminScheduleState.scheduleCalendar.unselect();
+                return;
+            }
+            
+            const dateTimeStr = info.start.toISOString().replace('.000Z', '');
+            const displayText = info.start.toLocaleDateString('es-ES', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+            }) + ' - ' + info.start.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            
+            adminScheduleState.selectedDates.push({
+                start: info.start,
+                datetime: dateTimeStr,
+                displayText: displayText
+            });
+            
+            // Add visual indicator
+            adminScheduleState.scheduleCalendar.addEvent({
+                start: info.start,
+                end: new Date(info.start.getTime() + 60 * 60 * 1000),
+                display: 'background',
+                backgroundColor: 'rgba(184, 169, 154, 0.5)'
+            });
+            
+            updateSelectedTimesList(containerId);
+            adminScheduleState.scheduleCalendar.unselect();
+        }
+
+        function updateSelectedTimesList(containerId) {
+            const isFullpage = containerId.includes('fullpage');
+            const containerSuffix = isFullpage ? '-fullpage' : '';
+            
+            const container = document.getElementById(`admin-selected-times-container${containerSuffix}`);
+            const listEl = document.getElementById(`admin-selected-times-list${containerSuffix}`);
+            const countEl = document.getElementById(`admin-schedule-selected-count${containerSuffix}`);
+            
+            if (adminScheduleState.selectedDates.length === 0) {
+                container.style.display = 'none';
+                countEl.textContent = '0';
+                return;
+            }
+            
+            container.style.display = 'block';
+            countEl.textContent = adminScheduleState.selectedDates.length;
+            
+            listEl.innerHTML = '';
+            adminScheduleState.selectedDates.forEach((dateInfo, index) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'admin-selected-time-item';
+                itemEl.innerHTML = `
+                    <span>${dateInfo.displayText}</span>
+                    <button type="button" data-index="${index}">✕ Quitar</button>
+                `;
+                
+                itemEl.querySelector('button').addEventListener('click', function() {
+                    removeSelectedTime(parseInt(this.dataset.index), containerId);
+                });
+                
+                listEl.appendChild(itemEl);
+            });
+        }
+
+        function removeSelectedTime(index, containerId) {
+            adminScheduleState.selectedDates.splice(index, 1);
+            
+            // Refresh calendar
+            if (adminScheduleState.scheduleCalendar) {
+                initAdminScheduleCalendar(containerId);
+                
+                // Re-add remaining selected dates
+                adminScheduleState.selectedDates.forEach(dateInfo => {
+                    adminScheduleState.scheduleCalendar.addEvent({
+                        start: dateInfo.start,
+                        end: new Date(dateInfo.start.getTime() + 60 * 60 * 1000),
+                        display: 'background',
+                        backgroundColor: 'rgba(184, 169, 154, 0.5)'
+                    });
+                });
+            }
+            
+            updateSelectedTimesList(containerId);
+        }
+
+        async function confirmAdminScheduleModal() {
+            await saveAdminScheduledClasses();
+            closeAdminScheduleModal();
+        }
+
+        async function confirmAdminScheduleFullpage() {
+            await saveAdminScheduledClasses();
+            showAdminPanel();
+        }
+
+        async function saveAdminScheduledClasses() {
+            if (adminScheduleState.selectedDates.length === 0) {
+                alert('⚠️ Por favor selecciona al menos un horario');
+                return;
+            }
+            
+            if (adminScheduleState.selectedDates.length !== adminScheduleState.packageSize) {
+                if (!confirm(`Has seleccionado ${adminScheduleState.selectedDates.length} de ${adminScheduleState.packageSize} clases. ¿Continuar?`)) {
+                    return;
+                }
+            }
+            
+            try {
+                let successCount = 0;
+                
+                for (const dateInfo of adminScheduleState.selectedDates) {
+                    try {
+                        await addDoc(collection(db, 'reservas'), {
+                            nombre: adminScheduleState.clientName,
+                            telefono: adminScheduleState.clientPhone,
+                            fechaHora: dateInfo.datetime,
+                            notas: '',
+                            timestamp: serverTimestamp()
+                        });
+                        successCount++;
+                    } catch (error) {
+                        console.error('Error saving reservation:', error);
+                    }
+                }
+                
+                alert(`✅ ${successCount} clases agendadas para ${adminScheduleState.clientName}`);
+                
+                await loadAdminCalendarReservations();
+                
+            } catch (error) {
+                console.error('Error confirming schedule:', error);
+                alert('❌ Error al agendar las clases');
+            }
+        }
+
+        // Expose function for inline onclick handlers
+        window.normalizePhoneForWhatsApp = normalizePhoneForWhatsApp;
+    </script>
+</body>
+</html>
