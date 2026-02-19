@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Detect video load errors
         heroVideo.addEventListener('error', function(e) {
             console.warn('⚠️ Video failed to load');
-            console.warn('📁 Expected location: videoaura155.mp4');
+            console.warn('📁 Expected location: assets/videoaura155.mp4');
             console.warn('📖 Instructions: See DOWNLOAD_VIDEO_FIRST.md or video-missing.html');
             console.warn('🔗 Download from: https://www.pexels.com/video/8746842/download/');
             
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.log('%cThe background video is not playing because the file is missing.', 'font-size: 14px;');
                         console.log('%cTo fix this:', 'font-size: 14px; font-weight: bold;');
                         console.log('%c1. Download: https://www.pexels.com/video/8746842/download/', 'font-size: 13px;');
-                        console.log('%c2. Save as: videoaura155.mp4', 'font-size: 13px;');
+                        console.log('%c2. Save as: assets/videoaura155.mp4', 'font-size: 13px;');
                         console.log('%c3. Or run: ./download-video.sh or python download-video.py', 'font-size: 13px;');
                         console.log('%cFor detailed instructions, open: video-missing.html', 'font-size: 13px; font-style: italic;');
                     }

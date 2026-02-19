@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 // Configuration constants
-const LOGO_FILENAME = 'auralogo2.png';
+const LOGO_FILENAME = 'assets/auralogo2.png';
 
 // PDF Layout constants (in points)
 const PAGE_HEIGHT = 792; // LETTER size height
