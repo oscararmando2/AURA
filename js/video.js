@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         heroVideo.addEventListener('loadedmetadata', function() {
             videoLoaded = true;
             heroVideo.currentTime = 1;
-            console.log('✅ Video loaded successfully');
+            // console.log('✅ Video loaded successfully');
             // Ensure video plays after metadata loads
             attemptPlay();
         });
@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const playPromise = heroVideo.play();
                 if (playPromise !== undefined) {
                     playPromise.then(function() {
-                        console.log('✅ Video autoplay successful');
+                        // console.log('✅ Video autoplay successful');
                     }).catch(function(error) {
-                        console.log('Video autoplay was prevented:', error.message);
+                        // console.log('Video autoplay was prevented:', error.message);
                         // Try again on user interaction
                         setupUserInteractionFallback();
                     });
@@ -95,13 +95,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
                 setTimeout(function() {
                     if (!videoLoaded) {
-                        console.log('%c🎬 AURA Studio - Video Missing', 'font-size: 16px; font-weight: bold; color: #EFE9E1;');
-                        console.log('%cThe background video is not playing because the file is missing.', 'font-size: 14px;');
-                        console.log('%cTo fix this:', 'font-size: 14px; font-weight: bold;');
-                        console.log('%c1. Download: https://www.pexels.com/video/8746842/download/', 'font-size: 13px;');
-                        console.log('%c2. Save as: assets/videoaura155.mp4', 'font-size: 13px;');
-                        console.log('%c3. Or run: ./download-video.sh or python download-video.py', 'font-size: 13px;');
-                        console.log('%cFor detailed instructions, open: video-missing.html', 'font-size: 13px; font-style: italic;');
+                        // console.log('%c🎬 AURA Studio - Video Missing', 'font-size: 16px; font-weight: bold; color: #EFE9E1;');
+                        // console.log('%cThe background video is not playing because the file is missing.', 'font-size: 14px;');
+                        // console.log('%cTo fix this:', 'font-size: 14px; font-weight: bold;');
+                        // console.log('%c1. Download: https://www.pexels.com/video/8746842/download/', 'font-size: 13px;');
+                        // console.log('%c2. Save as: assets/videoaura155.mp4', 'font-size: 13px;');
+                        // console.log('%c3. Or run: ./download-video.sh or python download-video.py', 'font-size: 13px;');
+                        // console.log('%cFor detailed instructions, open: video-missing.html', 'font-size: 13px; font-style: italic;');
                     }
                 }, 1000);
             }
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
             if (!videoLoaded && heroVideo.readyState === 0) {
                 console.warn('⚠️ Video may be missing or failed to load');
-                console.log('%c📖 Open video-missing.html for instructions', 'font-size: 14px; color: #2196F3; font-weight: bold;');
+                // console.log('%c📖 Open video-missing.html for instructions', 'font-size: 14px; color: #2196F3; font-weight: bold;');
             }
         }, 2000);
     }

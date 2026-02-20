@@ -147,9 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Sistema de autenticación no está listo. Por favor, espera unos segundos e intenta nuevamente.');
             }
             
-            console.log('✅ Usando reCAPTCHA verifier global existente');
+            // console.log('✅ Usando reCAPTCHA verifier global existente');
             
-            console.log('📱 Enviando código de verificación para login:', phoneWithCountryCode);
+            // console.log('📱 Enviando código de verificación para login:', phoneWithCountryCode);
             
             // Send verification code
             const confirmationResult = await signInWithPhoneNumber(window.auth, phoneWithCountryCode, window.recaptchaVerifier);
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 phoneWithCountryCode
             };
             
-            console.log('✅ Código enviado para login');
+            // console.log('✅ Código enviado para login');
             
             // Hide login modal
             userLoginModal.style.display = 'none';
@@ -225,14 +225,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             try {
-                console.log('🔐 Verificando código de login...');
+                // console.log('🔐 Verificando código de login...');
                 
                 // Verify the code
                 const result = await window.phoneLoginData.confirmationResult.confirm(code);
                 const user = result.user;
                 
-                console.log('✅ Login exitoso! UID:', user.uid);
-                console.log('📱 Teléfono:', user.phoneNumber);
+                // console.log('✅ Login exitoso! UID:', user.uid);
+                // console.log('📱 Teléfono:', user.phoneNumber);
                 
                 // Get user data
                 const { phoneDigits, phoneWithCountryCode } = window.phoneLoginData;
@@ -320,8 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
                 
-                console.log('📱 Reenviando código de login a:', phoneWithCountryCode);
-                console.log('✅ Usando reCAPTCHA verifier global existente');
+                // console.log('📱 Reenviando código de login a:', phoneWithCountryCode);
+                // console.log('✅ Usando reCAPTCHA verifier global existente');
                 
                 // Resend code
                 const { signInWithPhoneNumber } = window.firebaseAuthExports || {};
@@ -330,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Update confirmation result
                 window.phoneLoginData.confirmationResult = confirmationResult;
                 
-                console.log('✅ Código reenviado');
+                // console.log('✅ Código reenviado');
                 errorDivLogin.textContent = '✅ Código reenviado exitosamente';
                 errorDivLogin.style.display = 'block';
                 errorDivLogin.style.background = 'rgba(76, 175, 80, 0.1)';

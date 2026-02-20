@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            console.log(`Plan button clicked: ${clases} clases, $${precio}`);
+            // console.log(`Plan button clicked: ${clases} clases, $${precio}`);
             // NUEVO FLUJO: Llamar directamente a selectPlan (muestra calendario inmediatamente)
             window.selectPlan(clases, precio);
         });
@@ -109,7 +109,7 @@ async function crearPreferenciaYRedirigir(nombre, telefono) {
     }
     
     // Mostrar indicador de carga
-    console.log(`⏳ Procesando pago de ${classes} clase${classes > 1 ? 's' : ''} por $${price}...`);
+    // console.log(`⏳ Procesando pago de ${classes} clase${classes > 1 ? 's' : ''} por $${price}...`);
 
     try {
         // Llamar al backend seguro en lugar de exponer el token
@@ -149,8 +149,8 @@ async function crearPreferenciaYRedirigir(nombre, telefono) {
             return;
         }
         
-        console.log('✅ Preferencia creada:', data.preference_id || 'OK');
-        console.log('🔗 Redirigiendo a MercadoPago...');
+        // console.log('✅ Preferencia creada:', data.preference_id || 'OK');
+        // console.log('🔗 Redirigiendo a MercadoPago...');
         
         // Verificar una última vez que las reservas están guardadas
         const verificacionFinal = localStorage.getItem('tempReservations');
@@ -159,7 +159,7 @@ async function crearPreferenciaYRedirigir(nombre, telefono) {
             alert('⚠️ Error al guardar las reservas.\n\nPor favor, intenta nuevamente.');
             return;
         }
-        console.log('✅ Verificación final: tempReservations presente en localStorage');
+        // console.log('✅ Verificación final: tempReservations presente en localStorage');
         
         // Redirigir a MercadoPago
         location.href = data.init_point;
@@ -184,7 +184,7 @@ let paymentReturnProcessed = false;
 async function detectarRetorno() {
     // Evitar doble procesamiento (DOMContentLoaded + load)
     if (paymentReturnProcessed) {
-        console.log('⏭️ Retorno ya procesado, saltando...');
+        // console.log('⏭️ Retorno ya procesado, saltando...');
         return;
     }
     
@@ -231,11 +231,11 @@ async function detectarRetorno() {
     
     // Marcar como procesado para evitar doble ejecución
     paymentReturnProcessed = true;
-    console.log('💳 Retorno de Mercado Pago detectado:', { status, paymentId, isApproved, isPending, isRejected });
+    // console.log('💳 Retorno de Mercado Pago detectado:', { status, paymentId, isApproved, isPending, isRejected });
     
     // Manejar pago rechazado
     if (isRejected) {
-        console.log('❌ Pago rechazado');
+        // console.log('❌ Pago rechazado');
         history.replaceState({}, document.title, location.pathname);
         alert('❌ El pago fue rechazado.\n\nPor favor, verifica tu método de pago e intenta nuevamente.\n\nTus reservas temporales se mantienen.');
         return;
@@ -243,7 +243,7 @@ async function detectarRetorno() {
     
     // Manejar pago pendiente
     if (isPending) {
-        console.log('⏳ Pago pendiente');
+        // console.log('⏳ Pago pendiente');
         history.replaceState({}, document.title, location.pathname);
         alert('⏳ Tu pago está siendo procesado.\n\nTe notificaremos cuando se confirme.\n\nNo cierres esta ventana.');
         // No limpiar localStorage, ya que el pago aún no está confirmado
@@ -252,26 +252,26 @@ async function detectarRetorno() {
     
     // Solo continuar si el pago fue aprobado
     if (!isApproved) {
-        console.log('⚠️ Estado de pago no reconocido:', status);
+        // console.log('⚠️ Estado de pago no reconocido:', status);
         history.replaceState({}, document.title, location.pathname);
         return;
     }
     
-    console.log('✅ Pago aprobado, procesando reservas...');
+    // console.log('✅ Pago aprobado, procesando reservas...');
     
     // 1. Limpiar URL inmediatamente (quitar parámetros de pago)
     history.replaceState({}, document.title, location.pathname);
-    console.log('🧹 URL limpiada');
+    // console.log('🧹 URL limpiada');
     
     // 2. Recuperar reservas temporales de localStorage
-    console.log('🔍 Verificando localStorage...');
-    console.log('📦 Claves en localStorage:', Object.keys(localStorage));
+    // console.log('🔍 Verificando localStorage...');
+    // console.log('📦 Claves en localStorage:', Object.keys(localStorage));
     
     const tempReservationsStr = localStorage.getItem('tempReservations');
     
     if (!tempReservationsStr) {
         console.error('❌ No hay reservas temporales en localStorage');
-        console.log('📋 Estado de localStorage:', {
+        // console.log('📋 Estado de localStorage:', {
             tempReservations: localStorage.getItem('tempReservations'),
             tempPlanClasses: localStorage.getItem('tempPlanClasses'),
             tempPlanPrice: localStorage.getItem('tempPlanPrice'),
@@ -282,7 +282,7 @@ async function detectarRetorno() {
         return;
     }
     
-    console.log('✅ Reservas encontradas en localStorage:', tempReservationsStr.substring(0, 100) + '...');
+    // console.log('✅ Reservas encontradas en localStorage:', tempReservationsStr.substring(0, 100) + '...');
     
     let tempData;
     try {
@@ -310,7 +310,7 @@ async function detectarRetorno() {
         return;
     }
     
-    console.log(`📋 Reservas recuperadas: ${reservations.length} clases para ${nombre} (${telefono})`);
+    // console.log(`📋 Reservas recuperadas: ${reservations.length} clases para ${nombre} (${telefono})`);
     
     // 3. Mostrar mensaje de éxito inicial
     alert(`¡Pago recibido, ${nombre}!\n\nGuardando tus ${reservations.length} clases...`);
@@ -325,7 +325,7 @@ async function detectarRetorno() {
             }
             await new Promise(resolve => setTimeout(resolve, FIREBASE_POLLING_INTERVAL_MS));
             attempts++;
-            console.log(`⏳ Esperando Firebase... (${attempts}/${MAX_FIREBASE_INIT_ATTEMPTS})`);
+            // console.log(`⏳ Esperando Firebase... (${attempts}/${MAX_FIREBASE_INIT_ATTEMPTS})`);
         }
         return false;
     };
@@ -338,7 +338,7 @@ async function detectarRetorno() {
         return;
     }
     
-    console.log('✅ Firebase listo, guardando reservas...');
+    // console.log('✅ Firebase listo, guardando reservas...');
     
     // 5. Guardar todas las reservas en Firestore
     const savedReservations = [];
@@ -347,7 +347,7 @@ async function detectarRetorno() {
     for (let i = 0; i < reservations.length; i++) {
         const reservation = reservations[i];
         try {
-            console.log(`💾 Guardando reserva ${i + 1}/${reservations.length}...`, reservation);
+            // console.log(`💾 Guardando reserva ${i + 1}/${reservations.length}...`, reservation);
             
             // Validar datos de la reserva antes de guardar
             if (!reservation.nombre || !reservation.telefono || !reservation.fechaHora) {
@@ -364,7 +364,7 @@ async function detectarRetorno() {
             );
             
             savedReservations.push(reservaId);
-            console.log(`✅ Reserva ${i + 1} guardada con ID:`, reservaId);
+            // console.log(`✅ Reserva ${i + 1} guardada con ID:`, reservaId);
         } catch (error) {
             console.error(`❌ Error al guardar reserva ${i + 1}:`, error);
             failedReservations.push(reservation);
@@ -378,7 +378,7 @@ async function detectarRetorno() {
         localStorage.removeItem('tempPlanPrice');
         localStorage.removeItem('planClases');
         localStorage.removeItem('planPrecio');
-        console.log('🧹 Datos temporales limpiados');
+        // console.log('🧹 Datos temporales limpiados');
     }
     
     // 7. Mostrar resultado
@@ -389,7 +389,7 @@ async function detectarRetorno() {
         
         // 8. Recargar "Mis Clases" si el usuario está logueado
         if (telefono && typeof window.loadUserClasses === 'function') {
-            console.log('📚 Recargando "Mis Clases"...');
+            // console.log('📚 Recargando "Mis Clases"...');
             try {
                 await window.loadUserClasses(telefono);
             } catch (e) {
@@ -399,7 +399,7 @@ async function detectarRetorno() {
         
         // 9. Recargar panel admin si está disponible
         if (window.isAdmin && typeof window.loadReservationsFromFirestore === 'function') {
-            console.log('👨‍💼 Recargando panel admin...');
+            // console.log('👨‍💼 Recargando panel admin...');
             try {
                 await window.loadReservationsFromFirestore();
             } catch (e) {
@@ -500,7 +500,7 @@ function showPaymentSuccessWithWhatsApp(nombre, telefono, classCount) {
     sendBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('📱 Enviar mis clases button clicked', { telefono, nombre });
+        // console.log('📱 Enviar mis clases button clicked', { telefono, nombre });
         try {
             // Send WhatsApp message with class schedule
             if (typeof window.sendWhatsAppMessage === 'function') {
