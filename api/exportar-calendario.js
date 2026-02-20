@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 // Configuration constants
-const LOGO_FILENAME = 'assets/auralogo2.png';
+const LOGO_FILENAME = 'auralogo2.png';
 const BRAND_COLORS = {
   brown: '#8B6E55',
   cream: '#EFE9E1',

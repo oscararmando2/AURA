@@ -87,9 +87,9 @@ async function guardarRegistroLocalYPagar() {
       throw new Error('Sistema de autenticación no está listo. Por favor, espera unos segundos e intenta nuevamente.');
     }
     
-    // console.log('✅ Usando reCAPTCHA verifier global existente');
+    console.log('✅ Usando reCAPTCHA verifier global existente');
     
-    // console.log('📱 Enviando código de verificación a:', fullPhoneNumber);
+    console.log('📱 Enviando código de verificación a:', fullPhoneNumber);
     
     // Send verification code
     const confirmationResult = await signInWithPhoneNumber(window.auth, fullPhoneNumber, window.recaptchaVerifier);
@@ -103,7 +103,7 @@ async function guardarRegistroLocalYPagar() {
       context: registrationContext
     };
     
-    // console.log('✅ Código enviado exitosamente');
+    console.log('✅ Código enviado exitosamente');
     
     // Close registration modal
     document.getElementById('register-modal').style.display = 'none';
@@ -152,7 +152,7 @@ async function crearPreferenciaYpagar(title, price) {
     return;
   }
 
-  // console.log('📋 Creando preferencia de pago:', { title, price, nombre, telefono });
+  console.log('📋 Creando preferencia de pago:', { title, price, nombre, telefono });
 
   try {
     const res = await fetch(BACKEND_URL, {
@@ -177,7 +177,7 @@ async function crearPreferenciaYpagar(title, price) {
     }
 
     if (data.init_point) {
-      // console.log('✅ Preferencia creada exitosamente, redirigiendo a Mercado Pago');
+      console.log('✅ Preferencia creada exitosamente, redirigiendo a Mercado Pago');
       window.location.href = data.init_point;
     } else {
       console.error('❌ Respuesta sin init_point:', data);
@@ -219,14 +219,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       try {
-        // console.log('🔐 Verificando código...');
+        console.log('🔐 Verificando código...');
         
         // Verify the code
         const result = await window.phoneVerificationData.confirmationResult.confirm(code);
         const user = result.user;
         
-        // console.log('✅ Verificación exitosa! UID:', user.uid);
-        // console.log('📱 Teléfono verificado:', user.phoneNumber);
+        console.log('✅ Verificación exitosa! UID:', user.uid);
+        console.log('📱 Teléfono verificado:', user.phoneNumber);
         
         // Store user data in localStorage
         const { name, phoneDigits, fullPhoneNumber, context } = window.phoneVerificationData;
@@ -324,8 +324,8 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         
-        // console.log('📱 Reenviando código a:', fullPhoneNumber);
-        // console.log('✅ Usando reCAPTCHA verifier global existente');
+        console.log('📱 Reenviando código a:', fullPhoneNumber);
+        console.log('✅ Usando reCAPTCHA verifier global existente');
         
         // Resend code
         const { signInWithPhoneNumber } = window.firebaseAuthExports || {};
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Update confirmation result
         window.phoneVerificationData.confirmationResult = confirmationResult;
         
-        // console.log('✅ Código reenviado');
+        console.log('✅ Código reenviado');
         errorDiv.textContent = '✅ Código reenviado exitosamente';
         errorDiv.style.display = 'block';
         errorDiv.style.background = 'rgba(76, 175, 80, 0.1)';

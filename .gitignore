@@ -41,9 +41,3 @@ pdfs/*.pdf
 tmp/
 test_edit_modal.html
 test_phone_login.html
-
-# Removed/backup files (not part of AURA)
-_removed_invoice_system/
-
-# Local reference files
-ROLLBACK_REFERENCE.md
