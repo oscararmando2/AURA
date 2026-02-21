@@ -7961,7 +7961,11 @@
                     // Si es admin, mostrar panel y cerrar modal
                     // Check if this is an admin user (authenticated via /api/admin-login)
                     // Custom token auth uses uid = email, or we check the _adminEmail set during login
+                    console.log('DEBUG: _adminEmail =', _adminEmail);
+                    console.log('DEBUG: user.uid =', user.uid);
+                    console.log('DEBUG: user.email =', user.email);
                     const isAdminUser = _adminEmail && (user.uid === _adminEmail || user.email === _adminEmail);
+                    console.log('DEBUG: isAdminUser =', isAdminUser);
                     
                     if (isAdminUser) {
                         console.log('✅ Admin autenticado, mostrando panel...');
