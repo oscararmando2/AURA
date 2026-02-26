@@ -98,8 +98,10 @@ export default async function handler(req, res) {
 
     // Create a custom token for the admin user
     // This token can be used with signInWithCustomToken() on the client
+    // IMPORTANT: Include email in claims so Firestore rules can check request.auth.token.email
     const customToken = await adminAuth.createCustomToken(adminEmail, {
-      admin: true
+      admin: true,
+      email: adminEmail
     });
 
     console.log(`✅ Custom token created for admin: ${email}`);
