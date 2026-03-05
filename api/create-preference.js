@@ -1,8 +1,9 @@
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
 export default async function handler(req, res) {
-  // Set CORS headers for all requests
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // Set CORS headers - restrict to production domain only
+  const allowedOrigin = process.env.ALLOWED_ORIGIN || "https://aurapilates.app";
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
     console.error("❌ Datos incompletos:", { title, price, payer_name, payer_phone });
     return res.status(400).json({ 
       error: "Datos incompletos", 
-      details: "Se requiere: title, price, payer_name, payer_phone" 
+      details: "Se requiere: title, price, payer_name, payer_phone"  //check this details message, is getting retunred in html responses
     });
   }
   

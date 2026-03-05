@@ -14,7 +14,8 @@ const BRAND_COLORS = {
 export default async function handler(req, res) {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    const allowedOrigin = process.env.ALLOWED_ORIGIN || "https://aurapilates.app";
+    res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     return res.status(200).end();
