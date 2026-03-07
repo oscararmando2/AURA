@@ -1,0 +1,23 @@
+# PHP files - Vercel has no PHP runtime, these get served as static downloads
+*.php
+fpdf/
+
+# Legacy/removed systems
+_removed_invoice_system/
+python_invoice_system/
+
+# SQL files - should not be publicly accessible
+*.sql
+
+# Scripts not needed in production
+*.sh
+*.py
+download-video.*
+setup-env.*
+
+# Documentation
+docs/
+
+# Environment and config
+.env
+.env.*
