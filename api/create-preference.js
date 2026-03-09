@@ -31,8 +31,8 @@ export default async function handler(req, res) {
   if (!title || !price || !payer_name || !payer_phone) {
     console.error("❌ Datos incompletos:", { title, price, payer_name, payer_phone });
     return res.status(400).json({ 
-      error: "Datos incompletos", 
-      details: "Se requiere: title, price, payer_name, payer_phone"  //check this details message, is getting retunred in html responses
+      error: "Datos incompletos"
+      //details: "Se requiere: title, price, payer_name, payer_phone"
     });
   }
   
